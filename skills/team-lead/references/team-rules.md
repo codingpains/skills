@@ -40,9 +40,14 @@ The shell is zsh, not bash. Four bash habits break in it:
 Every turn re-reads your whole context, so turns cost more than tool calls.
 
 - Send independent reads, searches and checks in the same turn.
-- Read a file once. When the plan or ticket cites lines, read that range
-  (`sed -n a,bp`), not the whole file. Edit fails loudly when it misses, so
-  do not re-read a file to confirm an edit.
+- Read a file once, then work from what you know. Your own edits don't
+  change that: Edit fails loudly when its text is missing, so do not re-read
+  to confirm one. Re-read when something else changed the file (a formatter,
+  `--fix`, codegen, a hook, a git command, `sed -i`), or when you need lines
+  you haven't seen.
+- When the plan or ticket cites lines, read that range (`sed -n a,bp`)
+  before you edit the file, not the whole file. After an edit, find the code
+  with `rg`, since line numbers have moved.
 - A command that takes over 20 s runs once, as
   `<cmd> > <tmp>/<name>.log 2>&1; echo "exit $?"`. Read the log with `tail`,
   `head` or `rg`. Never re-run a command to see a different part of its
