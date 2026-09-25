@@ -48,6 +48,17 @@ Stages run one after another, each in the foreground (`run_in_background:
 false`): each stage builds on the previous one's commits. Subagents do not see
 this conversation. Everything an agent needs goes in its handoff.
 
+## One worktree per ticket
+
+Each ticket gets its own git worktree, so several tickets can run at once, in
+separate sessions, without touching each other or the human's main checkout.
+The session itself stays in the main checkout, so **every command for this
+ticket runs in the worktree**: `git -C <worktree> ...`, or
+`cd <worktree> && <command>` in the same Bash call (the shell's directory
+does not carry over between calls). Every file path is absolute under the
+worktree. Never edit, commit, stash or check out anything in the main
+checkout.
+
 ## Run directory
 
 `~/.team-lead/runs/<TICKET_ID>/` holds the state of the run so a stopped run
@@ -57,30 +68,62 @@ can resume with `--from`:
 ticket.md          ticket, acceptance criteria, decisions (the brief)
 groom.md           answer table and scores, when quill:groom ran
 plan.json          {"plan_id": "...", "url": "..."} when the Architect ran
-run.json           {"repo": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main"}
+run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main"}
 reports/<stage>.md each stage report, verbatim
 review-fixes.md    the fix list you sent the Wrap-up coder
 ```
 
 Write each file as soon as its content exists. With `--from`, read the
-directory back, check `run.json` matches the current repo and that the branch
-is checked out, and continue at that stage.
+directory back, check the worktree in `run.json` still exists
+(`git worktree list`), has the branch checked out and a clean tree, then
+skip preflight and continue at that stage.
 
 ## 0. Preflight
 
-1. Confirm you are inside a git repository, and find its default branch
+1. Confirm you are inside a git repository. Find the **main checkout**, the
+   folder holding the shared `.git` (the parent of
+   `git rev-parse --path-format=absolute --git-common-dir`), even when the
+   session was started from another worktree. Find the default branch
    (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`, falling
-   back to `origin/HEAD`).
-2. The working tree must be clean (`git status --porcelain` empty). If it is
-   not, stop and tell the human what is dirty. Do not stash their work.
-3. `gh auth status` must pass; you need it for the PR.
-4. `git fetch origin <default>`. Create the work branch from
-   `origin/<default>`: use the ticket's suggested branch name (Linear's
-   `branchName`) when there is one, otherwise `<ticket-id-lowercase>-<short-slug>`.
-   If the branch already exists locally or on the remote, ask the human
-   whether to resume on it or start fresh; never delete it yourself.
-5. Record the base commit (`git rev-parse HEAD` right after branching) in
-   `run.json`. Every agent diffs against this SHA.
+   back to `origin/HEAD`). The main checkout may be dirty or on any branch;
+   you never touch it.
+2. `gh auth status` must pass; you need it for the PR.
+3. Pick the branch: the ticket's suggested branch name (Linear's
+   `branchName`) when there is one, otherwise
+   `<ticket-id-lowercase>-<short-slug>`. Pick the worktree path:
+   `<parent of main checkout>/<repo folder name>-worktrees/<ticket-id-lowercase>`,
+   for example `~/src/work/megalith-worktrees/onb-1208`.
+4. Check for earlier work with `git worktree list` and
+   `git branch -a --list '*<branch>'`:
+   - a worktree already at that path or on that branch: ask the human whether
+     to resume in it (`--from` the right stage) or stop. Another session may
+     be running this ticket.
+   - the branch exists but has no worktree: ask whether to continue on it
+     (`git worktree add <path> <branch>`) or start fresh under a new branch
+     name.
+   Never remove a worktree or delete a branch yourself.
+5. Create it:
+   `git -C <main checkout> fetch origin <default>` then
+   `git -C <main checkout> worktree add -b <branch> <worktree> origin/<default>`.
+6. **Set up the worktree.** A new worktree has no gitignored files: no
+   installed dependencies, no `.env`, no build output. In order:
+   - If the repo documents its own worktree setup (its `CLAUDE.md`, README,
+     or a `scripts/*worktree*` script), follow that. In megalith, run
+     `cd <worktree> && bash ~/.claude/skills/wx-review/scripts/bootstrap-worktree.sh`
+     when it exists; it also brings the built and generated folders the
+     tests need.
+   - Otherwise run
+     `bash ~/.claude/skills/team-lead/scripts/bootstrap-worktree.sh <main checkout> <worktree>`.
+     It copies the `.env` files and dependency folders from the main checkout
+     (copy-on-write, so it is fast and takes no extra disk), and names every
+     lockfile that differs from the main checkout's.
+   - For each lockfile it names, run that package's install command in the
+     worktree (`npm ci`, `bundle install`, `uv sync`, as the repo uses).
+   If a later stage fails on missing build or generated output, run the
+   repo's documented build or generate command in the worktree and retry.
+7. Record the main checkout, worktree, branch and base commit
+   (`git -C <worktree> rev-parse HEAD`) in `run.json`. Every agent works in
+   this worktree and diffs against this SHA.
 
 ## 1. Intake
 
@@ -216,7 +259,7 @@ sanity-check, not a second review):
    own commits before the next stage.
 5. Every validation it ran passed, or its failure is shown to exist on the
    base commit too.
-6. The working tree is clean after the stage.
+6. The worktree is clean after the stage (`git -C <worktree> status --porcelain`).
 
 If a check fails, send the same agent back once with the specific failure
 (`SendMessage`, or a new spawn with the report and the failure). A second
@@ -264,7 +307,7 @@ PR.
 
 **Open the PR.**
 
-1. `git push -u origin <branch>`. Never force-push.
+1. `git -C <worktree> push -u origin <branch>`. Never force-push.
 2. Use the repo's PR template when one exists
    (`.github/pull_request_template.md` or `.github/PULL_REQUEST_TEMPLATE/`),
    and any PR rules in the repo's `CLAUDE.md`. Otherwise use this body:
@@ -291,8 +334,8 @@ PR.
 
    No co-attribution lines and no "Generated with" footer in the title or
    body.
-3. `gh pr create --base <default> --head <branch> --title "<ID>: <title>"
-   --body-file <file>`, with `--draft` when the flag was passed.
+3. `cd <worktree> && gh pr create --base <default> --head <branch> --title
+   "<ID>: <title>" --body-file <file>`, with `--draft` when the flag was passed.
 4. If a `link_pull_request` tool is available in this session, register the
    PR URL with it.
 
@@ -313,6 +356,8 @@ If the Slack post fails, say so; the PR still stands.
 
 End with, in plain words:
 
+- the worktree path. Leave it in place for review follow-ups; once the PR
+  is merged, the human removes it with `git worktree remove <worktree>`;
 - the PR URL and whether Slack was notified (for a draft: not posted, and
   post it with the message above once the PR is marked ready);
 - one line per stage: status, commit count, validations passed;

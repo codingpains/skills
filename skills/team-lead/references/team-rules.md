@@ -6,9 +6,14 @@ something narrower, the narrower rule wins.
 
 ## Scope
 
-- Work on the branch you were handed, in the repository you were handed.
-  Never switch branches, rebase, reset, stash, or rewrite commits you did not
-  make in this stage.
+- Work only in the worktree you were handed. Your shell starts in a
+  different folder (the human's main checkout) and does not remember `cd`
+  between calls, so start every Bash command with `cd <worktree> &&` or use
+  `git -C <worktree>`, and give every file tool an absolute path under the
+  worktree. Never read from, edit or commit in the main checkout; it may hold
+  unrelated work.
+- Stay on the branch you were handed. Never switch branches, rebase, reset,
+  stash, or rewrite commits you did not make in this stage.
 - Stay inside the ticket. Something wrong that the ticket does not cover goes
   in your report under *Concerns*, not into the diff.
 - Never push. The Lead pushes and opens the PR.

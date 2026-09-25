@@ -11,8 +11,8 @@ Read first: ~/.claude/skills/team-lead/references/team-rules.md
 Report format: ~/.claude/skills/team-lead/references/stage-report.md
 
 ## Where
-Repository: <absolute path>
-Branch: <branch> (checked out)
+Worktree: <absolute path>   # all your work happens here; see team-rules § Scope
+Branch: <branch> (checked out in the worktree)
 Base commit: <sha>   # diff everything against this: git diff <sha>...HEAD
 Default branch: <name>
 Run directory: ~/.team-lead/runs/<TICKET_ID>/  # the Lead's state; write here only when your agent file says so

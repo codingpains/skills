@@ -79,6 +79,13 @@ Shared rules live in `skills/team-lead/references/`:
 `handoff.md` (what each agent receives), `stage-report.md` (what each agent
 returns).
 
+Each ticket runs in its own git worktree at
+`<repo>-worktrees/<ticket-id>` next to the main clone, so several tickets can
+run at once in separate sessions and your main checkout is never touched.
+`skills/team-lead/scripts/bootstrap-worktree.sh` copies `.env` files and
+dependency folders into a new worktree. Remove a worktree yourself once its PR
+is merged: `git worktree remove <path>`.
+
 Flags: `--from <stage>` resumes a stopped run from
 `~/.team-lead/runs/<TICKET_ID>/`; `--draft` opens a draft PR and skips the
 Slack post, so peers are not asked to review it; `--no-slack` skips the Slack
