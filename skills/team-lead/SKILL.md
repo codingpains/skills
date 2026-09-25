@@ -1,7 +1,7 @@
 ---
 name: team-lead
-description: "Run one ticket through a local agentic development team: intake and grooming (quill:groom), plan gating, Architect plan on Planbin, Coder, Hardener, Tester, Reviewer, Wrap-up coder, then open the PR and post it to Slack. Invoked as /team-lead TICKET_ID [--from <stage>] [--draft] [--no-slack]."
-argument-hint: "TICKET_ID [--from <stage>] [--draft] [--no-slack]"
+description: "Run one ticket through a local agentic development team: intake and grooming (quill:groom), plan gating, Architect plan on Planbin, Coder, Hardener, Tester, Reviewer, Wrap-up coder, then open the PR and post it to Slack. Tickets come from Linear or Notion. Invoked as /team-lead TICKET [--from <stage>] [--draft] [--no-slack]."
+argument-hint: "<Linear ID | Notion task ID or URL> [--from <stage>] [--draft] [--no-slack]"
 disable-model-invocation: true
 effort: high
 ---
@@ -13,7 +13,10 @@ subagents over one ticket. You never write production code yourself: you
 gather context, make the routing calls, write each handoff, check each report,
 talk to the human, open the PR and announce it.
 
-Arguments: `$ARGUMENTS`. The first word is the ticket ID. Flags:
+Arguments: `$ARGUMENTS`. The first word is the ticket: a Linear identifier
+(`ONB-123`) or URL, or a Notion task's Task ID number or URL (§ 1 Intake).
+Everywhere below, `<TICKET_ID>` is the ticket's **key**: the Linear
+identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 
 | Flag | Effect |
 |---|---|
@@ -88,9 +91,9 @@ skip preflight and continue at that stage.
    back to `origin/HEAD`). The main checkout may be dirty or on any branch;
    you never touch it.
 2. `gh auth status` must pass; you need it for the PR.
-3. Pick the branch: the ticket's suggested branch name (Linear's
-   `branchName`) when there is one, otherwise
-   `<ticket-id-lowercase>-<short-slug>`. Pick the worktree path:
+3. Resolve the ticket and its key (§ 1 Intake, *Find the ticket*). Pick the
+   branch: Linear's suggested `branchName` when there is one, otherwise
+   `<ticket-key-lowercase>-<short-slug>`. Pick the worktree path:
    `<parent of main checkout>/<repo folder name>-worktrees/<ticket-id-lowercase>`,
    for example `~/src/work/megalith-worktrees/onb-1208`.
 4. Check for earlier work with `git worktree list` and
@@ -127,16 +130,41 @@ skip preflight and continue at that stage.
 
 ## 1. Intake
 
-Pull all the context of the ticket:
+Tickets live in **Linear** or in a **Notion** tasks database. Nothing else.
 
-- **Linear** (IDs like `ABC-123`): load `mcp__claude_ai_Linear__get_issue`
-  and `mcp__claude_ai_Linear__list_comments` with `ToolSearch`, then fetch the
-  issue, its comments, its parent and sub-issues, and linked issues and
-  documents when the description leans on them. Pull images with
+**Find the ticket**, by the shape of the argument:
+
+- **Linear**: an identifier like `ONB-123`, or a `linear.app` URL. Load
+  `mcp__claude_ai_Linear__get_issue` with `ToolSearch` and fetch it. Key: the
+  identifier.
+- **Notion**: a `notion.so` or `notion.site` URL, or a bare number (the
+  task's `Task ID`). Load `mcp__claude_ai_Notion__notion-fetch`,
+  `mcp__claude_ai_Notion__notion-query-data-sources` and
+  `mcp__claude_ai_Notion__notion-get-comments` with `ToolSearch`.
+  - A URL: `notion-fetch` the page.
+  - A bare number: find the tasks database the way `quill:groom` does.
+    Resolve Quill's config (`$QUILL_HOME`, else the nearest
+    `quill.config.json` walking up from the main checkout, else
+    `~/.quill/quill.config.json`), take
+    `projects[activeProject].notionTasks.dataSourceId`, and query
+    `SELECT * FROM "collection://<dataSourceId>" WHERE "Task ID" = ?` with the
+    number. Without a `notionTasks` block, ask the human for the task's URL.
+  - Key: the `Task ID` value with its prefix when the property has one,
+    otherwise `TASK-<number>`.
+- Anything else, or a ticket that cannot be fetched: stop and ask the human
+  for a Linear identifier or a Notion task.
+
+**Pull all its context:**
+
+- **Linear**: the issue, its comments (`mcp__claude_ai_Linear__list_comments`),
+  its parent and sub-issues, and linked issues and documents when the
+  description leans on them. Pull images with
   `mcp__claude_ai_Linear__extract_images` when a screenshot carries a
   requirement.
-- **GitHub issue** (a number or an issue URL): `gh issue view <id> --comments`.
-- Anything else: ask the human where the ticket lives.
+- **Notion**: the page body, every property (`Acceptance Criteria`,
+  `Status`, `Priority`, and an estimate property when there is one), the
+  page's comments, and the titles and bodies of tasks linked through
+  `Depends On` / `Blocks` relations when the task leans on them.
 
 Write `ticket.md`:
 
@@ -191,7 +219,8 @@ ask**:
   human; say so and move on.
 
 `quill:groom` keeps its own gates: the human approves the groomed ticket
-before it is written back to Linear, and approves the Notion user story sync.
+before it is written back to Linear or Notion, and approves the Notion user
+story sync.
 Do not skip them. If it stops because Quill is not set up (no
 `quill.config.json` or no active project), stop too and tell the human to run
 `/quill:setup`.
@@ -208,7 +237,8 @@ derived yourself are then an escalation: show them to the human in one
 
 ## 2. Plan gating
 
-Read the ticket's estimate (Linear `estimate`, in points).
+Read the ticket's estimate, in points: Linear's `estimate` field, or for a
+Notion task a number property named `Estimate`, `Points` or `Story Points`.
 
 - Estimate **greater than 1** → step 3, Architect.
 - Estimate **0 or 1** → skip to step 4 with no plan. Tell the Coder there is

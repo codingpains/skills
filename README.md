@@ -92,7 +92,7 @@ Slack post, so peers are not asked to review it; `--no-slack` skips the Slack
 post for a ready PR.
 
 **Needs:** `gh` logged in; the Quill plugin set up (`/quill:setup`) for
-grooming; the Linear and Slack connectors authorized in Claude; the `planbin-cli` skill and `npx planbin login` done once. The
+grooming; the Linear, Notion and Slack connectors authorized in Claude; the `planbin-cli` skill and `npx planbin login` done once. The
 Hardener and Tester use the complexity, duplication and coverage scripts in
 `~/.claude/agents/references/` when present, and fall back to standard tools
 otherwise.

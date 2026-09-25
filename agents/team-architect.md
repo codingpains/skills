@@ -19,6 +19,7 @@ tools:
     'mcp__claude_ai_Linear__get_issue',
     'mcp__claude_ai_Linear__list_comments',
     'mcp__claude_ai_Linear__list_issues',
+    'mcp__claude_ai_Notion__notion-fetch',
   ]
 ---
 
