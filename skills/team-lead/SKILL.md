@@ -331,12 +331,28 @@ to the human.
 
 - every acceptance criterion is marked met in the Reviewer's report, and any
   it marked unmet was on the fix list and the Wrap-up coder applied it;
-- the last validations after the final commit passed;
+- every stage's *Validations* section reports a result for each command,
+  and every result passed or is a pre-existing failure with evidence;
 - the branch has commits and a clean tree, and `git diff --stat <base>..HEAD`
   matches what the reports describe.
 
-If anything does not line up, stop and tell the human instead of opening the
-PR.
+**Trust the reports on validations.** Each agent ran the validations for its
+own changes; do not re-run them. Run validations yourself only where a report
+falls short:
+
+- a stage that changed code but reports no validation result (a missing
+  section, an empty result, or `not run` without a good reason): run the
+  validations relevant to that stage's files;
+- a reported failure that is not shown to be pre-existing: re-run that
+  command.
+
+Run only those, in the worktree, scoped as `team-rules.md` § Validations
+says. If they pass, note it in the PR's *Validations* table as run by the
+Lead. If they fail, stop and tell the human which stage, which command and
+the output.
+
+If anything else does not line up, stop and tell the human instead of
+opening the PR.
 
 **Open the PR.**
 
@@ -356,7 +372,7 @@ PR.
    - [x] AC1 — <how it is met / test name>
 
    ## Validations
-   | Command | Result |
+   | Stage | Command | Result |
 
    ## Plan
    <Planbin URL, or "No plan: trivial ticket">
