@@ -86,6 +86,14 @@ run at once in separate sessions and your main checkout is never touched.
 dependency folders into a new worktree. Remove a worktree yourself once its PR
 is merged: `git worktree remove <path>`.
 
+**Repo profiles** record the exact checks (lint, typecheck, tests, generated
+code, quality tools) and worktree setup for one repo or one folder of a
+monorepo, in `skills/team-lead/repos/<name>.md`. They are matched by the
+repo's GitHub remote, so they work in any worktree. Create or refresh one from
+inside the repo with `/team-lead --configure-repo [path]`; it saves and
+commits the profile here. Without a profile, agents work the checks out from
+the repo each time.
+
 Flags: `--from <stage>` resumes a stopped run from
 `~/.team-lead/runs/<TICKET_ID>/`; `--draft` opens a draft PR and skips the
 Slack post, so peers are not asked to review it; `--no-slack` skips the Slack

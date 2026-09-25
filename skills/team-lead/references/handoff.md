@@ -15,6 +15,7 @@ Worktree: <absolute path>   # all your work happens here; see team-rules § Scop
 Branch: <branch> (checked out in the worktree)
 Base commit: <sha>   # diff everything against this: git diff <sha>...HEAD
 Default branch: <name>
+Repo profiles: <absolute paths, each with its `paths` scope, or "none: work the checks out yourself">
 Run directory: ~/.team-lead/runs/<TICKET_ID>/  # the Lead's state; write here only when your agent file says so
 
 ## Ticket

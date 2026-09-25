@@ -38,8 +38,11 @@ say so in your report.
 
 Run the validations **relevant to your changes**, not the whole suite.
 
-Find the commands, most trusted first: the repo's `CLAUDE.md`/`AGENTS.md` and
-rules; the CI workflow files (`.github/workflows/*`), which show what the
+Find the commands, most trusted first: the **repo profile** in your handoff
+that covers the files you touched (read it in full; its *Checks by change*,
+*Conditional checks* and *Never* sections outrank everything below, and its
+*Gotchas* explain known failures); then the repo's `CLAUDE.md`/`AGENTS.md`
+and rules; the CI workflow files (`.github/workflows/*`), which show what the
 merge gate runs; the touched package's scripts (`package.json`, `Makefile`,
 `justfile`, `pyproject.toml`, `Gemfile`/`Rakefile`, `go.mod`).
 
@@ -60,6 +63,11 @@ A failing validation is yours to fix when your change caused it. When it
 fails on the base commit too, it is pre-existing: show the evidence (the same
 command at the base commit, or CI on the default branch) and leave it alone.
 Never disable, skip, or weaken a check, a test, or a lint rule to get green.
+
+If a profile command fails because the command itself is wrong (a script
+that no longer exists, a flag the tool rejects), use the next source to find
+the right one, and name the stale command under *Concerns* so the profile
+gets refreshed.
 
 ## Commits
 

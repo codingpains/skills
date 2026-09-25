@@ -3,6 +3,7 @@
 #
 #   skills/<name>/SKILL.md  frontmatter has name == <name> and a description
 #   agents/<name>.md        frontmatter has name == <name>, a description, and a known model
+#   skills/team-lead/repos/<name>.md  repo profile with name == <name> and a host/owner/repo remote
 #   ~/.claude/skills/<skill>/<path> references to a skill in this repo point at a real file
 set -euo pipefail
 
@@ -38,6 +39,18 @@ for file in "$REPO"/agents/*.md; do
   case "$model" in
     ''|sonnet|opus|haiku|fable|inherit|claude-*) ;;
     *) fail "agents/$base.md: unknown model '$model'" ;;
+  esac
+done
+
+for file in "$REPO"/skills/team-lead/repos/*.md; do
+  [ -f "$file" ] || continue
+  base="$(basename "$file" .md)"
+  name="$(field "$file" name)"
+  [ "$name" = "$base" ] || fail "repos/$base.md: name '$name' does not match file name"
+  remote="$(field "$file" remote)"
+  case "$remote" in
+    */*/*) ;;
+    *) fail "repos/$base.md: remote '$remote' is not host/owner/repo" ;;
   esac
 done
 

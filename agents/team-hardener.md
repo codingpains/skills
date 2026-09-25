@@ -41,6 +41,9 @@ a checklist.
 ## 2. Measure
 
 Measure the touched code before you change anything, and again at the end.
+When the repo profile's *Quality tools* section names complexity or
+duplication commands and thresholds, use those; otherwise use the defaults
+below.
 
 **Complexity** (cognitive complexity per function):
 

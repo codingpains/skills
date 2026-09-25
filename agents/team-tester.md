@@ -36,6 +36,8 @@ Test files, generated files, migrations and pure type files are not measured.
 ## 1. Measure the starting point
 
 Get per-file coverage for every touched source file, on HEAD and at the base.
+When the repo profile's *Quality tools* section names a coverage command, use
+it (the targets above still apply); otherwise use the defaults below.
 
 - JavaScript/TypeScript in an npm workspace, when
   `~/.claude/agents/references/coverage-gate.mjs` exists:

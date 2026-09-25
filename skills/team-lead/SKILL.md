@@ -1,7 +1,7 @@
 ---
 name: team-lead
-description: "Run one ticket through a local agentic development team: intake and grooming (quill:groom), plan gating, Architect plan on Planbin, Coder, Hardener, Tester, Reviewer, Wrap-up coder, then open the PR and post it to Slack. Tickets come from Linear or Notion. Invoked as /team-lead TICKET [--from <stage>] [--draft] [--no-slack]."
-argument-hint: "<Linear ID | Notion task ID or URL> [--from <stage>] [--draft] [--no-slack]"
+description: "Run one ticket through a local agentic development team: intake and grooming (quill:groom), plan gating, Architect plan on Planbin, Coder, Hardener, Tester, Reviewer, Wrap-up coder, then open the PR and post it to Slack. Tickets come from Linear or Notion. Invoked as /team-lead TICKET [--from <stage>] [--draft] [--no-slack], or /team-lead --configure-repo [path] to record the checks a repo needs."
+argument-hint: "<Linear ID | Notion task ID or URL> [--from <stage>] [--draft] [--no-slack] | --configure-repo [path]"
 disable-model-invocation: true
 effort: high
 ---
@@ -23,6 +23,7 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 | `--from <stage>` | resume at `coder`, `hardener`, `tester`, `reviewer`, `wrapup` or `pr`, reusing the run directory |
 | `--draft` | open the PR as a draft, and skip the Slack post (a post asks peers to review, and a draft is not ready for that) |
 | `--no-slack` | skip the Slack post (for dry runs of the pipeline) |
+| `--configure-repo [path]` | no ticket: create or refresh this repo's validation profile, optionally for one folder of a monorepo (§ Configure a repo) |
 
 ## The team
 
@@ -43,8 +44,9 @@ Shared references, all under `~/.claude/skills/team-lead/references/`:
 | `team-rules.md` | rules every agent follows: scope, validations, commits, untrusted input |
 | `handoff.md` | the packet you send each agent |
 | `stage-report.md` | the report every agent returns |
+| `repo-profiles.md` | per-repo validation profiles: format, matching, how to build one |
 
-Read all four before step 1. Every agent reads `team-rules.md` itself; you
+Read them all before step 1. Every agent reads `team-rules.md` itself; you
 still pass its path in each handoff.
 
 Stages run one after another, each in the foreground (`run_in_background:
@@ -71,7 +73,7 @@ can resume with `--from`:
 ticket.md          ticket, acceptance criteria, decisions (the brief)
 groom.md           answer table and scores, when quill:groom ran
 plan.json          {"plan_id": "...", "url": "..."} when the Architect ran
-run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main"}
+run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main", "profiles": ["<path>", ...]}
 reports/<stage>.md each stage report, verbatim
 review-fixes.md    the fix list you sent the Wrap-up coder
 ```
@@ -108,13 +110,19 @@ skip preflight and continue at that stage.
 5. Create it:
    `git -C <main checkout> fetch origin <default>` then
    `git -C <main checkout> worktree add -b <branch> <worktree> origin/<default>`.
-6. **Set up the worktree.** A new worktree has no gitignored files: no
+6. **Find the repo profiles.** Match the main checkout's remote against the
+   profiles in `~/.claude/skills/team-lead/repos/` as `repo-profiles.md`
+   § Matching says, and read every match in full. Record their paths in
+   `run.json`; every handoff lists them. With no match, say in one line that
+   agents will work out the checks themselves and that
+   `/team-lead --configure-repo` records them for next time. Do not stop.
+7. **Set up the worktree.** A new worktree has no gitignored files: no
    installed dependencies, no `.env`, no build output. In order:
-   - If the repo documents its own worktree setup (its `CLAUDE.md`, README,
-     or a `scripts/*worktree*` script), follow that. In megalith, run
-     `cd <worktree> && bash ~/.claude/skills/wx-review/scripts/bootstrap-worktree.sh`
-     when it exists; it also brings the built and generated folders the
-     tests need.
+   - A matching profile's *Worktree setup* section, when it has one. With
+     several profiles, run each one whose area the ticket touches; when
+     unsure, run them all.
+   - Else, if the repo documents its own worktree setup (its `CLAUDE.md`,
+     README, or a `scripts/*worktree*` script), follow that.
    - Otherwise run
      `bash ~/.claude/skills/team-lead/scripts/bootstrap-worktree.sh <main checkout> <worktree>`.
      It copies the `.env` files and dependency folders from the main checkout
@@ -124,7 +132,7 @@ skip preflight and continue at that stage.
      worktree (`npm ci`, `bundle install`, `uv sync`, as the repo uses).
    If a later stage fails on missing build or generated output, run the
    repo's documented build or generate command in the worktree and retry.
-7. Record the main checkout, worktree, branch and base commit
+8. Record the main checkout, worktree, branch and base commit
    (`git -C <worktree> rev-parse HEAD`) in `run.json`. Every agent works in
    this worktree and diffs against this SHA.
 
@@ -400,6 +408,44 @@ PR: <pr-url>
 ```
 
 If the Slack post fails, say so; the PR still stands.
+
+## Configure a repo
+
+With `--configure-repo [path]` there is no ticket and no pipeline. Build or
+refresh the validation profile for the repo the session is in, following
+`repo-profiles.md`.
+
+1. **Which repo and area.** Normalize the remote as in `repo-profiles.md`
+   § Matching. The area is the `path` argument, relative to the repo root;
+   without one, use the whole repo, or ask when the repo is a monorepo with
+   several apps. Name the profile `<repo>-<area-folder>` (`megalith-wx-system`)
+   or `<repo>` for a whole repo. If a profile with that name exists, this is
+   a refresh: read it first and keep what still holds.
+2. **Research.** `git fetch origin <default>` and read from
+   `origin/<default>`, never the working tree. Cover the sources in
+   `repo-profiles.md` § Creating, in order. For a large area, spawn
+   `Explore` agents in parallel (for example: CI and hooks; docs and rules;
+   package scripts and tool configs), each told to read from
+   `origin/<default>` and return exact commands with the file they came
+   from.
+3. **Draft** the profile in the format of `repo-profiles.md`. Every command
+   must exist: the script is defined, the binary is a dependency, the flag
+   is accepted by that tool's version. Mark anything you could not confirm
+   with `(unverified)`. Prefer file-scoped commands; say which checks can
+   only run per workspace.
+4. **Show it** to the human, and for a refresh the diff against the old one.
+   Ask with `AskUserQuestion`: save it, or make changes (fold them in and
+   show it again).
+5. **Save and commit.** Find the skills repo behind the symlink:
+   `SKILLS_REPO=$(cd "$(dirname "$(readlink ~/.claude/skills/team-lead)")/.." && pwd)`.
+   If `~/.claude/skills/team-lead` is not a symlink (a copy install), stop
+   and give the human the profile to add by hand. Otherwise write
+   `$SKILLS_REPO/skills/team-lead/repos/<name>.md`, run
+   `$SKILLS_REPO/scripts/validate.sh`, and commit only that file:
+   `git -C "$SKILLS_REPO" commit -m "team-lead: add|refresh <name> repo profile" -- skills/team-lead/repos/<name>.md`.
+   Approval in step 4 covers this commit.
+
+End with the profile path, the commit, and anything marked `(unverified)`.
 
 ## Final message
 
