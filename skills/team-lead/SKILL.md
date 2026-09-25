@@ -20,7 +20,7 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 
 | Flag | Effect |
 |---|---|
-| `--from <stage>` | resume at `coder`, `hardener`, `tester`, `reviewer`, `wrapup` or `pr`, reusing the run directory |
+| `--from <stage>` | resume at `coder`, `hardener`, `tester`, `reviewer`, `wrapup`, `pr` or `assess`, reusing the run directory (`assess` runs only step 11, for example after a stopped run) |
 | `--draft` | open the PR as a draft, and skip the Slack post (a post asks peers to review, and a draft is not ready for that) |
 | `--no-slack` | skip the Slack post (for dry runs of the pipeline) |
 | `--configure-repo [path]` | no ticket: create or refresh this repo's validation profile, optionally for one folder of a monorepo (§ Configure a repo) |
@@ -35,6 +35,7 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 | 5 Test | `team-tester` | opus | yes | yes |
 | 6 Review | `team-reviewer` | opus | no | no |
 | 7 Wrap-up | `team-wrapup` | sonnet | yes | yes |
+| 11 Assess | `team-assessor` | opus | no | no |
 
 Shared references, all under `~/.claude/skills/team-lead/references/`:
 
@@ -51,7 +52,9 @@ still pass its path in each handoff.
 
 Stages run one after another, each in the foreground (`run_in_background:
 false`): each stage builds on the previous one's commits. Subagents do not see
-this conversation. Everything an agent needs goes in its handoff.
+this conversation. Everything an agent needs goes in its handoff. Give every
+`Agent` call the description `<Stage> — <TICKET_ID>`: the self-assessment
+reads it to tell the stages apart.
 
 ## One worktree per ticket
 
@@ -76,6 +79,12 @@ plan.json          {"plan_id": "...", "url": "..."} when the Architect ran
 run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main", "profiles": ["<path>", ...]}
 reports/<stage>.md each stage report, verbatim
 review-fixes.md    the fix list you sent the Wrap-up coder
+notes.md           one line per event, as it happens: `<time> <event>`, for every
+                   send-back and its reason, escalation to the human, BLOCKED
+                   report, dropped review finding and why, validation you ran
+                   yourself, and anything that surprised you
+metrics.json/.md   written by the self-assessment
+performance.md     the self-assessment report
 ```
 
 Write each file as soon as its content exists. With `--from`, read the
@@ -132,8 +141,9 @@ skip preflight and continue at that stage.
      worktree (`npm ci`, `bundle install`, `uv sync`, as the repo uses).
    If a later stage fails on missing build or generated output, run the
    repo's documented build or generate command in the worktree and retry.
-8. Record the main checkout, worktree, branch and base commit
-   (`git -C <worktree> rev-parse HEAD`) in `run.json`. Every agent works in
+8. Record the main checkout, worktree, branch, base commit
+   (`git -C <worktree> rev-parse HEAD`) and `started_at` (now, UTC,
+   ISO 8601) in `run.json`. A resumed run keeps the first `started_at`. Every agent works in
    this worktree and diffs against this SHA.
 
 ## 1. Intake
@@ -303,12 +313,14 @@ sanity-check, not a second review):
 6. The worktree is clean after the stage (`git -C <worktree> status --porcelain`).
 
 If a check fails, send the same agent back once with the specific failure
-(`SendMessage`, or a new spawn with the report and the failure). A second
+(`SendMessage`, or a new spawn with the report and the failure), and note
+the send-back in `notes.md`. A second
 failure, or a `BLOCKED` report, stops the pipeline: tell the human what
 failed, what the agent tried, and what you recommend, and wait.
 
 Any escalation (score 1) an agent raises mid-stage goes to the human the same
-way as in step 1; resume the agent with the answer.
+way as in step 1; resume the agent with the answer. Note each escalation in
+`notes.md`.
 
 ## 8. Triage the review
 
@@ -319,7 +331,7 @@ verdict. Decide the fix list:
 - **should-fix**: on the list when it is inside the ticket's scope and small.
   Otherwise record it for the PR body under *Follow-ups*.
 - **nit**: off the list unless trivial and touching a file already on it.
-- A finding you disagree with: drop it, and write one line in the run notes
+- A finding you disagree with: drop it, and write one line in `notes.md`
   saying why. Do not ask the human about ordinary review triage.
 
 Write the list to `review-fixes.md`, numbered, each item with the file, line,
@@ -409,6 +421,34 @@ PR: <pr-url>
 
 If the Slack post fails, say so; the PR still stands.
 
+## 11. Self-assessment
+
+Once the PR is published (draft or not), measure how the pipeline itself
+did, so the skill can improve over time. Make sure `notes.md` is complete,
+then spawn `team-assessor` with the description `Assess — <TICKET_ID>` and a
+short handoff:
+
+```
+Ticket: <TICKET_ID>: <title>
+PR: <url>
+Run directory: ~/.team-lead/runs/<TICKET_ID>/
+started_at: <from run.json>
+Worktree: <path>   Base commit: <sha>
+Repo profile: <path or none>
+Log directory: ~/.team-lead/performance/
+```
+
+It measures the run from Claude Code's own transcripts with
+`scripts/run-metrics.py` (time, tokens, cost and tool calls per agent),
+compares with earlier runs, and logs a report with ranked optimizations to
+`~/.team-lead/performance/<date>-<TICKET_ID>.md`, plus one line in
+`~/.team-lead/performance/index.jsonl`. It never changes the skill. Do not
+read its metrics yourself; relay its summary.
+
+If it fails, say so in the final message; the PR is unaffected. Never apply
+its optimizations on your own: they are proposals for the human, made in the
+skills repo.
+
 ## Configure a repo
 
 With `--configure-repo [path]` there is no ticket and no pipeline. Build or
@@ -457,4 +497,6 @@ End with, in plain words:
   post it with the message above once the PR is marked ready);
 - one line per stage: status, commit count, validations passed;
 - decisions the human made, and deferred follow-ups;
-- anything you dropped from the review and why.
+- anything you dropped from the review and why;
+- the self-assessment: the report path, active time, tokens and cost, and
+  its top three optimizations.

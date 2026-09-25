@@ -60,7 +60,7 @@ Coder (sonnet) ──► Hardener (opus) ──► Tester (opus) ──► Revie
                           Lead picks the fixes ◄────────────┘
                                    │
                                    ▼
-                       Wrap-up coder (sonnet) ──► PR ──► Slack
+                       Wrap-up coder (sonnet) ──► PR ──► Slack ──► Assessor (opus)
 ```
 
 | Piece | File | Model |
@@ -73,6 +73,7 @@ Coder (sonnet) ──► Hardener (opus) ──► Tester (opus) ──► Revie
 | Tester | `agents/team-tester.md` | opus |
 | Reviewer | `agents/team-reviewer.md` | opus |
 | Wrap-up coder | `agents/team-wrapup.md` | sonnet |
+| Assessor | `agents/team-assessor.md` | opus |
 
 Shared rules live in `skills/team-lead/references/`:
 `confidence-scoring.md`, `team-rules.md` (scope, validations, commits),
@@ -85,6 +86,16 @@ run at once in separate sessions and your main checkout is never touched.
 `skills/team-lead/scripts/bootstrap-worktree.sh` copies `.env` files and
 dependency folders into a new worktree. Remove a worktree yourself once its PR
 is merged: `git worktree remove <path>`.
+
+**Self-assessment.** After the PR is published, the Assessor measures the
+run from Claude Code's own transcripts (`skills/team-lead/scripts/run-metrics.py`:
+active time, time waiting on you, tokens, cost and tool calls per agent),
+compares it with earlier runs, and logs a report with ranked optimizations to
+`~/.team-lead/performance/<date>-<ticket>.md` plus one line per run in
+`~/.team-lead/performance/index.jsonl`. Optimizations carry a stable slug, so
+a problem that keeps coming back is marked recurring. The log stays outside
+this repo because it holds work ticket details; apply the optimizations here.
+Re-assess a run with `/team-lead <ticket> --from assess`.
 
 **Repo profiles** record the exact checks (lint, typecheck, tests, generated
 code, quality tools) and worktree setup for one repo or one folder of a

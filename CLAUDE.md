@@ -24,6 +24,10 @@ six `agents/team-*.md` files, and the shared files in
 `skills/team-lead/references/`. A rule every agent follows belongs in
 `references/team-rules.md`, not copied into each agent.
 
+Pipeline performance reports live in `~/.team-lead/performance/` (outside
+this repo). When asked to improve the pipeline, read `index.jsonl` there
+first: optimizations recurring across runs come first.
+
 Repo profiles (`skills/team-lead/repos/<name>.md`) hold per-repo checks.
 `/team-lead --configure-repo` writes and commits them here; hand edits are
 fine too. Keep `updated:` current when you change a command.
