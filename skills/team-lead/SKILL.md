@@ -261,6 +261,9 @@ to Planbin, and returns the plan ID, the URL and any escalations.
   instruction to update that plan.
 - Check the plan is retrievable: `npx planbin get <plan-id> --json` must
   return HTML. If it does not, stop and report.
+- Check the Architect's report says `Retained: yes`. A plan uploaded without
+  `--retain` is deleted after 7 days, and an update cannot fix that: send the
+  Architect back to upload it again with `--retain`, and use the new plan ID.
 - Post the plan URL in chat in one line so the human can read it while the
   pipeline runs.
 

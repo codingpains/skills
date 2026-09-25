@@ -93,17 +93,24 @@ screen.
 npx planbin upload <tmpdir>/plan.html \
   --name "<TICKET_ID>: <title>" \
   --description "Dev plan for <TICKET_ID> (team-lead pipeline)" \
+  --retain \
   --json
 ```
 
-Private and temporary are the defaults; keep them. Do not add `--share` or
-`--retain`. Take the plan ID and URL from the JSON. Copy `plan.html` into the
-run directory from your handoff.
+**Always pass `--retain`.** Without it Planbin deletes the plan after 7 days,
+and plans are kept as a lasting record of why the code looks the way it does.
+`--retain` keeps it with no expiry. Check the JSON reports the plan as
+retained; if it does not, stop with status `BLOCKED` and say so. Keep the
+plan private: do not add `--share`.
+
+Take the plan ID and URL from the JSON. Copy `plan.html` into the run
+directory from your handoff.
 
 When revising a plan you already published (the Lead sends you decisions),
 edit the HTML, replace each `PENDING HUMAN DECISION` with the decision marked
 `human decision`, and publish with `npx planbin update <plan-id> <file>
---json` so the URL stays the same.
+--json` so the URL stays the same. An update keeps the plan's retention, so
+it needs no `--retain`.
 
 If `npx planbin` says there is no valid credential, stop with status
 `BLOCKED` and tell the Lead to run `npx planbin login`.
@@ -117,6 +124,7 @@ Use `stage-report.md`. Commits: `none — read-only stage`. Validations:
 Plan ID: <id>
 Plan URL: <url>
 Version: <n>
+Retained: yes
 Files the plan touches: <count>
 Decisions: <n> (x at 3, y at 2, z pending human decision)
 ```
