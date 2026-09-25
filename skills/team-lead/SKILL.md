@@ -18,7 +18,7 @@ Arguments: `$ARGUMENTS`. The first word is the ticket ID. Flags:
 | Flag | Effect |
 |---|---|
 | `--from <stage>` | resume at `coder`, `hardener`, `tester`, `reviewer`, `wrapup` or `pr`, reusing the run directory |
-| `--draft` | open the PR as a draft |
+| `--draft` | open the PR as a draft, and skip the Slack post (a post asks peers to review, and a draft is not ready for that) |
 | `--no-slack` | skip the Slack post (for dry runs of the pipeline) |
 
 ## The team
@@ -296,8 +296,10 @@ PR.
 4. If a `link_pull_request` tool is available in this session, register the
    PR URL with it.
 
-**Notify.** Unless `--no-slack`, load `mcp__claude_ai_Slack__slack_send_message`
-with `ToolSearch` and post to channel `C0BULBDLXUK`:
+**Notify.** Skip this with `--draft` or `--no-slack`: the post asks peers to
+review, and a draft is not ready for that. Otherwise load
+`mcp__claude_ai_Slack__slack_send_message` with `ToolSearch` and post to
+channel `C0BULBDLXUK`:
 
 ```
 <ID>: <title>
@@ -311,7 +313,8 @@ If the Slack post fails, say so; the PR still stands.
 
 End with, in plain words:
 
-- the PR URL and whether Slack was notified;
+- the PR URL and whether Slack was notified (for a draft: not posted, and
+  post it with the message above once the PR is marked ready);
 - one line per stage: status, commit count, validations passed;
 - decisions the human made, and deferred follow-ups;
 - anything you dropped from the review and why.

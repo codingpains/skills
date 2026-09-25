@@ -80,8 +80,9 @@ Shared rules live in `skills/team-lead/references/`:
 returns).
 
 Flags: `--from <stage>` resumes a stopped run from
-`~/.team-lead/runs/<TICKET_ID>/`; `--draft` opens a draft PR; `--no-slack`
-skips the Slack post.
+`~/.team-lead/runs/<TICKET_ID>/`; `--draft` opens a draft PR and skips the
+Slack post, so peers are not asked to review it; `--no-slack` skips the Slack
+post for a ready PR.
 
 **Needs:** `gh` logged in; the Quill plugin set up (`/quill:setup`) for
 grooming; the Linear and Slack connectors authorized in Claude; the `planbin-cli` skill and `npx planbin login` done once. The
