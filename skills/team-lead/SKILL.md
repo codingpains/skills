@@ -1,6 +1,6 @@
 ---
 name: team-lead
-description: "Run one ticket through a local agentic development team: intake and grooming, plan gating, Architect plan on Planbin, Coder, Hardener, Tester, Reviewer, Wrap-up coder, then open the PR and post it to Slack. Invoked as /team-lead TICKET_ID [--from <stage>] [--draft] [--no-slack]."
+description: "Run one ticket through a local agentic development team: intake and grooming (quill:groom), plan gating, Architect plan on Planbin, Coder, Hardener, Tester, Reviewer, Wrap-up coder, then open the PR and post it to Slack. Invoked as /team-lead TICKET_ID [--from <stage>] [--draft] [--no-slack]."
 argument-hint: "TICKET_ID [--from <stage>] [--draft] [--no-slack]"
 disable-model-invocation: true
 effort: high
@@ -55,7 +55,7 @@ can resume with `--from`:
 
 ```
 ticket.md          ticket, acceptance criteria, decisions (the brief)
-groom.md           grooming answers and scores, when grooming ran
+groom.md           answer table and scores, when quill:groom ran
 plan.json          {"plan_id": "...", "url": "..."} when the Architect ran
 run.json           {"repo": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main"}
 reports/<stage>.md each stage report, verbatim
@@ -127,19 +127,41 @@ or behavior is named without a way to find it; two statements conflict; an
 obvious case (empty input, error path, permission, existing data) has no
 defined behavior that the change cannot avoid. List each gap as a question.
 
-If there is any question, run the `groom` skill with the ticket ID and the
-question list (`Skill` tool, `skill: "groom"`). It returns one answer per
-question with a confidence score (see `confidence-scoring.md`).
+If there is any gap, groom the ticket with **`quill:groom`** (`Skill` tool,
+`skill: "quill:groom"`, `args: "<TICKET_ID>"`). Follow that skill's phases
+exactly, with one change the team makes on top of it, **answer before you
+ask**:
 
-- Score 3 or 2: write the answer into `## Decisions` with its score and
+- At its question phase ("Grill in batches"), before showing a category's
+  questions to the human, try to answer each one yourself from the code,
+  docs, git history and related tickets, and score each answer with
+  `confidence-scoring.md`. Spawn `Explore` agents in parallel when the
+  questions span unrelated parts of the codebase, asking each for file:line
   evidence.
-- Score 1: **escalate to the human.** Use `AskUserQuestion` with the question,
-  the suggested options groom produced (recommended one first), and a
-  one-line trade-off per option. Batch up to four questions per call. Write
-  the human's answer into `## Decisions` as `human decision`.
+- Score 3 or 2: do not ask it. Show it in the batch as a proposed answer with
+  its score and evidence, so the human can correct it but does not have to
+  answer it.
+- Score 1: **escalate to the human.** Ask it in the batch with two to four
+  suggested options, recommended one first, each with a one-line trade-off
+  (the escalation format in `confidence-scoring.md`).
+- A category where every question scored 3 or 2 needs no answer from the
+  human; say so and move on.
 
-Derived acceptance criteria are an escalation too: show them to the human in
-one `AskUserQuestion` call and ask for approval or edits before planning.
+`quill:groom` keeps its own gates: the human approves the groomed ticket
+before it is written back to Linear, and approves the Notion user story sync.
+Do not skip them. If it stops because Quill is not set up (no
+`quill.config.json` or no active project), stop too and tell the human to run
+`/quill:setup`.
+
+When `quill:groom` finishes, re-fetch the ticket and rebuild `ticket.md` from
+the groomed version: its acceptance criteria are now the source. Write every
+answer into `## Decisions` with its score and evidence, or `human decision`
+when the human gave or changed it, and save the full answer table to
+`groom.md`.
+
+When the ticket is already clear, skip `quill:groom`. Acceptance criteria you
+derived yourself are then an escalation: show them to the human in one
+`AskUserQuestion` call and ask for approval or edits before planning.
 
 ## 2. Plan gating
 
@@ -154,7 +176,7 @@ Read the ticket's estimate (Linear `estimate`, in points).
 ## 3. Architect
 
 Spawn `team-architect` with the handoff (`handoff.md`). It explores the code,
-scores its own open decisions the same way grooming does, publishes the plan
+scores its own open decisions with the same scale, publishes the plan
 to Planbin, and returns the plan ID, the URL and any escalations.
 
 - Save `plan.json`.

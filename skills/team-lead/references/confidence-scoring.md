@@ -1,7 +1,8 @@
 # Confidence scoring
 
-Used by `/groom`, by the Architect, and by any agent that has to answer an
-open question about the ticket. Every answer gets exactly one score.
+Used by the Lead when it answers `quill:groom` questions before asking the
+human, by the Architect, and by any agent that has to answer an open
+question about the ticket. Every answer gets exactly one score.
 
 ## The scale
 

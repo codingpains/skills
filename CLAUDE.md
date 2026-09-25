@@ -20,6 +20,10 @@ After a change:
    and tell me to start a new session.
 
 The `/team-lead` pipeline is split across `skills/team-lead/SKILL.md`, the
-six `agents/team-*.md` files, `skills/groom/SKILL.md`, and the shared files
-in `skills/team-lead/references/`. A rule every agent follows belongs in
+six `agents/team-*.md` files, and the shared files in
+`skills/team-lead/references/`. A rule every agent follows belongs in
 `references/team-rules.md`, not copied into each agent.
+
+Grooming uses the Quill plugin's `quill:groom`. It is not in this repo; do
+not add a grooming skill here. Before adding any skill, check whether an
+installed plugin already covers it.
