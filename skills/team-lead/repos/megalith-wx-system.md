@@ -2,7 +2,7 @@
 name: megalith-wx-system
 remote: github.com/onboardiq/megalith
 paths: [apps/wx-system/]
-updated: 2026-09-24
+updated: 2026-09-25
 ---
 
 # megalith / wx-system
@@ -29,9 +29,14 @@ are dead leftovers; ignore them.
    `packages/`. When that script is missing, use the generic
    `~/.claude/skills/team-lead/scripts/bootstrap-worktree.sh`, then
    `npm run clients:prebuild` if wx-ui is touched.
-3. If `apps/wx-system/package-lock.json` differs from the main checkout's
+3. The wx-review script skips the repo-root `node_modules`, where lefthook
+   lives, so git hooks (lint-staged, the ticket prefix, the barrel-import
+   check) silently do nothing. From the worktree root:
+   `[ -e node_modules ] || cp -c -R <main checkout>/node_modules node_modules`,
+   then check `node_modules/lefthook-darwin-arm64/bin/lefthook` exists.
+4. If `apps/wx-system/package-lock.json` differs from the main checkout's
    (`cmp`), run `npm ci --no-audit` (minutes; one long timeout).
-4. The copied `dist/` folders come from whatever branch the main checkout is
+5. The copied `dist/` folders come from whatever branch the main checkout is
    on. Before running a workspace's tests, build it and what it depends on:
    `npx tsc -b <workspace>` (incremental, fast after the first run).
 
@@ -158,6 +163,8 @@ section are relative to the **worktree root** (megalith), not
 
 ## Gotchas
 
+- A commit subject without `[<KEY>]:` means the git hooks did not run.
+  Re-run setup step 3; never amend around it.
 - `Failed to resolve import "@fountain/wx-api-clients/generated/..."`: the
   generated clients are missing. Re-run setup step 2, or
   `npm run clients:prebuild`.
