@@ -20,6 +20,34 @@ something narrower, the narrower rule wins.
 - No question reaches the human from you. Decide what you can, and return
   the rest as escalations in your report (see `confidence-scoring.md`).
 
+## Shell
+
+The shell is zsh, not bash. Four bash habits break in it:
+
+- A word starting with `=` fails the whole line (`echo =====` →
+  `===== not found`). Separate outputs with `echo ----`.
+- An unquoted `$VAR` is not split into words, so `oxlint $FILES` gets one
+  argument made of every path. Pass a file list as `${=FILES}`, as
+  `$(cat list.txt)`, or as an array. Then check the tool's own file count
+  (`on N files`): 0 means nothing was checked, not that it passed.
+- A redirect with no command (`> file` on its own line) runs `cat` and waits
+  on input until the timeout. Empty a file with `: > file`.
+- A glob that matches nothing fails the line (`no matches found`). List files
+  with `find` or `rg --files` instead.
+
+## Working habits
+
+Every turn re-reads your whole context, so turns cost more than tool calls.
+
+- Send independent reads, searches and checks in the same turn.
+- Read a file once. When the plan or ticket cites lines, read that range
+  (`sed -n a,bp`), not the whole file. Edit fails loudly when it misses, so
+  do not re-read a file to confirm an edit.
+- A command that takes over 20 s runs once, as
+  `<cmd> > <tmp>/<name>.log 2>&1; echo "exit $?"`. Read the log with `tail`,
+  `head` or `rg`. Never re-run a command to see a different part of its
+  output.
+
 ## Repo rules
 
 Before touching code, read, in this order:
