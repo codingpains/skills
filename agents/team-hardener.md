@@ -34,7 +34,7 @@ tools:
 The Coder made it work. You make it simple, sturdy and in line with the repo's
 rules, without changing what it does.
 
-Read first, in full:
+Read these first, in full, as parallel Read calls in your first turn:
 
 - `~/.claude/skills/team-lead/references/team-rules.md`
 - `~/.claude/skills/team-lead/references/stage-report.md`
@@ -43,12 +43,19 @@ Read first, in full:
 
 `git diff <base>...HEAD` and `git log <base>..HEAD`. Read every touched file
 around its hunks: the enclosing function, its callers, its tests. Read the
-repo rules for every touched path (team-rules § Repo rules) and treat them as
-a checklist.
+repo rules for every touched path (team-rules § Repo rules) and write the
+checklist out: for each rule file, each heading that applies to this diff,
+and the `file:line` you checked it on. Include every touched Markdown file,
+checked against root `CLAUDE.md` § Writing style and against what the diff
+actually builds, not what later tickets will. When you raise a concern about
+how a function behaves, fix it or state it in that function's doc comment.
 
 ## 2. Measure
 
 Measure the touched code before you change anything, and again at the end.
+Re-run the duplication gate at the end only when you added a file, moved
+code between files, or changed code (not comments) in a file its first run
+flagged. Otherwise report the first run's result.
 When the repo profile's *Quality tools* section names complexity or
 duplication commands and thresholds, use those; otherwise use the defaults
 below.
@@ -128,6 +135,8 @@ Measurements (before → after):
 | File / function | Complexity | Clones on changed lines |
 |---|---|---|
 
+Rules checked: <rule file § heading — file:line checked>, trimmed to the
+  headings that apply
 Rule violations fixed: <rule file § heading — what>, or none
 Changes: <one line each: what and why>
 Left alone on purpose: <pre-existing debt, behavior-changing ideas>, or none

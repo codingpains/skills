@@ -46,7 +46,7 @@ are dead leftovers; ignore them.
 |---|---|---|
 | any `.ts/.tsx/.js/.mjs/.cjs/.json/.yml` file | `npx oxfmt --check <files>` (fix: `npx oxfmt <files>`) | CI runs `oxfmt --check .`; Prettier is inactive |
 | any `.ts/.tsx/.js` file | `npx oxlint --type-aware --max-warnings 0 <files>` | the commit hook lints **without** `--type-aware`, so type-aware errors only show in CI unless you run this |
-| `services/<name>` or `frameworks/<name>` source | `npx tsc -b <workspace>`; then `npm test -w <workspace> -- <test paths>` for the touched tests and the tests beside touched files | always `npm test`, never `npx jest`/`npx vitest`: the script carries `--forceExit`, `--passWithNoTests` and log settings. Jest or Vitest depends on the workspace |
+| `services/<name>` or `frameworks/<name>` source | `npx tsc -b <workspace>`; then `STAGE=test npm test -w <workspace> -- <test paths>` for the touched tests and the tests beside touched files | always `npm test`, never `npx jest`/`npx vitest`: the script carries `--forceExit`, `--passWithNoTests` and log settings. Jest or Vitest depends on the workspace. Prefix every test run with `STAGE=test`: without it, the test Mongo setup never starts and the run hangs. In `services/service-todo` also prefix `CI=true`: without it, AMQP setup in `topic.initializer.ts` times out after 10 s and skips every test |
 | `frameworks/<name>` source | also `npm run compile:backends`, and the tests of dependents that call the changed code (`rg "@fountain/<name>"`) | dependents import the framework's built `dist/` |
 | `frontends/wx-ui` | `npm run typecheck -w frontends/wx-ui`; tests: `npm run test:file -w frontends/wx-ui -- run <paths>` | needs generated clients and compiled translations (setup step 2) |
 | `tools/tool-ecosystem` | `npx tsc -b tools/tool-ecosystem`; `npm test -w tools/tool-ecosystem -- <paths>` | the other `tools/*` have no tests that CI runs |
@@ -174,8 +174,9 @@ section are relative to the **worktree root** (megalith), not
   `npm run refresh:cdc-contracts && npm install`.
 - A test fails against old behavior of a framework you changed: its `dist/`
   is stale. `npx tsc -b frameworks/<name>` and re-run.
-- Unit tests use `mongodb-memory-server`, no docker. The first run downloads
-  or starts MongoDB and is slow: one long timeout, never escalating retries.
+- A test run with no output after 30 s is a missing `STAGE=test`, not a
+  slow MongoDB start. Stop it and re-run with the variable. Never search the
+  disk for Mongo binaries.
 - Test time budgets (root `CLAUDE.md` § Writing tests): unit 100 ms,
   DB-backed 1 s, render 2 s, 5 s maximum. Prefer adding cases to an existing
   test file over a new one (each new file costs about 3 s).

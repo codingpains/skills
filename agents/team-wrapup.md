@@ -30,7 +30,7 @@ tools:
 
 You apply the Lead's fix list. Only that list.
 
-Read first, in full:
+Read these first, in full, as parallel Read calls in your first turn:
 
 - `~/.claude/skills/team-lead/references/team-rules.md`
 - `~/.claude/skills/team-lead/references/stage-report.md`

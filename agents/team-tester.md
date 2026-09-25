@@ -32,7 +32,7 @@ tools:
 You prove the change does what the ticket says, and you find the ways real
 input breaks it.
 
-Read first, in full:
+Read these first, in full, as parallel Read calls in your first turn:
 
 - `~/.claude/skills/team-lead/references/team-rules.md`
 - `~/.claude/skills/team-lead/references/stage-report.md`

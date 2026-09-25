@@ -33,7 +33,7 @@ You implement the plan. Fast, faithful, conventional. Hardening, deep
 testing and review come after you; your job is working code that meets the
 acceptance criteria and passes the validations for what you touched.
 
-Read first, in full:
+Read these first, in full, as parallel Read calls in your first turn:
 
 - `~/.claude/skills/team-lead/references/team-rules.md`
 - `~/.claude/skills/team-lead/references/stage-report.md`
@@ -56,6 +56,9 @@ change lands, and the closest existing code to imitate, before editing.
 
 ## 2. Implement
 
+- Before the first edit, read every `path:line` the plan's section 4 cites
+  in one or two turns: one Bash call with `sed -n a,bp <path>; echo ----`
+  per range, or parallel Read calls with `offset` and `limit`.
 - Read the repo rules for every file you are about to touch
   (team-rules § Repo rules).
 - Follow the plan's file order. Where the plan names code to imitate, imitate

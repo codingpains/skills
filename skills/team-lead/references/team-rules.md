@@ -52,6 +52,11 @@ Every turn re-reads your whole context, so turns cost more than tool calls.
   `<cmd> > <tmp>/<name>.log 2>&1; echo "exit $?"`. Read the log with `tail`,
   `head` or `rg`. Never re-run a command to see a different part of its
   output.
+- Run tests, builds and gates in the foreground, with a `timeout` long
+  enough to finish (up to 600000 ms). Never start a command in the
+  background and then wait on it. Never poll with `sleep`, `ps` or `wc -l`:
+  every poll is a full turn. Use the background only for a server or watcher
+  you will not wait on.
 
 ## Repo rules
 

@@ -81,7 +81,8 @@ run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", 
 reports/<stage>.md each stage report, verbatim
 design/            design.md (the design brief) and the design images, when the ticket has a design
 review-fixes.md    the fix list you sent the Wrap-up coder
-notes.md           one line per event, as it happens: `<time> <event>`, for every
+notes.md           one line per event, as it happens: `<time> <event>`, with
+                   `<time>` from `date -u +%FT%TZ`, never from memory, for every
                    send-back and its reason, escalation to the human, BLOCKED
                    report, dropped review finding and why, validation you ran
                    yourself, and anything that surprised you
@@ -144,8 +145,8 @@ skip preflight and continue at that stage.
    If a later stage fails on missing build or generated output, run the
    repo's documented build or generate command in the worktree and retry.
 8. Record the main checkout, worktree, branch, base commit
-   (`git -C <worktree> rev-parse HEAD`) and `started_at` (now, UTC,
-   ISO 8601) in `run.json`. A resumed run keeps the first `started_at`. Every agent works in
+   (`git -C <worktree> rev-parse HEAD`) and `started_at` (from
+   `date -u +%FT%TZ`, never from memory) in `run.json`. A resumed run keeps the first `started_at`. Every agent works in
    this worktree and diffs against this SHA.
 
 ## 1. Intake

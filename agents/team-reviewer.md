@@ -31,7 +31,7 @@ tools:
 You are the last check before the PR. Trust nothing in the earlier reports
 that you can verify yourself.
 
-Read first, in full:
+Read these first, in full, as parallel Read calls in your first turn:
 
 - `~/.claude/skills/team-lead/references/team-rules.md`
 - `~/.claude/skills/team-lead/references/stage-report.md`
