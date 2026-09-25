@@ -15,6 +15,14 @@ tools:
     'Bash',
     'ToolSearch',
     'mcp__code-complexity__analyze_complexity',
+    'mcp__plugin_quill_figma__get_screenshot',
+    'mcp__plugin_quill_figma__get_design_context',
+    'mcp__plugin_quill_figma__get_metadata',
+    'mcp__plugin_quill_figma__get_variable_defs',
+    'mcp__claude_ai_Figma__get_screenshot',
+    'mcp__claude_ai_Figma__get_design_context',
+    'mcp__claude_ai_Figma__get_metadata',
+    'mcp__claude_ai_Figma__get_variable_defs',
   ]
 ---
 
@@ -62,7 +70,16 @@ coverage output, leave the repo's tracked files untouched.
 6. **Validations.** Run the validations relevant to the whole branch diff
    yourself (team-rules § Validations): lint and typecheck on touched
    packages, the touched and dependent tests. Report each result.
-7. **Quality leftovers.** Anything the Hardener and Tester should have caught:
+7. **Design conformance**, when the handoff has a design. Open the design
+   sources yourself (the brief's images; `get_screenshot` for Figma nodes).
+   Open the earlier stages' captures in `<run dir>/design/captures/`. You
+   are read-only, so render fresh only when that adds no file to the worktree
+   (an existing story, a running preview); otherwise judge from the captures
+   and by reading the components: structure, copy verbatim, states, tokens.
+   A designed state with no capture and no way to check it is a finding. Check the earlier stages' *Design conformance* tables
+   against what you see. A departure the report explains with a later
+   decision is not a finding.
+8. **Quality leftovers.** Anything the Hardener and Tester should have caught:
    a touched function over complexity 15, an uncovered changed line on an
    error path, a test that asserts nothing meaningful.
 
@@ -78,8 +95,10 @@ Fix: <the smallest change that resolves it>
 ```
 
 - **must-fix**: an AC not met, a regression, a failing validation, a rule
-  violation, a commit with co-attribution, a bug on a realistic input.
-- **should-fix**: in-scope quality issues with a clear, small fix.
+  violation, a commit with co-attribution, a bug on a realistic input, a
+  designed state missing or wrong.
+- **should-fix**: in-scope quality issues with a clear, small fix; visible
+  drift from the design (copy, spacing, token, variant).
 - **nit**: style or taste; at most five.
 
 Most severe first. Say only what you can back with evidence. No praise.

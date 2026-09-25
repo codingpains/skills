@@ -69,6 +69,30 @@ that no longer exists, a flag the tool rejects), use the next source to find
 the right one, and name the stale command under *Concerns* so the profile
 gets refreshed.
 
+## UI changes
+
+When your stage changes, tests or reviews anything a person sees:
+
+- Read the repo profile's *UI* section, and the UI rules it names, before
+  the first edit.
+- When the handoff has a design, read the brief and open every image it
+  lists before the first edit. Fetch a Figma node yourself with
+  `get_screenshot` or `get_design_context` when the brief is not enough (the
+  handoff names the tool prefix). Load the tools with `ToolSearch`.
+- Match the design: structure, every string verbatim, states, tokens. Where
+  the code cannot or should not match (the design system has no such
+  component, a later decision overrules the picture), say so in the report.
+- When the profile gives a way to render the UI, render what you changed in
+  each designed state and look at it next to the design before you commit.
+- Save every capture as
+  `<run dir>/design/captures/<stage>-<screen>-<state>.png`, so later stages
+  and the Lead can open it. Never upload a design image or a capture
+  anywhere, and never commit one.
+- Files a render path adds to the worktree (a harness entry, stubs) are
+  scaffolding: never commit them, and delete them before your last commit so
+  the tree is clean.
+- Report the *Design conformance* table from `design-context.md`.
+
 ## Commits
 
 - Commit with the repo's configured git identity. Never pass `--author`.

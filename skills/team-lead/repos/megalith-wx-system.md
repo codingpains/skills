@@ -103,6 +103,43 @@ node ~/.claude/agents/references/coverage-gate.mjs --workspace <ws> --base $BASE
   never re-run with other flags to move a number.
 - The repo has no coverage thresholds of its own and no CI coverage job.
 
+## UI
+
+For any change under `frontends/wx-ui` that can move a pixel. Paths in this
+section are relative to the **worktree root** (megalith), not
+`apps/wx-system`.
+
+- **Design system**: Ripple (`packages/ripple`, `@fountain/ripple` in wx-ui),
+  MUI and Tailwind. Reuse before building; the component-sourcing ladder is
+  in `.claude/skills/prototype-to-implementation/SKILL.md`.
+- **Rules to read before the first visual edit**, in order, from
+  `.claude/skills/ux-design/`: `constraint-anti-pattern-guard` (wins on
+  conflict), `layout-composition`, `content-hierarchy`, `copywriting-voice`,
+  `fountain-product-context`. When the ticket has a design, also
+  `.claude/skills/prototype-to-implementation/SKILL.md` (which source wins,
+  tokens, what to do when the design has a gap).
+- **Render**: `.claude/skills/visual-harness/SKILL.md` with its wx-ui recipe
+  `references/wx-ui.md`. It mounts one real component on localhost with only
+  the data layer stubbed: no backend, no docker. Only 3% of wx-ui components
+  have stories, so the harness is the default. When a story covers the
+  state, from `apps/wx-system/frontends/wx-ui` run
+  `npx storybook dev -p <free port> --ci --no-open` (the npm script hardcodes
+  6006, which another worktree may hold). Harness files are scaffolding:
+  never commit them.
+- **Capture** (Playwright, headless Chromium):
+  `node .claude/skills/prototype-conformance/scripts/capture.mjs --url <url> --viewport 1512x982 --shot <out.png> [--element <selector>] [--measure <selector>]`.
+  Its header documents `--click`, `--steps` and `--init` to reach a state.
+  Side by side: `node .claude/skills/prototype-conformance/scripts/compose.mjs --out <cmp.png> <design.png> <shipped.png> --labels "Design|Build"`.
+  Headless Chromium needs the Bash sandbox off on macOS. Rendering pitfalls
+  (fonts, stubs, viewport):
+  `.claude/skills/implement-prototype-ticket/references/render-paths.md`.
+- **Prototypes in the repo**: `designs/<project>/`. Read in the order
+  `designs/CLAUDE.md` gives (`HANDOFF.md`, `CHANGELOG.md`, then the screen's
+  source). A prototype named by the ticket is a design source like Figma.
+  Resolve its colors with `node tools/design-sync/tokens.mjs --project <project>`.
+- **Before the last commit** of a UI change: the checks in
+  `.claude/skills/frontend-pre-pr/SKILL.md` (i18n extraction, oxfmt).
+
 ## Never
 
 - `npm test` or `npm run test:ci` at `apps/wx-system` level: every workspace.

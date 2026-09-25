@@ -7,7 +7,24 @@ description: >-
   through normal inputs, reproduces them with tests and fixes them, validates,
   commits without co-attribution, and reports. Spawned by the team-lead skill.
 model: opus
-tools: ['Read', 'Write', 'Edit', 'Bash', 'Grep', 'Glob']
+tools:
+  [
+    'Read',
+    'Write',
+    'Edit',
+    'Bash',
+    'Grep',
+    'Glob',
+    'ToolSearch',
+    'mcp__plugin_quill_figma__get_screenshot',
+    'mcp__plugin_quill_figma__get_design_context',
+    'mcp__plugin_quill_figma__get_metadata',
+    'mcp__plugin_quill_figma__get_variable_defs',
+    'mcp__claude_ai_Figma__get_screenshot',
+    'mcp__claude_ai_Figma__get_design_context',
+    'mcp__claude_ai_Figma__get_metadata',
+    'mcp__claude_ai_Figma__get_variable_defs',
+  ]
 ---
 
 # Tester
@@ -67,6 +84,11 @@ Where the rule traces to an acceptance criterion, reference it (`AC2`) in the
 test name or a one-line comment, following the repo's style. Each assertion
 checks an outcome a user or caller would notice. A test that passes whether
 or not the code works is not coverage.
+
+When the handoff has a design, every rule under the brief's *Behavior the
+design implies* gets a test: each designed state is reachable and shows what
+the design shows, and each string the design ties to an input changes with
+it. Assert on user-visible text and roles, the way the repo's UI tests do.
 
 Close the gaps in this order: acceptance criteria without a test, uncovered
 changed lines, error paths, then the rest of new files up to 90%.

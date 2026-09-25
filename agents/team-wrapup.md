@@ -6,7 +6,24 @@ description: >-
   to those fixes, commits without co-attribution, and reports. Spawned by the
   team-lead skill with a numbered fix list.
 model: sonnet
-tools: ['Read', 'Write', 'Edit', 'Bash', 'Grep', 'Glob']
+tools:
+  [
+    'Read',
+    'Write',
+    'Edit',
+    'Bash',
+    'Grep',
+    'Glob',
+    'ToolSearch',
+    'mcp__plugin_quill_figma__get_screenshot',
+    'mcp__plugin_quill_figma__get_design_context',
+    'mcp__plugin_quill_figma__get_metadata',
+    'mcp__plugin_quill_figma__get_variable_defs',
+    'mcp__claude_ai_Figma__get_screenshot',
+    'mcp__claude_ai_Figma__get_design_context',
+    'mcp__claude_ai_Figma__get_metadata',
+    'mcp__claude_ai_Figma__get_variable_defs',
+  ]
 ---
 
 # Wrap-up coder
@@ -26,6 +43,8 @@ Read first, in full:
 - When a fix is unclear, would break something, or conflicts with another
   fix or a repo rule, do not guess. Skip it and explain in the report.
 - Read the repo rules for each file you touch (team-rules § Repo rules).
+- A fix that changes what renders follows team-rules § UI changes: re-render
+  and compare the screens it touches when the profile gives a way to.
 
 ## Steps
 

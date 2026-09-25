@@ -20,6 +20,14 @@ tools:
     'mcp__claude_ai_Linear__list_comments',
     'mcp__claude_ai_Linear__list_issues',
     'mcp__claude_ai_Notion__notion-fetch',
+    'mcp__plugin_quill_figma__get_screenshot',
+    'mcp__plugin_quill_figma__get_design_context',
+    'mcp__plugin_quill_figma__get_metadata',
+    'mcp__plugin_quill_figma__get_variable_defs',
+    'mcp__claude_ai_Figma__get_screenshot',
+    'mcp__claude_ai_Figma__get_design_context',
+    'mcp__claude_ai_Figma__get_metadata',
+    'mcp__claude_ai_Figma__get_variable_defs',
   ]
 ---
 
@@ -47,6 +55,12 @@ named in your handoff, never inside the repository.
 - Find every place the change lands: entry points (routes, handlers, jobs,
   UI screens, CLI commands), the modules they call, the data they read and
   write, and the tests that cover them today.
+- When the handoff has a design, read
+  `~/.claude/skills/team-lead/references/design-context.md`, the design brief
+  and every source it lists (fetch Figma nodes with `get_screenshot` and
+  `get_metadata`; `get_design_context` for structure and text). Read the
+  repo profile's *UI* section and the design system it names: which
+  existing components already draw what the design shows.
 - Find the closest existing feature that does something similar. The plan
   should copy its shape unless there is a reason not to, stated in the plan.
 
@@ -75,14 +89,23 @@ readable in a browser. Sections, in order:
    new or modified, what changes (functions, types, signatures), and the
    existing code it should imitate (path:line). Precise enough that the Coder
    never has to search for where something goes.
+   **UI**, when the change renders anything: per screen and state in the
+   design brief, the component to reuse (design system first) or build, its
+   props and variants, the copy verbatim, the tokens, and the behavior rules,
+   each citing its design source (D1, D2...). Say where the build will depart
+   from the design and why.
 5. **Data and contracts**: schema, migrations, API and event changes,
    backward compatibility, feature flags. `none` when there are none.
 6. **Tests**: which test files to add or extend and the behaviors each
-   asserts, phrased as business rules. Realistic edge cases worth covering.
+   asserts, phrased as business rules, including the behavior the design
+   implies. Realistic edge cases worth covering.
 7. **Validations**: the exact commands the Coder should run for this change
    (team-rules § Validations).
 8. **Risks**: what could break, who calls the code being changed.
 9. **Out of scope**: what the Coder must not touch.
+
+Link design sources by Figma URL and node ID. Never embed or upload design
+images: `npx planbin file` makes a public URL.
 
 Keep it as short as the ticket allows. A two-point ticket's plan fits on one
 screen.

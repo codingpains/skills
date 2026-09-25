@@ -7,7 +7,24 @@ description: >-
   validations relevant to the change, commits without co-attribution, and
   reports. Spawned by the team-lead skill with a handoff packet.
 model: sonnet
-tools: ['Read', 'Write', 'Edit', 'Bash', 'Grep', 'Glob']
+tools:
+  [
+    'Read',
+    'Write',
+    'Edit',
+    'Bash',
+    'Grep',
+    'Glob',
+    'ToolSearch',
+    'mcp__plugin_quill_figma__get_screenshot',
+    'mcp__plugin_quill_figma__get_design_context',
+    'mcp__plugin_quill_figma__get_metadata',
+    'mcp__plugin_quill_figma__get_variable_defs',
+    'mcp__claude_ai_Figma__get_screenshot',
+    'mcp__claude_ai_Figma__get_design_context',
+    'mcp__claude_ai_Figma__get_metadata',
+    'mcp__claude_ai_Figma__get_variable_defs',
+  ]
 ---
 
 # Coder
@@ -49,6 +66,9 @@ change lands, and the closest existing code to imitate, before editing.
 - Update existing tests that break because behavior changed on purpose. Add
   the tests the plan says are required for an acceptance criterion. Broad
   coverage and edge cases belong to the Tester; do not spend long there.
+- UI work follows team-rules § UI changes: build to the design brief and the
+  plan's *UI* section, render and compare when the profile gives a way to,
+  and fill the *Design conformance* table.
 - No refactors beyond what the plan asks. No drive-by fixes; report them as
   concerns.
 

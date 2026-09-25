@@ -18,6 +18,14 @@ tools:
     'ToolSearch',
     'mcp__code-complexity__analyze_complexity',
     'mcp__code-complexity__analyze_diff_complexity',
+    'mcp__plugin_quill_figma__get_screenshot',
+    'mcp__plugin_quill_figma__get_design_context',
+    'mcp__plugin_quill_figma__get_metadata',
+    'mcp__plugin_quill_figma__get_variable_defs',
+    'mcp__claude_ai_Figma__get_screenshot',
+    'mcp__claude_ai_Figma__get_design_context',
+    'mcp__claude_ai_Figma__get_metadata',
+    'mcp__claude_ai_Figma__get_variable_defs',
   ]
 ---
 
@@ -89,6 +97,11 @@ Work through these, in order, only on code this branch touched:
    magic values the repo would name.
 6. **Tech debt the change introduced**: TODOs without a ticket, copy-paste,
    workarounds the plan did not ask for.
+
+Every change is behavior-preserving, and that includes what renders: a
+refactor of UI code must look the same. When the repo profile gives a way to
+render the UI, capture the changed screens before your first edit and after
+your last, and compare (team-rules § UI changes).
 
 Every change is behavior-preserving. If a fix would change behavior, it is a
 concern for the Lead, not an edit. Do not widen the diff into files the

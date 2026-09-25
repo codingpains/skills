@@ -35,6 +35,12 @@ AC2. ...
 ### Out of scope
 <from ticket.md>
 
+## Design
+<"none", or:
+Brief: ~/.team-lead/runs/<TICKET_ID>/design/design.md (read it, and open every image it lists)
+Figma: D1 <url> node <id>, ...   Figma tools: <mcp__plugin_quill_figma__ | mcp__claude_ai_Figma__ | none reachable>
+How to use it: ~/.claude/skills/team-lead/references/design-context.md § How each agent uses it>
+
 ## Plan
 <Planbin plan ID and URL, or "no plan: trivial ticket, the brief is the spec">
 

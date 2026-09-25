@@ -46,6 +46,7 @@ Shared references, all under `~/.claude/skills/team-lead/references/`:
 | `handoff.md` | the packet you send each agent |
 | `stage-report.md` | the report every agent returns |
 | `repo-profiles.md` | per-repo validation profiles: format, matching, how to build one |
+| `design-context.md` | Figma links and other design sources: collecting them, Figma access, the design brief, how each agent uses it |
 
 Read them all before step 1. Every agent reads `team-rules.md` itself; you
 still pass its path in each handoff.
@@ -78,6 +79,7 @@ groom.md           answer table and scores, when quill:groom ran
 plan.json          {"plan_id": "...", "url": "..."} when the Architect ran
 run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main", "profiles": ["<path>", ...]}
 reports/<stage>.md each stage report, verbatim
+design/            design.md (the design brief) and the design images, when the ticket has a design
 review-fixes.md    the fix list you sent the Wrap-up coder
 notes.md           one line per event, as it happens: `<time> <event>`, for every
                    send-back and its reason, escalation to the human, BLOCKED
@@ -184,6 +186,14 @@ Tickets live in **Linear** or in a **Notion** tasks database. Nothing else.
   page's comments, and the titles and bodies of tasks linked through
   `Depends On` / `Blocks` relations when the task leans on them.
 
+**Collect the design.** Follow `design-context.md`: find every Figma link,
+pasted image, prototype folder and design requirements page the ticket
+reaches (its parent epic too, when the ticket changes UI and carries none),
+check Figma is reachable, look at each source, and write the design brief to
+`design/design.md` with the images beside it. When Figma cannot be reached,
+ask the human as that file says. No design and no UI change: skip this and
+write `Design: none` in `ticket.md`.
+
 Write `ticket.md`:
 
 ```
@@ -208,9 +218,13 @@ AC2. ...
 
 ## Out of scope
 <what the ticket or its comments exclude>
+
+## Design
+<`design/design.md`: sources D1..Dn in one line each, or "none">
 ```
 
-**Is the ticket clear?** It is unclear when any of these hold: there are no
+**Is the ticket clear?** Read the design brief's *Gaps* and *Behavior the
+design implies* as part of the ticket. It is unclear when any of these hold: there are no
 acceptance criteria and you cannot derive testable ones; a term, field, screen
 or behavior is named without a way to find it; two statements conflict; an
 obvious case (empty input, error path, permission, existing data) has no

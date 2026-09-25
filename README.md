@@ -87,6 +87,17 @@ run at once in separate sessions and your main checkout is never touched.
 dependency folders into a new worktree. Remove a worktree yourself once its PR
 is merged: `git worktree remove <path>`.
 
+**Designs.** When a ticket carries Figma links, pasted screenshots, a repo
+prototype or a design requirements page (or its epic does), the Lead writes a
+design brief to `~/.team-lead/runs/<ticket>/design/`: every source, each
+screen and state with its copy verbatim, tokens, the behavior the design
+implies, and its gaps. The Architect maps screens to components in the plan;
+coding agents build to it and, where the repo profile's *UI* section says how,
+render their work and compare it side by side with the design; the Tester
+tests the designed states; the Reviewer checks conformance. Figma is read
+through the Figma desktop app's MCP server (Quill plugin) or the claude.ai
+Figma connector; designs are never uploaded anywhere.
+
 **Self-assessment.** After the PR is published, the Assessor measures the
 run from Claude Code's own transcripts (`skills/team-lead/scripts/run-metrics.py`:
 active time, time waiting on you, tokens, cost and tool calls per agent),

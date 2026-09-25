@@ -66,6 +66,12 @@ when the repo has more than `.claude/rules` globs can express.
 Complexity, duplication and coverage commands and thresholds, for the
 Hardener and the Tester.
 
+## UI
+Optional, for repos with a frontend: the design system and where its
+components live, the UI rules to read before a visual change, how to render
+one component or page without the whole stack, how to capture it, and where
+design prototypes live in the repo.
+
 ## Never
 Commands agents must not run (full suite, anything that needs docker or a
 live database, destructive setup scripts), each with the reason.
