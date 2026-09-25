@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Block a commit that would install a malformed skill or agent.
+exec "$(git rev-parse --show-toplevel)/scripts/validate.sh"
