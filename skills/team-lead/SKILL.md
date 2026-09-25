@@ -29,7 +29,7 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 
 | Stage | Agent (`subagent_type`) | Model | Writes code | Commits |
 |---|---|---|---|---|
-| 2 Plan | `team-architect` | fable | no | no |
+| 2 Plan | `team-architect` | opus | no | no |
 | 3 Implement | `team-coder` | sonnet | yes | yes |
 | 4 Harden | `team-hardener` | opus | yes | yes |
 | 5 Test | `team-tester` | opus | yes | yes |

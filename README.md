@@ -52,7 +52,7 @@ subagents, then opens the PR and posts it to Slack channel `C0BULBDLXUK`.
 Intake ──► unclear? ──► quill:groom (Lead answers from code, scored 1–3; score 1 → ask the human)
    │
    ▼
-estimate > 1 point (or none)? ──► Architect (fable) ──► plan on Planbin
+estimate > 1 point (or none)? ──► Architect (opus) ───► plan on Planbin
    │ no                                                     │
    ▼                                                        ▼
 Coder (sonnet) ──► Hardener (opus) ──► Tester (opus) ──► Reviewer (opus)
@@ -67,7 +67,7 @@ Coder (sonnet) ──► Hardener (opus) ──► Tester (opus) ──► Revie
 |---|---|---|
 | Lead | `skills/team-lead/SKILL.md` | main session |
 | Grooming | `quill:groom` (Quill plugin, not in this repo) | main session |
-| Architect | `agents/team-architect.md` | fable |
+| Architect | `agents/team-architect.md` | opus |
 | Coder | `agents/team-coder.md` | sonnet |
 | Hardener | `agents/team-hardener.md` | opus |
 | Tester | `agents/team-tester.md` | opus |

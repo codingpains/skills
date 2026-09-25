@@ -6,7 +6,7 @@ description: >-
   ticket and publishes it to Planbin, returning the plan ID. Read-only on the
   repository. Spawned by the team-lead skill with a handoff packet; not useful
   on its own.
-model: fable
+model: opus
 tools:
   [
     'Read',
