@@ -75,7 +75,10 @@ below.
 
 - JavaScript/TypeScript, when `~/.claude/agents/references/dup-gate.mjs`
   exists: `node ~/.claude/agents/references/dup-gate.mjs --workspace
-  <pkg-dir> --base <base> --scan <npm-root> --json <tmp>/dup.json`.
+  <pkg-dir> --base <base> --scan <npm-root> --json <tmp>/dup.json`. Each
+  run scans all of `--scan`, so when the change touches several packages,
+  run it once: `--workspace <npm-root> --files <every touched source file,
+  relative to the npm root>`.
 - Otherwise `npx --yes jscpd --min-lines 5 --min-tokens 50 --reporters json
   --output <tmp> <touched paths and their package>`.
 

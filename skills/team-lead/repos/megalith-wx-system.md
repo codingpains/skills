@@ -83,16 +83,23 @@ pipeline are reviewed by `/wx-review` against the same list.
 ## Quality tools
 
 The same gates `/wx-review` runs, from `~/.claude/agents/references/`. Run
-from `apps/wx-system`, once per touched workspace, over **application code
-only**: never a `tools/<name>` workspace, never files under `scripts/` or
-`migration(s)/`, never migration scripts by name. `FILES` is that list,
-comma-separated, relative to the workspace. `BASE` is the base commit.
+from `apps/wx-system`, over **application code only**: never a
+`tools/<name>` workspace, never files under `scripts/` or `migration(s)/`,
+never migration scripts by name, never test files. `BASE` is the base
+commit.
+
+Complexity and coverage run once per touched workspace, with `FILES` that
+workspace's list, comma-separated, relative to the workspace. Duplication
+runs **once for the whole change**, with `ALL_FILES` every touched
+application file, relative to `apps/wx-system`: each run scans all of
+`apps/wx-system` (about 18,000 files, about 70 s) whatever the workspace, so
+one run per workspace repeats the same scan.
 
 ```sh
 node ~/.claude/agents/references/complexity-gate.mjs --workspace <ws> --base $BASE --files $FILES \
   --ceiling 15 --warn 8 --delta 20 --min-drop 10 --json <tmp>/complexity.json
-node ~/.claude/agents/references/dup-gate.mjs --workspace <ws> --base $BASE --files $FILES \
-  --scan . --json <tmp>/dup.json
+node ~/.claude/agents/references/dup-gate.mjs --workspace . --scan . --base $BASE --files $ALL_FILES \
+  --json <tmp>/dup.json
 node ~/.claude/agents/references/coverage-gate.mjs --workspace <ws> --base $BASE --files $FILES \
   --threshold 90 --json <tmp>/coverage.json
 ```
