@@ -78,6 +78,7 @@ ticket.md          ticket, acceptance criteria, decisions (the brief)
 groom.md           answer table and scores, when quill:groom ran
 plan.json          {"plan_id": "...", "url": "..."} when the Architect ran
 run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main", "profiles": ["<path>", ...]}
+setup.log          worktree setup output (preflight step 7)
 reports/<stage>.md each stage report, verbatim
 design/            design.md (the design brief) and the design images, when the ticket has a design
 review-fixes.md    the fix list you sent the Wrap-up coder
@@ -128,8 +129,20 @@ skip preflight and continue at that stage.
    `run.json`; every handoff lists them. With no match, say in one line that
    agents will work out the checks themselves and that
    `/team-lead --configure-repo` records them for next time. Do not stop.
-7. **Set up the worktree.** A new worktree has no gitignored files: no
-   installed dependencies, no `.env`, no build output. In order:
+7. **Set up the worktree, in the background.** A new worktree has no
+   gitignored files: no installed dependencies, no `.env`, no build output.
+   Its tracked files are all there, and intake and the Architect only read
+   them, so do not wait for setup. Run the commands chosen below as one Bash
+   call with `run_in_background: true`, output to
+   `~/.team-lead/runs/<TICKET_ID>/setup.log` (`mkdir -p` it first), ending in
+   `echo "setup exit $?"`, and go on to step 8. This is the one command you
+   start in the background and wait on: you get a notice when it ends, so
+   never poll it (team-rules § Working habits). When the notice comes, read
+   the log's tail and run any install it calls for the same way. Before
+   step 4, or any command that builds or tests in the worktree, the log must
+   end in `setup exit 0` with every lockfile check passed; if setup is still
+   running then, wait for its notice. If it failed, fix it and re-run it in
+   the foreground. Choose the commands in this order:
    - A matching profile's *Worktree setup* section, when it has one. With
      several profiles, run each one whose area the ticket touches; when
      unsure, run them all.
@@ -283,7 +296,10 @@ Notion task a number property named `Estimate`, `Points` or `Story Points`.
 
 Spawn `team-architect` with the handoff (`handoff.md`). It explores the code,
 scores its own open decisions with the same scale, publishes the plan
-to Planbin, and returns the plan ID, the URL and any escalations.
+to Planbin, and returns the plan ID, the URL and any escalations. When
+worktree setup has not ended yet, say so in the handoff: `node_modules`,
+`dist` and generated code may be missing or partial, so read source, not
+build output.
 
 - Save `plan.json`.
 - If it returned escalations (score 1), ask the human exactly as in step 1,
@@ -302,8 +318,9 @@ to Planbin, and returns the plan ID, the URL and any escalations.
 
 ## 4–7. Coding stages
 
-For each stage, in order, spawn its agent with the handoff and wait for its
-report:
+Before the first of them, confirm worktree setup ended cleanly (preflight
+step 7). For each stage, in order, spawn its agent with the handoff and wait
+for its report:
 
 | Stage | Agent | Extra in the handoff |
 |---|---|---|
