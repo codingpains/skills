@@ -12,6 +12,13 @@ something narrower, the narrower rule wins.
   `git -C <worktree>`, and give every file tool an absolute path under the
   worktree. Never read from, edit or commit in the main checkout; it may hold
   unrelated work.
+- Never read secret files: `.env` and its variants (`.env.local`,
+  `.env.example`), keys, credentials. Repos often deny them, and a denial
+  drops the output of every command in that Bash call, so never put such a
+  path in a batched command. To learn what a setting does, search the code
+  for `process.env.<NAME>` (or the language's equivalent): that shows what
+  reads it and its default. Settings that tests need are in the repo
+  profile's *Checks by change*.
 - Stay on the branch you were handed. Never switch branches, rebase, reset,
   stash, or rewrite commits you did not make in this stage.
 - Stay inside the ticket. Something wrong that the ticket does not cover goes
