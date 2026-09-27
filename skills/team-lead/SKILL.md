@@ -94,7 +94,12 @@ performance.md     the self-assessment report
 Write each file as soon as its content exists. With `--from`, read the
 directory back, check the worktree in `run.json` still exists
 (`git worktree list`), has the branch checked out and a clean tree, then
-skip preflight and continue at that stage.
+skip preflight and continue at that stage. Uncommitted changes left by a
+stopped stage: save them with `git -C <worktree> diff > <run dir>/stopped-<stage>.patch`
+and ask the human whether to discard them. With `--from coder`, the Coder's
+commits stay: its handoff carries `git log --format='%h %s' <base>..HEAD`
+and the instruction to continue from the first block of the plan not yet
+committed.
 
 ## 0. Preflight
 
@@ -260,7 +265,11 @@ ask**:
   answer it.
 - Score 1: **escalate to the human.** Ask it in the batch with two to four
   suggested options, recommended one first, each with a one-line trade-off
-  (the escalation format in `confidence-scoring.md`).
+  (the escalation format in `confidence-scoring.md`). Every option you offer
+  must be one the repo's hooks and rules allow: read the hook or rule behind
+  each option before you ask (a lockfile option, for example, against the
+  pre-commit hook), and drop the ones it forbids. When only one option is
+  left, it is a decision, not a question: take it and note it.
 - A category where every question scored 3 or 2 needs no answer from the
   human; say so and move on.
 
@@ -304,10 +313,13 @@ build output.
 - Save `plan.json`.
 - If it returned escalations (score 1), ask the human exactly as in step 1,
   add the answers to `## Decisions`, then have the Architect revise the plan
-  under the **same plan ID** (`npx planbin update`). Continue the same agent
-  with `SendMessage` when available (load it with `ToolSearch`), otherwise
-  spawn a new `team-architect` with the plan ID, the decisions, and the
-  instruction to update that plan.
+  under the **same plan ID** (`npx planbin update`). Within 5 minutes of the
+  Architect's report, continue the same agent with `SendMessage` (load it
+  with `ToolSearch`). After that its cached context has expired, and
+  resuming pays to write all of it again (about $1.40 for a 230k context),
+  so spawn a new `team-architect` with the plan ID, the decisions, the plan
+  sections they change, and the instruction to update that plan. Do the
+  same when `SendMessage` is not available.
 - Check the plan is retrievable: `npx planbin get <plan-id> --json` must
   return HTML. If it does not, stop and report.
 - Check the Architect's report says `Retained: yes`. A plan uploaded without
@@ -333,8 +345,10 @@ After each report, before moving on, **check it** (this is your
 sanity-check, not a second review):
 
 1. Save it verbatim to `reports/<stage>.md`.
-2. The report has every section in `stage-report.md` and its status is not
-   `BLOCKED`.
+2. The report has every section in `stage-report.md`, and every line of the
+   *Stage-specific* block its agent file names (the Hardener's *Rules
+   checked*, the Tester's *Coverage* table), and its status is not
+   `BLOCKED`. A missing line is a failed check.
 3. The commits it lists exist: `git log --format='%h %s' <base>..HEAD`.
 4. No commit carries co-attribution:
    `git log --format=%B <base>..HEAD | grep -iE 'co-authored-by|generated with'`

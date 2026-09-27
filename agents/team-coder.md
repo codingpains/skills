@@ -54,6 +54,10 @@ with `BLOCKED`.
 With `no plan: trivial ticket`, the brief is the spec. Find the place the
 change lands, and the closest existing code to imitate, before editing.
 
+When the handoff lists commits a stopped Coder already made, that work
+stands: read its diff (`git diff <base>..HEAD --stat`, then the files you
+build on) and continue from the first block not yet committed.
+
 ## 2. Implement
 
 - Before the first edit, read every `path:line` the plan's section 4 cites
@@ -82,6 +86,12 @@ Run the plan's validation commands, and anything else team-rules
 broke. Re-run until green or until you can show a failure is pre-existing.
 
 ## 4. Commit
+
+Commit each block of the plan as soon as it compiles and its tests pass, not
+all at the end. A block is a group of files in the plan's section 4 that
+builds on its own, such as a framework change, then the service code that
+uses it, then the UI. A stopped run keeps committed blocks and loses
+uncommitted work, so the next Coder starts from the last commit.
 
 Per team-rules § Commits: explicit paths, the repo's message convention, no
 co-attribution, no `--no-verify`, clean tree at the end.

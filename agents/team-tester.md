@@ -80,10 +80,11 @@ ticket or the domain, not the implementation:
 - good: `rejects a shift whose end time is before its start time`
 - bad: `validateShift returns false`
 
-Where the rule traces to an acceptance criterion, reference it (`AC2`) in the
-test name or a one-line comment, following the repo's style. Each assertion
-checks an outcome a user or caller would notice. A test that passes whether
-or not the code works is not coverage.
+Never put ticket IDs, AC numbers or plan labels (`AC2`, `T1`) in test names
+or comments unless the repo's existing tests do; many repos ban them. The
+AC-to-test mapping goes in your report. Each assertion checks an outcome a
+user or caller would notice. A test that passes whether or not the code
+works is not coverage.
 
 When the handoff has a design, every rule under the brief's *Behavior the
 design implies* gets a test: each designed state is reachable and shows what
@@ -105,6 +106,18 @@ records in older formats, permissions at the edges.
 Only cases reachable through those inputs count. A case that needs a caller
 to break an internal contract is not a finding.
 
+Two more sources of cases:
+
+- The earlier stages' concerns. The Hardener may not change behavior, so a
+  behavior problem it saw (its *Left alone on purpose* and *Concerns*) has
+  no owner until you take it. For each one about realistic input, reproduce
+  it and fix it as below when it is inside the ticket, or say in one line
+  why not.
+- A batched version of a per-item computation. Its main new bug is one
+  member's data reaching another. Build a batch whose members share inputs
+  (one member assigned to, or in a group with, something another member
+  owns) and assert each member's batched result equals its per-item result.
+
 For each real case:
 
 1. Write a test that reproduces it through the ingress (or the closest layer
@@ -118,7 +131,9 @@ escalation, not an edit.
 ## 4. Validate
 
 Run the touched test files, the tests of anything you fixed, and lint on
-every file you wrote (team-rules § Validations). Re-measure coverage.
+every file you wrote (team-rules § Validations). Re-measure coverage. When
+the repo profile has a *Rule greps* section, run it over your own commits
+(`<first tester commit>^..HEAD` in place of the base) and fix every hit.
 
 ## 5. Commit
 

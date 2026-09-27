@@ -2,7 +2,7 @@
 name: megalith-wx-system
 remote: github.com/onboardiq/megalith
 paths: [apps/wx-system/]
-updated: 2026-09-25
+updated: 2026-09-27
 ---
 
 # megalith / wx-system
@@ -39,6 +39,11 @@ are dead leftovers; ignore them.
 5. The copied `dist/` folders come from whatever branch the main checkout is
    on. Before running a workspace's tests, build it and what it depends on:
    `npx tsc -b <workspace>` (incremental, fast after the first run).
+6. `@fountain/cdc-contracts` is installed as a copy, so it also comes from the
+   main checkout's branch, and a newer base fails with `TS2305`. Rebuild it
+   from this worktree's source, from the worktree root:
+   `(cd packages/cdc-contracts && npm run build) && rsync -a --delete packages/cdc-contracts/dist/ apps/wx-system/node_modules/@fountain/cdc-contracts/dist/`.
+   Never fix it with `npm install`: that rewrites `package-lock.json`.
 
 ## Checks by change
 
@@ -61,7 +66,7 @@ are dead leftovers; ignore them.
 | `frameworks/waterworks-backend-hire-internal`, `-hire-public-v2`, or `apps/hire/swagger/{internal_api,api/v2}/fountain.yaml` | `npm run codegen`, commit `frameworks/*/generated` | CI `hire-sdk-diff` fails on stale generated SDKs; never hand-edit them |
 | a `*.template.yml` (permissions) | `npm run rebuild:authz`, commit what it changes (unverified) | `apps/wx-system/CLAUDE.md` § Commands |
 | an i18n message in wx-ui | `npm run i18n:extract:source -w frontends/wx-ui`, commit only `src/i18n/translations/en-US.json`; then `npm run formatjs:compile -w frontends/wx-ui && npm run i18n:check -w frontends/wx-ui` | never commit other locales; every new message needs a `description` |
-| `package.json` dependencies or `package-lock.json` | `npm install --package-lock-only --ignore-scripts`, then `npm ci --dry-run --no-audit --ignore-scripts` | pre-commit and CI both check the lockfile is in sync; never hand-edit it |
+| `package.json` dependencies or `package-lock.json` | `npm install --package-lock-only --ignore-scripts`, then `npm ci --dry-run --no-audit --ignore-scripts` | never hand-edit it. The pre-commit hook re-runs `npm install --package-lock-only` and rejects any other lockfile, so npm's output is the only one that commits. npm may also rewrite hundreds of unrelated lines (it records the root `overrides`): run the same install on a clean base first, and if the churn shows there too, it is npm's. Commit it, check no installed `version` changed, and say so in the PR body. It is not a question for the human |
 | any `{services,frameworks,tools}/**/*.{ts,tsx}` | `node tools/scripts/check-talent-reads.mjs` | ratchet on unprojected talent reads; pragma `// talent-full-doc: <reason>`; never hand-edit `.talent-reads-baseline.json` |
 | an MCP tool definition in a service or framework | `npm run build:backends && npm run check:mcp-tool-names` | the baseline only shrinks |
 | a `BEGIN/END_CRITICAL_SECTION` body in `service-workforce` `workers.proxy.ts` / `workers.client.ts` | `node tools/scripts/check-critical-methods.mjs`; when the change is intended, `--update` and commit `.critical-methods.json` | checksum gate |
@@ -73,12 +78,49 @@ Pre-commit also blocks, in added lines: barrel imports (`from '.'`,
 and `instance.create` in tests that import `waterworks-backend-dao` (use the
 factories in `waterworks-backend-test-helpers`).
 
+**service-security tests.** `CI=true` does not help there:
+`tests.initializer.ts` always creates a broker topic, so every test file
+hangs about 30 s and fails with `#d89b17c5`. Run its tests through the
+no-broker config, which drops only the topic setup:
+`STAGE=test npm test -w services/service-security -- --config ~/.claude/skills/team-lead/repos/megalith-wx-system.jest-security.cjs <paths>`.
+A test that publishes events also installs the in-memory messaging stand-in
+(`src/lib/initializers/in-memory-messaging.initializer.ts`, `ci-testing`
+skill). `tokens.utils.test.ts` imports the topic setup itself and always
+fails locally. The coverage gate cannot run in this workspace: measure with
+`--coverage` through the same config, and say so in the report.
+
 ## Rules to read
 
 Route rule files and skills by touched path with
 `~/.claude/skills/wx-review/references/rule-routing.md`: its *Always*,
 *Rules by touched path* and *Skills by touched area* tables. PRs from this
 pipeline are reviewed by `/wx-review` against the same list.
+
+## Rule greps
+
+Rules that reviews keep finding, as searches over the added lines. The
+Hardener runs them on the whole diff before its first edit, and the Tester
+on its own commits before it reports. Resolve every hit, or name it under
+*Left alone on purpose* with the reason. From `apps/wx-system`:
+
+- A cast in service-todo source (`todo-typescript.md` § Validate: never
+  cast):
+  `git diff $BASE...HEAD -U0 -- services/service-todo/src ':!*.test.ts' | rg '^\+.*\bas [A-Z]'`
+- A `||` default in service-todo (`todo-typescript.md`: use `??`):
+  `git diff $BASE...HEAD -U0 -- services/service-todo/src | rg '^\+.*\|\| '`
+- A new database read (`backend.md` § MongoDB reads: each needs a `limit`,
+  or a one-line comment that proves the bound):
+  `git diff $BASE...HEAD -U0 -- services frameworks ':!*.test.ts' | rg '^\+.*\.(find|findOne|findBatched|aggregate|__unsafeFind)\('`
+- A plain read on a locked DAO (§ Gotchas, *Locked DAOs*). A hit in code
+  another service reaches (a client method, anything the service's index
+  exports, another service's code) is a must-fix. List the locked DAOs with
+  `rg -n '^\s*[\w.]+\.dao\.lock\(\)' services/*/src/index.ts`, then the new
+  plain reads with
+  `git diff $BASE...HEAD -U0 -- services ':!*.test.ts' | rg '^\+.*\.dao\.instance\.(find|findOne|count|aggregate)\('`.
+- A ticket ID, AC number or plan label in a comment or test name (root
+  `CLAUDE.md` § Writing style; a lint suppression directive is the one
+  allowed case):
+  `git diff $BASE...HEAD -U0 | rg '^\+.*(//|/\*|\* |it\(|test\(|describe\().*\b(AC[0-9]+|[STDF][0-9]{1,2}|[A-Z]{2,5}-[0-9]+)\b'`
 
 ## Quality tools
 
@@ -110,9 +152,11 @@ node ~/.claude/agents/references/coverage-gate.mjs --workspace <ws> --base $BASE
   files no drop). `/wx-review` itself runs this gate at `--threshold 95
   --step 1 --step-max-lines 400 --min-fn-lines 10` and reports touched
   functions under 95; aim there when it is cheap.
-- The coverage gate needs `.env`, `node_modules` and built `dist/` (setup
-  step 2). A wx-ui run takes minutes: one long timeout, never `--no-cache`,
-  never re-run with other flags to move a number.
+- The coverage gate needs the `.env` files, `node_modules` and built `dist/`
+  that setup step 2 copies. Never check for `.env` yourself (team-rules
+  § Scope): a missing one fails with `#1e2551e1` (§ Gotchas). A wx-ui run
+  takes minutes: one long timeout, never `--no-cache`, never re-run with
+  other flags to move a number.
 - The repo has no coverage thresholds of its own and no CI coverage job.
 
 ## UI
@@ -177,8 +221,18 @@ section are relative to the **worktree root** (megalith), not
   `npm run clients:prebuild`.
 - `#1e2551e1 Missing required MongoDB environment variables`: no `.env`.
   Re-run setup step 2, or `npm run env`.
-- `TS2305` from `@fountain/cdc-contracts`:
-  `npm run refresh:cdc-contracts && npm install`.
+- `TS2305` from `@fountain/cdc-contracts`: re-run setup step 6. Never
+  `npm install`: it rewrites `package-lock.json`.
+- **Locked DAOs.** A service's `src/index.ts` calls `lock()` on the DAOs it
+  exports and on its own DAOs other services read (service-authorization
+  locks `data.matrices`; service-security locks `data.users`). Once that
+  index loads, `dao.instance.find`, `findOne` and `count` throw `#540b9a12`.
+  Code that another service or a client method reaches reads them with
+  `__unsafeFind` / `__unsafeFindOne` and `{ __overrideLockMode: true }`
+  (`.claude/skills/dao/SKILL.md` § cross-service reads; some DAOs cannot
+  take the flag). A test that spies on `find`, or imports a client by file
+  path instead of through the service's index, never meets the lock, so a
+  green test proves nothing here.
 - A test fails against old behavior of a framework you changed: its `dist/`
   is stale. `npx tsc -b frameworks/<name>` and re-run.
 - A test run with no output after 30 s is a missing `STAGE=test`, not a

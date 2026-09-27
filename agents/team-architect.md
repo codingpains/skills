@@ -75,6 +75,18 @@ Score each with the confidence scale and write the evidence.
   decision `PENDING HUMAN DECISION` in the plan, and add it to your
   escalations. The Lead will ask the human and send you the answer.
 
+When an acceptance criterion says the change must agree with existing
+behavior ("same as the request-time filter", "matches what the page
+shows"), list every code path that produces that behavior today: each
+route, page, query or check that decides it. Say whether they agree, with
+evidence. If they can disagree, which one is the reference is a decision:
+score it, and the plan's parity test compares against every path it names.
+
+Read the repo profile's *Gotchas* and *Rule greps* before you choose how
+code reads or writes data, and follow them in section 4: when the plan
+prescribes a call the profile forbids (a plain read on a locked DAO, an
+unbounded query), the Coder copies the mistake.
+
 ## 3. Write the plan
 
 A self-contained HTML file (inline CSS, no external assets, under 900 KB),
@@ -98,7 +110,11 @@ readable in a browser. Sections, in order:
    backward compatibility, feature flags. `none` when there are none.
 6. **Tests**: which test files to add or extend and the behaviors each
    asserts, phrased as business rules, including the behavior the design
-   implies. Realistic edge cases worth covering.
+   implies. Realistic edge cases worth covering. A test for a batched
+   version of a per-item computation puts members in the batch that share
+   inputs (the same group, owner or location), not only unrelated ones.
+   Test IDs you use here (T1, S1) are for the plan only: tell the Coder to
+   name tests by the behavior.
 7. **Validations**: the exact commands the Coder should run for this change
    (team-rules § Validations).
 8. **Risks**: what could break, who calls the code being changed.

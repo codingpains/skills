@@ -50,6 +50,10 @@ checked against root `CLAUDE.md` § Writing style and against what the diff
 actually builds, not what later tickets will. When you raise a concern about
 how a function behaves, fix it or state it in that function's doc comment.
 
+When the repo profile has a *Rule greps* section, run every search in it on
+the whole diff before your first edit, and put each hit in the checklist
+with what you did about it.
+
 ## 2. Measure
 
 Measure the touched code before you change anything, and again at the end.
@@ -88,7 +92,14 @@ Write all measurement output to a temp directory, never the repo.
 
 Work through these, in order, only on code this branch touched:
 
-1. **Rule violations**: anything the repo rules forbid or require.
+1. **Rule violations**: anything the repo rules forbid or require, and
+   every rule-grep hit. Two kinds are yours to fix, never to leave as a
+   concern or for the PR body:
+   - text that describes behavior no code has yet (a doc, an API
+     description, a comment): rewrite it to what the code does now;
+   - ticket IDs, AC numbers and plan labels (`AC3`, `S1`, `D7`) in test
+     names or comments, when the repo bans them: rename the test for the
+     behavior it checks.
 2. **Complexity**: a touched function above 15 that was not above 15 at the
    base, or that this branch raised, comes back down (to 15, or to its base
    score if it was already above). Extract with intent: a named helper that

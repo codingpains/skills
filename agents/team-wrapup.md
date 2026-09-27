@@ -42,6 +42,9 @@ Read these first, in full, as parallel Read calls in your first turn:
   to keep the suite honest.
 - When a fix is unclear, would break something, or conflicts with another
   fix or a repo rule, do not guess. Skip it and explain in the report.
+- Two failed attempts at the same fix (the same test still fails, or the
+  fix breaks something else twice): stop that fix, revert your changes for
+  it, and report what blocked it. The Lead decides the next step.
 - Read the repo rules for each file you touch (team-rules § Repo rules).
 - A fix that changes what renders follows team-rules § UI changes: re-render
   and compare the screens it touches when the profile gives a way to.
