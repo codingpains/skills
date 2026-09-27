@@ -59,10 +59,13 @@ it (the targets above still apply); otherwise use the defaults below.
 - JavaScript/TypeScript in an npm workspace, when
   `~/.claude/agents/references/coverage-gate.mjs` exists:
   `node ~/.claude/agents/references/coverage-gate.mjs --workspace <pkg-dir>
-  --base <base> --threshold 90 --json <tmp>/coverage.json`. It measures the
-  branch and the merge-base in one run and reports per-file before and
-  after. Use its per-file numbers against the targets above; its
-  function-level verdicts are advice.
+  --base <base> --tests <test files> --threshold 90 --json <tmp>/coverage.json`.
+  It measures the branch and the merge-base in one run and reports per-file
+  before and after. `--tests` names the test files beside the touched files
+  and those the branch added or changed; without it the gate runs every test
+  that imports a touched file, which can be most of the suite. Use its
+  per-file numbers against the targets above; its function-level verdicts
+  are advice.
 - Otherwise the repo's coverage command scoped to the touched package
   (`vitest --coverage`, `jest --coverage`, `pytest --cov`, SimpleCov,
   `go test -cover`). For the base numbers, run the same command in a

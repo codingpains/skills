@@ -142,13 +142,23 @@ node ~/.claude/agents/references/complexity-gate.mjs --workspace <ws> --base $BA
   --ceiling 15 --warn 8 --delta 20 --min-drop 10 --json <tmp>/complexity.json
 node ~/.claude/agents/references/dup-gate.mjs --workspace . --scan . --base $BASE --files $ALL_FILES \
   --json <tmp>/dup.json
-node ~/.claude/agents/references/coverage-gate.mjs --workspace <ws> --base $BASE --files $FILES \
-  --threshold 90 --json <tmp>/coverage.json
+STAGE=test node ~/.claude/agents/references/coverage-gate.mjs --workspace <ws> --base $BASE --files $FILES \
+  --tests $TESTS --threshold 90 --json <tmp>/coverage.json
 ```
 
 - Complexity: `services/service-todo` sets a ceiling of **8** per function
   (`.claude/rules/todo-typescript.md`); use `--ceiling 8` there.
-- Coverage: the Tester's targets apply (new files at least 90%, touched
+- Coverage: prefix the same variables the workspace's tests need
+  (§ Checks by change: `STAGE=test` always, and `CI=true` in service-todo).
+  `TESTS` is every test file beside a touched file plus every test file the
+  branch added or changed in that workspace, comma-separated, relative to
+  the workspace. Without `--tests` the gate runs every test that imports a
+  touched file, which for a widely imported file is most of the suite
+  (service-todo: about 1,900 tests and 160–250 s per side, against about
+  25 s). On ONB-1304 both ways gave the same numbers. When a touched file
+  shows `no test exercises this file` but is tested elsewhere, re-run that
+  workspace without `--tests` and say so.
+- Coverage targets: the Tester's apply (new files at least 90%, touched
   files no drop). `/wx-review` itself runs this gate at `--threshold 95
   --step 1 --step-max-lines 400 --min-fn-lines 10` and reports touched
   functions under 95; aim there when it is cheap.
