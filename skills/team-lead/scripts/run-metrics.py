@@ -10,7 +10,8 @@ takes each one from that invocation onward, adds the subagents it spawned,
 and reports per agent: wall time, turns, tokens by kind, peak context,
 estimated cost, tool calls by tool, the heaviest and slowest tool results,
 repeated calls and errors. The team-assessor's own work is left out. Time the Lead spent waiting on the human
-(AskUserQuestion) is reported apart, so it never reads as a bottleneck.
+(AskUserQuestion, or a typed message), and time a subagent sat idle between handing back and being resumed,
+is reported apart, so it never reads as a bottleneck.
 
 Tool-result tokens are estimated as characters / 4. Cost uses
 ~/.claude/pricing-cache.json (USD per million tokens) when it exists.
@@ -28,6 +29,11 @@ from datetime import datetime
 PROJECTS = os.path.expanduser("~/.claude/projects")
 PRICING = os.path.expanduser("~/.claude/pricing-cache.json")
 TOP = 8
+# Models the pricing cache is known to lack. Without an entry, price_for falls
+# back to the family (claude-opus-5-5 -> claude-opus-5) and bills the old rates.
+KNOWN_PRICES = {
+    "claude-opus-5-5": {"input": 4.0, "cache_write_5m": 5.0, "cache_write_1h": 8.0, "cache_read": 0.20, "output": 20.0},
+}
 
 
 def ts(value):
@@ -47,9 +53,10 @@ def load(path):
 
 def pricing():
     try:
-        return json.load(open(PRICING)).get("models", {})
+        cached = json.load(open(PRICING)).get("models", {})
     except (OSError, ValueError):
-        return {}
+        cached = {}
+    return {**KNOWN_PRICES, **cached}
 
 
 def price_for(model, table):
@@ -72,15 +79,28 @@ def summarize_input(name, inp):
     return " ".join(json.dumps(inp).split())[:140]
 
 
+def is_tool_result(r):
+    content = (r.get("message") or {}).get("content")
+    return isinstance(content, list) and any(
+        isinstance(b, dict) and b.get("type") == "tool_result" for b in content)
+
+
 def is_human_turn(r):
-    """A message the human typed, as opposed to a tool result or injected context."""
-    if r.get("type") != "user" or r.get("isMeta") or r.get("isSidechain"):
+    """A message the human typed, as opposed to a tool result, injected context,
+    or the notice that a background agent finished."""
+    if r.get("type") != "user" or r.get("isMeta") or r.get("isSidechain") or is_tool_result(r):
         return False
     content = (r.get("message") or {}).get("content")
-    if isinstance(content, str):
-        return True
-    return isinstance(content, list) and not any(
-        isinstance(b, dict) and b.get("type") == "tool_result" for b in content)
+    text = content if isinstance(content, str) else " ".join(
+        b.get("text", "") for b in content or [] if isinstance(b, dict))
+    return not text.lstrip().startswith("<task-notification>")
+
+
+def ended_turn(r):
+    """An assistant message that calls no tool: the agent has handed back."""
+    content = (r.get("message") or {}).get("content")
+    return not (isinstance(content, list) and any(
+        isinstance(b, dict) and b.get("type") == "tool_use" for b in content))
 
 
 def text_len(content):
@@ -96,13 +116,17 @@ def analyze(rows, label, kind, table, start=None):
     stamps = [ts(r["timestamp"]) for r in rows if r.get("timestamp")]
     usage, models, peak = collections.Counter(), collections.Counter(), 0
     seen, cost, calls, first_prompt = set(), 0.0, {}, 0
-    human_wait, prev = 0.0, None
+    human_wait, prev, handed_back = 0.0, None, False
     for r in rows:
         now = ts(r.get("timestamp"))
-        if kind == "lead" and prev and now and is_human_turn(r):
-            human_wait += (now - prev).total_seconds()
+        if prev and now and r.get("type") == "user":
+            # The Lead waits on a human message. A subagent that handed back and
+            # is later resumed (SendMessage after an escalation) was idle meanwhile.
+            if (kind == "lead" and is_human_turn(r)) or (kind == "subagent" and handed_back and not is_tool_result(r)):
+                human_wait += (now - prev).total_seconds()
+                prev = now  # the wait ended here; a second message in a row adds only its own gap
         if r.get("type") == "assistant" and now:
-            prev = now
+            prev, handed_back = now, ended_turn(r)
         msg = r.get("message") or {}
         if r.get("type") == "user" and not first_prompt and isinstance(msg.get("content"), str):
             first_prompt = len(msg["content"])
