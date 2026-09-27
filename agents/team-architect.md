@@ -106,6 +106,14 @@ readable in a browser. Sections, in order:
    props and variants, the copy verbatim, the tokens, and the behavior rules,
    each citing its design source (D1, D2...). Say where the build will depart
    from the design and why.
+   **Blocks**, when more than 15 files change: group the rows into 2 or 3
+   ordered blocks, B1, B2, B3. Each block builds and passes its own tests
+   without the later ones, for example the framework change, then the
+   service code and its tests. A plan that changes both backend code and a
+   frontend app always splits there, backend first. Each block gets its own
+   Coder session, so a block names everything its Coder needs from the
+   earlier ones (types, functions, contracts) instead of assuming it was
+   read.
 5. **Data and contracts**: schema, migrations, API and event changes,
    backward compatibility, feature flags. `none` when there are none.
 6. **Tests**: which test files to add or extend and the behaviors each
@@ -168,6 +176,7 @@ Plan URL: <url>
 Version: <n>
 Retained: yes
 Files the plan touches: <count>
+Blocks: <B1: n files, B2: n files, ...> | none
 Decisions: <n> (x at 3, y at 2, z pending human decision)
 ```
 

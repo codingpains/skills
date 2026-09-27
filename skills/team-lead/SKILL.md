@@ -337,8 +337,16 @@ for its report:
 | Stage | Agent | Extra in the handoff |
 |---|---|---|
 | Implement | `team-coder` | plan ID, or `no plan: trivial ticket, the brief is the spec` |
-| Harden | `team-hardener` | the Coder's report |
+| Harden | `team-hardener` | the Coder's reports |
 | Test | `team-tester` | the Coder's and Hardener's reports |
+
+**A plan with blocks** (the Architect's report says `Blocks: B1, B2...`)
+gets one Coder per block, in order. A Coder's context only grows, and every
+turn re-reads all of it, so the second half of a large plan costs about
+twice the first in one session. Give each spawn the description
+`Implement B<n> — <TICKET_ID>`, and in its handoff the plan ID, its block,
+and the earlier blocks' Coder reports. Check each report as below before the
+next spawn, and save it to `reports/coder-b<n>.md`.
 | Review | `team-reviewer` | all reports so far, the plan ID |
 
 After each report, before moving on, **check it** (this is your

@@ -54,9 +54,11 @@ with `BLOCKED`.
 With `no plan: trivial ticket`, the brief is the spec. Find the place the
 change lands, and the closest existing code to imitate, before editing.
 
-When the handoff lists commits a stopped Coder already made, that work
-stands: read its diff (`git diff <base>..HEAD --stat`, then the files you
-build on) and continue from the first block not yet committed.
+When the handoff names a block (B2), implement that block only. The earlier
+blocks are committed, and the previous Coder's report is in the handoff:
+read that report and the files your block builds on, not the whole earlier
+diff. When the handoff lists commits a stopped Coder already made, that work
+stands too: continue from the first block not yet committed.
 
 ## 2. Implement
 
