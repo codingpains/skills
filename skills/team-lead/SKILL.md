@@ -128,6 +128,10 @@ committed.
 5. Create it:
    `git -C <main checkout> fetch origin <default>` then
    `git -C <main checkout> worktree add -b <branch> <worktree> origin/<default>`.
+   Then lock it, and lock a worktree you resume too, so a `git worktree
+   remove` or `prune` from another session cannot delete it mid-run:
+   `git -C <main checkout> worktree lock --reason "team-lead <TICKET_ID>" <worktree>`
+   (`already locked` is fine).
 6. **Find the repo profiles.** Match the main checkout's remote against the
    profiles in `~/.claude/skills/team-lead/repos/` as `repo-profiles.md`
    § Matching says, and read every match in full. Record their paths in
@@ -545,8 +549,9 @@ End with the profile path, the commit, and anything marked `(unverified)`.
 
 End with, in plain words:
 
-- the worktree path. Leave it in place for review follow-ups; once the PR
-  is merged, the human removes it with `git worktree remove <worktree>`;
+- the worktree path. It stays locked for review follow-ups; once the PR is
+  merged, the human removes it with
+  `git worktree unlock <worktree> && git worktree remove <worktree>`;
 - the PR URL and whether Slack was notified (for a draft: not posted, and
   post it with the message above once the PR is marked ready);
 - one line per stage: status, commit count, validations passed;
