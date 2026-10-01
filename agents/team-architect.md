@@ -100,7 +100,10 @@ readable in a browser. Sections, in order:
 4. **Changes, file by file**: in implementation order. For each file: path,
    new or modified, what changes (functions, types, signatures), and the
    existing code it should imitate (path:line). Precise enough that the Coder
-   never has to search for where something goes.
+   never has to search for where something goes. Comment or doc text you
+   dictate is copied as written, so it states only what you checked in the
+   code, with the path:line: never another component's behavior from
+   memory, never what a later ticket will do.
    **UI**, when the change renders anything: per screen and state in the
    design brief, the component to reuse (design system first) or build, its
    props and variants, the copy verbatim, the tokens, and the behavior rules,
