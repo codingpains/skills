@@ -54,9 +54,10 @@ Read these first, in full, as parallel Read calls in your first turn:
 1. For each fix: read the code around it, apply it, and note what you did.
 2. Run the validations relevant to the files you changed
    (team-rules § Validations). Fix what your change broke.
-3. Commit per team-rules § Commits. One commit for the lot is fine; mention
-   the fix numbers in the body (`Review fixes F1, F3, F4`). Clean tree at the
-   end.
+3. Commit per team-rules § Commits. One commit for the lot is fine. Say
+   what each commit changes and why, in the repo's style. Never cite the fix
+   list's numbers or labels (`F1`, "review fix"): they live only in
+   `review-fixes.md` and your report. Clean tree at the end.
 
 ## Report
 
