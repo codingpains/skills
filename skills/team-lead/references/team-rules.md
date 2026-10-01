@@ -42,6 +42,13 @@ The shell is zsh, not bash. Four bash habits break in it:
 - A glob that matches nothing fails the line (`no matches found`). List files
   with `find` or `rg --files` instead.
 
+Never search from the disk root or the home folder (`find /`, `find ~`): it
+runs until the 120 s timeout. A `find .` over a large repo also walks every
+`node_modules`. Find a file with `rg --files | rg <name>`, and a symbol with
+`rg -n 'export (interface|type|enum|class|const|function) <Name>\b'`. A type
+from another package is in `node_modules/<scope>/<package>/`: search there
+with `rg -n <Name> node_modules/<scope>/<package>`.
+
 ## Working habits
 
 Every turn re-reads your whole context, so turns cost more than tool calls.

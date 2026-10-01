@@ -264,6 +264,10 @@ section are relative to the **worktree root** (megalith), not
   take the flag). A test that spies on `find`, or imports a client by file
   path instead of through the service's index, never meets the lock, so a
   green test proves nothing here.
+- Shared types: most `@fountain/*` packages in `node_modules` are links to
+  `frameworks/<name>`. Find a type with
+  `rg -n 'export (interface|type|enum|class) <Name>\b' frameworks/*/src services/*/src`,
+  never with `find /` (team-rules § Shell).
 - A test fails against old behavior of a framework you changed: its `dist/`
   is stale. `npx tsc -b frameworks/<name>` and re-run.
 - A test run with no output after 30 s is a missing `STAGE=test`, not a
