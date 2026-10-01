@@ -134,7 +134,9 @@ escalation, not an edit.
 ## 4. Validate
 
 Run the touched test files, the tests of anything you fixed, and lint on
-every file you wrote (team-rules § Validations). Re-measure coverage. When
+every file you wrote (team-rules § Validations). Writing only tests is not a
+reason to skip the typecheck: when the package's compiler config includes
+tests (the repo profile's *Checks by change* says which), run it. Re-measure coverage. When
 the repo profile has a *Rule greps* section, run it over your own commits
 (`<first tester commit>^..HEAD` in place of the base) and fix every hit.
 

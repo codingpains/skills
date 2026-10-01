@@ -97,7 +97,7 @@ Pick the scope:
 |---|---|
 | source files in one package | that package's lint, typecheck/compile, and the tests for the touched modules |
 | a shared module many packages import | the above for the module, plus the tests of its direct dependents |
-| tests only | those test files, plus lint on them |
+| tests only | those test files, lint on them, and the package's typecheck when its compiler config includes tests (the repo profile says which) |
 | build config, dependencies, shared tooling | the checks that config feeds, broader as needed; say why |
 
 Prefer file-scoped commands (lint on the touched files, the test runner with

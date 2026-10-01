@@ -71,7 +71,8 @@ after the first run).
 | `frameworks/<name>` source | also `npm run compile:backends`, and the tests of dependents that call the changed code (`rg "@fountain/<name>"`) | dependents import the framework's built `dist/` |
 | `frontends/wx-ui` | `npm run typecheck -w frontends/wx-ui`; tests: `npm run test:file -w frontends/wx-ui -- run <paths>` | needs generated clients and compiled translations (setup with `--ui`) |
 | `tools/tool-ecosystem` | `npx tsc -b tools/tool-ecosystem`; `npm test -w tools/tool-ecosystem -- <paths>` | the other `tools/*` have no tests that CI runs |
-| test files only | the test files as above; oxfmt and oxlint on them | framework tsconfigs exclude tests, so `tsc` never checks framework test files |
+| test files in `services/<name>` | the test files as above; oxfmt and oxlint on them; `npx tsc -b <workspace>` | service tsconfigs include their tests, and `oxlint --type-aware` does not report compiler errors (`TS2322`, `TS2741`): skipping `tsc` lets a broken test reach CI |
+| test files in `frameworks/<name>` | the test files as above; oxfmt and oxlint on them | framework tsconfigs exclude tests, so `tsc` never checks them |
 | a new `@fountain/<workspace>` import | `node scripts/check-tsconfig-refs.js` | fails when the tsconfig reference is missing |
 
 ## Conditional checks
