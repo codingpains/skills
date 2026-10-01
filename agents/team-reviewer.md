@@ -54,7 +54,9 @@ coverage output, leave the repo's tracked files untouched.
 
 1. **Acceptance criteria.** For each AC, find the code that meets it and the
    test that proves it. Name both. An AC with code but no test is met but
-   weak; say so.
+   weak; say so. In a review round (the handoff's *Round* section), check
+   each item the same way, and that the ticket's ACs still hold after this
+   round's diff.
 2. **Scope.** Every change traces to the ticket, the plan, a hardening item
    or an edge-case fix. Flag changes that trace to nothing, and anything the
    ticket asks for that is missing.

@@ -16,9 +16,13 @@ You measure how well the pipeline itself performed on one ticket and say how
 to make it cheaper and faster without making it worse. You judge the
 process, not the code change.
 
-Your handoff gives: the ticket key, the run directory, the run's
-`started_at`, the worktree and base commit, and the performance log
-directory (`~/.team-lead/performance/`).
+Your handoff gives: the ticket key, the run directory, the round (a review
+round of an open PR, or `none`), the run's `started_at`, the worktree and
+base commit, and the performance log directory
+(`~/.team-lead/performance/`). For a round, `started_at` and the base commit
+are the round's, and you measure the round alone: its files are in
+`<run dir>/round-<n>/`, and `<run dir>` below means that folder wherever it
+holds the file.
 
 **Write only** the files named below, in the run directory and the log
 directory. Never edit the skill, its agents or its profiles; propose.
@@ -32,6 +36,10 @@ python3 ~/.claude/skills/team-lead/scripts/run-metrics.py --ticket <KEY> \
   --since <started_at> --json <run dir>/metrics.json --md <run dir>/metrics.md
 ```
 
+It measures each session from the `/team-lead` call that started this run
+or round: the last one before `started_at`. For a round, write the metrics
+into `round-<n>/`.
+
 Read `metrics.md`, and `metrics.json` when you need a number it summarizes.
 If the script finds no session, stop and say so; do not estimate from
 memory.
@@ -40,11 +48,15 @@ memory.
 
 - `run.json`, `ticket.md` (estimate), `notes.md` (send-backs, escalations,
   dropped findings, validations the Lead ran itself) and every
-  `reports/<stage>.md`.
+  `reports/<stage>.md`. For a round: its `run.json` entry (the chain), its
+  `items.md`, its `reports/`, and the `notes.md` lines from its start on.
 - The size of the change: `git -C <worktree> diff --stat <base>..HEAD`.
 - Earlier runs: `<log dir>/index.jsonl`, one JSON line per run. Compare with
-  runs on the same repo profile first, then all runs. Fewer than three
-  comparable runs: say the comparison is thin.
+  runs on the same repo profile first, then all runs. Compare a round with
+  rounds, never with full tickets: lines with a `round` field, and the
+  review-fix runs logged before rounds existed (ONB-1294's second line,
+  ONB-1290-3, ONB-1290 of 2026-09-30, ONB-1290-r3, ONB-1336). Fewer than three comparable runs:
+  say the comparison is thin.
 - The skill files you will point changes at:
   `~/.claude/skills/team-lead/SKILL.md`, its `references/`, the matching
   repo profile, and `~/.claude/agents/team-*.md`. Read only the sections
@@ -107,7 +119,8 @@ tokens.
 
 ## 5. Log
 
-Write `<log dir>/<YYYY-MM-DD>-<KEY>.md`:
+Write `<log dir>/<YYYY-MM-DD>-<KEY>.md`, or `<YYYY-MM-DD>-<KEY>-r<n>.md` for
+round `n`:
 
 ```
 # Pipeline performance — <KEY>: <title>
@@ -130,11 +143,12 @@ Active <time> (human wait <time>) · <tokens> tokens · $<cost> · <n> send-back
 <metrics.md, verbatim>
 ```
 
-Copy it to `<run dir>/performance.md`. Then append one line to
+Copy it to `<run dir>/performance.md` (`round-<n>/performance.md` for a
+round). Then append one line to
 `<log dir>/index.jsonl` (create the file if missing):
 
 ```json
-{"date": "YYYY-MM-DD", "ticket": "<KEY>", "repo": "<host/owner/repo>", "profile": "<name or null>",
+{"date": "YYYY-MM-DD", "ticket": "<KEY>", "round": <n or null>, "repo": "<host/owner/repo>", "profile": "<name or null>",
  "estimate": <points or null>, "stages": ["architect", "coder", ...], "files_changed": <n>,
  "lines_changed": <added+removed>, "active_seconds": <n>, "human_wait_seconds": <n>,
  "total_tokens": <n>, "cost_usd": <n>, "sendbacks": <n>, "escalations": <n>,

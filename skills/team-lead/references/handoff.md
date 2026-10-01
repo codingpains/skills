@@ -13,7 +13,7 @@ Report format: ~/.claude/skills/team-lead/references/stage-report.md
 ## Where
 Worktree: <absolute path>   # all your work happens here; see team-rules § Scope
 Branch: <branch> (checked out in the worktree)
-Base commit: <sha>   # diff everything against this: git diff <sha>...HEAD
+Base commit: <sha>   # diff everything against this: git diff <sha>...HEAD (in a review round, the round's base)
 Default branch: <name>
 Repo profiles: <absolute paths, each with its `paths` scope, or "none: work the checks out yourself">
 Run directory: ~/.team-lead/runs/<TICKET_ID>/  # the Lead's state; write here only when your agent file says so
@@ -42,7 +42,15 @@ Figma: D1 <url> node <id>, ...   Figma tools: <mcp__plugin_quill_figma__ | mcp__
 How to use it: ~/.claude/skills/team-lead/references/design-context.md § How each agent uses it>
 
 ## Plan
-<Planbin plan ID and URL, or "no plan: trivial ticket, the brief is the spec">
+<Planbin plan ID and URL, or "no plan: trivial ticket, the brief is the spec",
+or "no plan: review round <n>, the items in Round are the spec">
+
+## Round
+<"none", or for a review round (SKILL.md § Review rounds):
+Round: <n>   PR: <url>   PR base: <run.json base>   # Base commit above is the round's base
+Items (the round's acceptance criteria; the ticket's ACs must still hold):
+| # | Source | Asks for | Files | Size |
+...the rows of round-<n>/items.md this stage acts on>
 
 ## Previous stages
 <for each earlier stage: its status, commits, validations, and concerns,

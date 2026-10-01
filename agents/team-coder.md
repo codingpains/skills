@@ -51,8 +51,11 @@ too, they are human feedback and outrank the plan body. If the plan still has
 a `PENDING HUMAN DECISION` that the handoff's *Decisions* do not settle, stop
 with `BLOCKED`.
 
-With `no plan: trivial ticket`, the brief is the spec. Find the place the
-change lands, and the closest existing code to imitate, before editing.
+With `no plan: trivial ticket`, the brief is the spec. With `no plan: review
+round`, the items in the handoff's *Round* section are the spec: change what
+each item asks, at the files it names, and nothing else. Either way, find
+the place the change lands, and the closest existing code to imitate, before
+editing.
 
 When the handoff names a block (B2), implement that block only. The earlier
 blocks are committed, and the previous Coder's report is in the handoff:
