@@ -121,8 +121,12 @@ on its own commits before it reports. Resolve every hit, or name it under
 *Left alone on purpose* with the reason. From `apps/wx-system`:
 
 - A cast in service-todo source (`todo-typescript.md` § Validate: never
-  cast):
-  `git diff $BASE...HEAD -U0 -- services/service-todo/src ':!*.test.ts' | rg '^\+.*\bas [A-Z]'`
+  cast). It catches `as any`, `as unknown as`, `as keyof`, lowercase,
+  literal and tuple casts, and skips `as const`, imports and comments:
+  `git diff $BASE...HEAD -U0 -- services/service-todo/src ':!*.test.ts' | rg -P '^\+(?!\s*(//|\*|import|export \{|(type )?\w+ as \w+,?$)).*\bas (?!const\b)[A-Za-z_\x27"\[{(]'`
+- `as unknown as` in service-todo tests (the same rule: "never correct").
+  `as any` in test mocks is the files' existing style and is not searched:
+  `git diff $BASE...HEAD -U0 -- 'services/service-todo/src/**/*.test.ts' | rg '^\+.*\bas unknown as\b'`
 - A `||` default in service-todo (`todo-typescript.md`: use `??`):
   `git diff $BASE...HEAD -U0 -- services/service-todo/src | rg '^\+.*\|\| '`
 - A new database read (`backend.md` § MongoDB reads: each needs a `limit`,
