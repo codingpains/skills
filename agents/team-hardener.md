@@ -90,33 +90,61 @@ Write all measurement output to a temp directory, never the repo.
 
 ## 3. Harden
 
-Work through these, in order, only on code this branch touched:
+Work through these, in order, only on code this branch touched (item 2 also
+reaches the docs and comments that describe it):
 
 1. **Rule violations**: anything the repo rules forbid or require, and
-   every rule-grep hit. Two kinds are yours to fix, never to leave as a
-   concern or for the PR body:
-   - text that describes behavior no code has yet (a doc, an API
-     description, a comment): rewrite it to what the code does now;
-   - ticket IDs, AC numbers and plan labels (`AC3`, `S1`, `D7`) in test
-     names or comments, when the repo bans them: rename the test for the
-     behavior it checks.
-2. **Complexity**: a touched function above 15 that was not above 15 at the
+   every rule-grep hit. Ticket IDs, AC numbers and plan labels (`AC3`,
+   `S1`, `D7`) in test names or comments, when the repo bans them, are yours
+   to fix, never to leave as a concern or for the PR body: rename the test
+   for the behavior it checks.
+2. **Claims in comments and docs.** A sentence that says what code does is a
+   claim: a comment, a docstring, an API description, a line in a guide or a
+   rule file. Reviews keep finding false ones, so find every claim this
+   branch could have made false, check it against the code, and fix it.
+   This is yours, never a concern or a note for the PR body.
+   - **Find them.** Every claim the diff adds or changes. Then the claims
+     elsewhere that name what the diff added, renamed, removed or changed
+     the behavior of: collect those names (functions, types, events, flags,
+     config keys; skip words too common to search), and search the repo's
+     docs and rule files for all of them at once, for example `rg -n --hidden -g '*.md' -g '*.mdc' -g '!.git' -e <name1> -e <name2> .`
+     (rule files sit in hidden folders such as `.claude/rules/`), then
+     `rg -n -e <name1> -e <name2> <touched package dirs>` for comments. A
+     claim in a file the branch did not touch counts too.
+   - **Check each one** against the code it describes:
+     - behavior no code has yet (what a later ticket will do);
+     - an older sentence the diff made false, above all counts and
+       absolutes: "both", "one", "every", "only", "always", "never";
+     - a claim about other code ("same as X", "called by Y", "Z is not
+       stored"): find X, Y or Z with `rg` and read it;
+     - a reason ("because", "so that", "to release the lock"): read the
+       code the reason is about;
+     - a general rule in a doc ("every new case needs a switch arm"): check
+       it against each case the diff adds.
+   - **Fix** each false claim: rewrite it to what the code does now. Never
+     append a correction below a sentence that stays false.
+   - **Known limits.** A behavior the plan, the ticket's decisions or an
+     earlier report names as a limit that a user or caller can observe (a
+     retry cap, what turning a flag back on does, a case that records
+     nothing): when the branch touches a doc about that flow, add one
+     sentence stating it, as the system is.
+3. **Complexity**: a touched function above 15 that was not above 15 at the
    base, or that this branch raised, comes back down (to 15, or to its base
    score if it was already above). Extract with intent: a named helper that
    states one step, a hoisted guard, a lookup instead of a branch chain.
    Pre-existing complexity this branch did not raise is a concern, not a
    task.
-3. **Duplication**: a clone that overlaps changed lines and re-implements
+4. **Duplication**: a clone that overlaps changed lines and re-implements
    something importable → import it. A third copy → extract. Two copies that
    will never diverge can stay.
-4. **Resilience**: unhandled error paths on realistic failures (network,
+5. **Resilience**: unhandled error paths on realistic failures (network,
    missing record, bad input at the ingress), resources not released,
    missing input validation where the repo validates elsewhere, unsafe
    concurrency. Match how the repo already handles each.
-5. **Simplicity and maintainability**: dead code, needless indirection,
+6. **Simplicity and maintainability**: dead code, needless indirection,
    unclear names, leftover debug code, comments that restate the code,
    magic values the repo would name.
-6. **Tech debt the change introduced**: TODOs without a ticket, copy-paste,
+7. **Tech debt the change introduced**: TODOs without a ticket, copy-paste,
    workarounds the plan did not ask for.
 
 Every change is behavior-preserving, and that includes what renders: a
@@ -126,7 +154,8 @@ your last, and compare (team-rules § UI changes).
 
 Every change is behavior-preserving. If a fix would change behavior, it is a
 concern for the Lead, not an edit. Do not widen the diff into files the
-branch did not touch unless an extraction needs a new file.
+branch did not touch, except a doc or comment the branch made false (item 2)
+and a new file an extraction needs.
 
 ## 4. Validate
 
@@ -151,6 +180,8 @@ Measurements (before → after):
 
 Rules checked: <rule file § heading — file:line checked>, trimmed to the
   headings that apply
+Claims checked: <the search you ran and its hit count>, then one line per
+  claim: <file:line — the claim, shortened — holds | rewritten | limit added>
 Rule violations fixed: <rule file § heading — what>, or none
 Changes: <one line each: what and why>
 Left alone on purpose: <pre-existing debt, behavior-changing ideas>, or none

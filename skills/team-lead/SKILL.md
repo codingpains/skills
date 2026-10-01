@@ -363,8 +363,8 @@ sanity-check, not a second review):
 1. Save it verbatim to `reports/<stage>.md`.
 2. The report has every section in `stage-report.md`, and every line of the
    *Stage-specific* block its agent file names (the Hardener's *Rules
-   checked*, the Tester's *Coverage* table), and its status is not
-   `BLOCKED`. A missing line is a failed check.
+   checked* and *Claims checked*, the Tester's *Coverage* table), and its
+   status is not `BLOCKED`. A missing line is a failed check.
 3. The commits it lists exist: `git log --format='%h %s' <base>..HEAD`.
 4. No commit carries co-attribution:
    `git log --format=%B <base>..HEAD | grep -iE 'co-authored-by|generated with'`
