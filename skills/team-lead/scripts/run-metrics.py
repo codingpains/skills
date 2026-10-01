@@ -215,14 +215,19 @@ def find_sessions(ticket, since, root):
     return sorted(found, key=os.path.getmtime)
 
 
-def invocation_start(rows, ticket):
+def invocation_start(rows, ticket, since=None):
+    """When the run being measured began in this session: the last `/team-lead <ticket>`
+    call at or before `since` (a session can hold an aborted attempt, or earlier review
+    rounds), else the session's first call (a session resumed with --from after `since`)."""
     pattern = re.compile(r"<command-args>[^<]*\b" + re.escape(ticket) + r"\b", re.I)
+    calls = []
     for r in rows:
         content = (r.get("message") or {}).get("content")
         text = content if isinstance(content, str) else json.dumps(content or "")
-        if r.get("type") == "user" and "team-lead" in text and pattern.search(text):
-            return ts(r.get("timestamp"))
-    return None
+        if r.get("type") == "user" and "team-lead" in text and pattern.search(text) and r.get("timestamp"):
+            calls.append(ts(r["timestamp"]))
+    before = [t for t in calls if since and t <= since]
+    return before[-1] if before else (calls[0] if calls else None)
 
 
 def fmt_secs(s):
@@ -293,7 +298,7 @@ def main():
     agents = []
     for n, path in enumerate(sessions, 1):
         rows = load(path)
-        start = invocation_start(rows, args.ticket) or since
+        start = invocation_start(rows, args.ticket, since) or since
         suffix = f" (session {n})" if len(sessions) > 1 else ""
         lead = analyze(rows, "lead" + suffix, "lead", table, start)
         agents.append(lead)
