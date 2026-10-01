@@ -31,7 +31,11 @@ clone() {
 ignored() { git -C "$SRC" ls-files --others --ignored --exclude-standard "$@"; }
 
 # .env, .env.local, .env.development and the like, outside dependency folders.
-ignored | grep -E '(^|/)\.env(\.[A-Za-z0-9_-]+)?$' | grep -vE '(^|/)(node_modules|\.venv|venv|vendor)/' \
+# A grep that matches nothing exits 1, which pipefail would turn into a failed script.
+envs="$(ignored | { grep -E '(^|/)\.env(\.[A-Za-z0-9_-]+)?$' || true; } \
+  | { grep -vE '(^|/)(node_modules|\.venv|venv|vendor)/' || true; })"
+[ -n "$envs" ] || echo "bootstrap: no .env files in $SRC; tests that need one will fail"
+printf '%s\n' "$envs" | { grep . || true; } \
   | while IFS= read -r file; do
       [ -e "$DST/$file" ] && continue
       mkdir -p "$DST/$(dirname "$file")"
@@ -41,8 +45,8 @@ ignored | grep -E '(^|/)\.env(\.[A-Za-z0-9_-]+)?$' | grep -vE '(^|/)(node_module
     done
 
 # Dependency folders, top-most only: a node_modules inside a node_modules comes with its parent.
-ignored --directory | grep -E '(^|/)(node_modules|\.venv|venv|vendor|\.bundle)/$' \
-  | grep -vE '(node_modules|\.venv|venv|vendor)/.+' \
+ignored --directory | { grep -E '(^|/)(node_modules|\.venv|venv|vendor|\.bundle)/$' || true; } \
+  | { grep -vE '(node_modules|\.venv|venv|vendor)/.+' || true; } \
   | while IFS= read -r dir; do
       dir="${dir%/}"
       [ -e "$DST/$dir" ] && continue

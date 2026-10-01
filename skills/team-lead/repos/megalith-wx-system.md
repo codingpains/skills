@@ -2,7 +2,7 @@
 name: megalith-wx-system
 remote: github.com/onboardiq/megalith
 paths: [apps/wx-system/]
-updated: 2026-09-27
+updated: 2026-09-30
 ---
 
 # megalith / wx-system
@@ -19,31 +19,47 @@ are dead leftovers; ignore them.
 
 ## Worktree setup
 
-1. `node -v` must print `v24.15.0`. If not: `source ~/.nvm/nvm.sh && nvm use`
-   (from `apps/wx-system`, which has an `.nvmrc`).
-2. From the worktree root:
-   `WX_REVIEW_SOURCE_CLONE=<main checkout> bash ~/.claude/skills/wx-review/scripts/bootstrap-worktree.sh`.
-   It copies every `.env` under `apps/wx-system`, and clones
-   (copy-on-write) every `node_modules`, `dist`, `generated` (API clients)
-   and `compiled` (translations) folder under `apps/wx-system` and
-   `packages/`. When that script is missing, use the generic
-   `~/.claude/skills/team-lead/scripts/bootstrap-worktree.sh`, then
-   `npm run clients:prebuild` if wx-ui is touched.
-3. The wx-review script skips the repo-root `node_modules`, where lefthook
-   lives, so git hooks (lint-staged, the ticket prefix, the barrel-import
-   check) silently do nothing. From the worktree root:
-   `[ -e node_modules ] || cp -c -R <main checkout>/node_modules node_modules`,
-   then check `node_modules/lefthook-darwin-arm64/bin/lefthook` exists.
-4. If `apps/wx-system/package-lock.json` differs from the main checkout's
-   (`cmp`), run `npm ci --no-audit` (minutes; one long timeout).
-5. The copied `dist/` folders come from whatever branch the main checkout is
-   on. Before running a workspace's tests, build it and what it depends on:
-   `npx tsc -b <workspace>` (incremental, fast after the first run).
-6. `@fountain/cdc-contracts` is installed as a copy, so it also comes from the
-   main checkout's branch, and a newer base fails with `TS2305`. Rebuild it
-   from this worktree's source, from the worktree root:
-   `(cd packages/cdc-contracts && npm run build) && rsync -a --delete packages/cdc-contracts/dist/ apps/wx-system/node_modules/@fountain/cdc-contracts/dist/`.
-   Never fix it with `npm install`: that rewrites `package-lock.json`.
+One command, run as the Lead's single background setup call (SKILL.md § 0
+step 7):
+
+`bash ~/.claude/skills/team-lead/repos/megalith-wx-system.setup.sh <main checkout> <worktree> [--ui] [--check <workspace>]...`
+
+- `--ui` when the ticket, a plan block or a review item touches
+  `frontends/`. When unsure, pass it: it adds about a minute.
+- `--check <workspace>` for each `services/` or `frameworks/` workspace the
+  ticket changes, for example `--check services/service-todo`.
+
+It stops at the first failure and runs, in order:
+
+1. Node from `apps/wx-system/.nvmrc` (v24.15.0).
+2. `~/.claude/skills/team-lead/scripts/bootstrap-worktree.sh`: every `.env`
+   and every `node_modules` (copy-on-write) from the main checkout,
+   including the repo-root one, where lefthook lives. Then it checks
+   lefthook is there: without it, git hooks (lint-staged, the ticket
+   prefix, the barrel-import check) silently do nothing.
+3. `npm ci` in `apps/wx-system` when its `package-lock.json` differs from
+   the main checkout's.
+4. A rebuild of `@fountain/cdc-contracts` from this worktree's source into
+   `apps/wx-system/node_modules`. It is installed as a copy, so it comes
+   from the main checkout's branch, and a newer base fails with `TS2305`.
+5. With `--ui`: `npm run clients:prebuild` (the generated API clients),
+   then wx-ui's `i18n:compile:local` and `formatjs:compile:src` (the
+   compiled translations the type check reads).
+6. With `--check`: `npx tsc -b <workspace>`. On `TS2307` for an installed
+   package (the main checkout was pulled but not reinstalled), it runs
+   `npm ci` once and checks again.
+
+The log ends in `setup: ok`, or in `setup: failed at <step>` with the error.
+Re-running it is safe. The bootstrap also names other lockfiles that
+differ: other megalith apps (`apps/hire`, ...), and `packages/ripple` and
+`packages/universal-search`, which wx-system reads through its own
+installed copies (its `npm ci` rebuilds them). Ignore those lines:
+`setup: ok` is the only lockfile check that counts here. Never repair a
+failure with `npm install`: it rewrites `package-lock.json`.
+
+Built output (`dist/`) is not copied. Before running a workspace's tests,
+build it and what it depends on: `npx tsc -b <workspace>` (incremental, fast
+after the first run).
 
 ## Checks by change
 
@@ -53,7 +69,7 @@ are dead leftovers; ignore them.
 | any `.ts/.tsx/.js` file | `npx oxlint --type-aware --max-warnings 0 <files>` | the commit hook lints **without** `--type-aware`, so type-aware errors only show in CI unless you run this |
 | `services/<name>` or `frameworks/<name>` source | `npx tsc -b <workspace>`; then `STAGE=test npm test -w <workspace> -- <test paths>` for the touched tests and the tests beside touched files | always `npm test`, never `npx jest`/`npx vitest`: the script carries `--forceExit`, `--passWithNoTests` and log settings. Jest or Vitest depends on the workspace. Prefix every test run with `STAGE=test`: without it, the test Mongo setup never starts and the run hangs. In `services/service-todo` also prefix `CI=true`: without it, AMQP setup in `topic.initializer.ts` times out after 10 s and skips every test |
 | `frameworks/<name>` source | also `npm run compile:backends`, and the tests of dependents that call the changed code (`rg "@fountain/<name>"`) | dependents import the framework's built `dist/` |
-| `frontends/wx-ui` | `npm run typecheck -w frontends/wx-ui`; tests: `npm run test:file -w frontends/wx-ui -- run <paths>` | needs generated clients and compiled translations (setup step 2) |
+| `frontends/wx-ui` | `npm run typecheck -w frontends/wx-ui`; tests: `npm run test:file -w frontends/wx-ui -- run <paths>` | needs generated clients and compiled translations (setup with `--ui`) |
 | `tools/tool-ecosystem` | `npx tsc -b tools/tool-ecosystem`; `npm test -w tools/tool-ecosystem -- <paths>` | the other `tools/*` have no tests that CI runs |
 | test files only | the test files as above; oxfmt and oxlint on them | framework tsconfigs exclude tests, so `tsc` never checks framework test files |
 | a new `@fountain/<workspace>` import | `node scripts/check-tsconfig-refs.js` | fails when the tsconfig reference is missing |
@@ -163,7 +179,7 @@ STAGE=test node ~/.claude/agents/references/coverage-gate.mjs --workspace <ws> -
   --step 1 --step-max-lines 400 --min-fn-lines 10` and reports touched
   functions under 95; aim there when it is cheap.
 - The coverage gate needs the `.env` files, `node_modules` and built `dist/`
-  that setup step 2 copies. Never check for `.env` yourself (team-rules
+  that setup copies. Never check for `.env` yourself (team-rules
   § Scope): a missing one fails with `#1e2551e1` (§ Gotchas). A wx-ui run
   takes minutes: one long timeout, never `--no-cache`, never re-run with
   other flags to move a number.
@@ -225,13 +241,13 @@ section are relative to the **worktree root** (megalith), not
 ## Gotchas
 
 - A commit subject without `[<KEY>]:` means the git hooks did not run.
-  Re-run setup step 3; never amend around it.
+  Re-run setup; never amend around it.
 - `Failed to resolve import "@fountain/wx-api-clients/generated/..."`: the
-  generated clients are missing. Re-run setup step 2, or
+  generated clients are missing: setup ran without `--ui`. Run
   `npm run clients:prebuild`.
 - `#1e2551e1 Missing required MongoDB environment variables`: no `.env`.
-  Re-run setup step 2, or `npm run env`.
-- `TS2305` from `@fountain/cdc-contracts`: re-run setup step 6. Never
+  Re-run setup, or `npm run env`.
+- `TS2305` from `@fountain/cdc-contracts`: re-run setup. Never
   `npm install`: it rewrites `package-lock.json`.
 - **Locked DAOs.** A service's `src/index.ts` calls `lock()` on the DAOs it
   exports and on its own DAOs other services read (service-authorization

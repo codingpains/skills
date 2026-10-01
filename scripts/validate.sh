@@ -55,11 +55,16 @@ for file in "$REPO"/skills/team-lead/repos/*.md; do
 done
 
 # References like ~/.claude/skills/team-lead/references/x.md must exist when the skill lives here.
+# A reference into a skill installed from elsewhere is only checked on this machine, as a warning:
+# that skill can change under us (wx-review dropped its scripts/ folder on 2026-09-29).
 while IFS= read -r ref; do
   rel="${ref#\~/.claude/skills/}"
   skill="${rel%%/*}"
-  [ -d "$REPO/skills/$skill" ] || continue
-  [ -e "$REPO/skills/$rel" ] || fail "broken reference: $ref"
+  if [ -d "$REPO/skills/$skill" ]; then
+    [ -e "$REPO/skills/$rel" ] || fail "broken reference: $ref"
+  elif [ -d "$HOME/.claude/skills/$skill" ] && [ ! -e "$HOME/.claude/skills/$rel" ]; then
+    echo "validate: warning: $ref does not exist in the installed $skill skill" >&2
+  fi
 done < <(grep -rhoE '~/\.claude/skills/[A-Za-z0-9_-]+/[A-Za-z0-9_./-]*[A-Za-z0-9_-]' "$REPO/skills" "$REPO/agents" | sort -u)
 
 if [ "$errors" -gt 0 ]; then
