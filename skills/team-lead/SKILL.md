@@ -131,6 +131,10 @@ committed.
    `<ticket-key-lowercase>-<short-slug>`. Pick the worktree path:
    `<parent of main checkout>/<repo folder name>-worktrees/<ticket-id-lowercase>`,
    for example `~/src/work/megalith-worktrees/onb-1208`.
+   Run the `guildhall-watch` skill with the ticket key, so Guildhall shows a
+   room for this run. A `--from` run, which skips preflight, and a review
+   round do this too, as soon as they know the key. Skip it when the skill is
+   not available (Codex).
 4. Check for earlier work with `git worktree list` and
    `git branch -a --list '*<branch>'`:
    - a worktree already at that path or on that branch: ask the human whether
@@ -544,7 +548,8 @@ section.
 
 ### R1. Load
 
-Run preflight steps 1, 2 and 6 (main checkout, `gh`, profiles). R2 replaces
+Run preflight steps 1, 2 and 6 (main checkout, `gh`, profiles), and the
+`guildhall-watch` skill from step 3. R2 replaces
 steps 3 to 5 and 8, and a round skips intake, grooming and plan gating.
 
 1. Read the PR, from the main checkout: its reviews and comments with
