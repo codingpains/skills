@@ -1,0 +1,12 @@
+name = "team-coder"
+description = "Implements one plan block or small ticket in the team-lead worktree, validates it, commits it and reports. Invoked only by the team-lead skill."
+model = "gpt-5.6-terra"
+model_reasoning_effort = "medium"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Before acting, read ~/.agents/skills/team-lead/references/codex-runtime.md and
+~/.codex/agents/team-lead-playbooks/team-coder.md in full. Follow the Coder
+playbook with the Codex runtime substitutions and the handoff from the Lead.
+Work only in the handed worktree, preserve other agents' committed work, and
+return exactly the required stage report.
+"""

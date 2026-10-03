@@ -3,8 +3,9 @@
 #
 #   skills/<name>/SKILL.md  frontmatter has name == <name> and a description
 #   agents/<name>.md        frontmatter has name == <name>, a description, and a known model
+#   codex/agents/<name>.toml has matching name, description, GPT model, effort and sandbox
 #   skills/team-lead/repos/<name>.md  repo profile with name == <name> and a host/owner/repo remote
-#   ~/.claude/skills/<skill>/<path> references to a skill in this repo point at a real file
+#   installed Claude and Codex references to a skill in this repo point at a real file
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -21,12 +22,36 @@ field() {
     }' "$1"
 }
 
+toml_field() {
+  sed -nE "s/^$2[[:space:]]*=[[:space:]]*\"([^\"]*)\".*/\1/p" "$1" | head -1
+}
+
 for file in "$REPO"/skills/*/SKILL.md; do
   [ -f "$file" ] || continue
   dir="$(basename "$(dirname "$file")")"
   name="$(field "$file" name)"
   [ "$name" = "$dir" ] || fail "skills/$dir/SKILL.md: name '$name' does not match folder '$dir'"
   [ -n "$(field "$file" description)" ] || fail "skills/$dir/SKILL.md: missing description"
+done
+
+for file in "$REPO"/codex/agents/*.toml; do
+  [ -f "$file" ] || continue
+  base="$(basename "$file" .toml)"
+  name="$(toml_field "$file" name)"
+  [ "$name" = "$base" ] || fail "codex/agents/$base.toml: name '$name' does not match file name"
+  [ -n "$(toml_field "$file" description)" ] || fail "codex/agents/$base.toml: missing description"
+  model="$(toml_field "$file" model)"
+  case "$model" in
+    gpt-5.6-sol|gpt-5.6-terra|gpt-5.6-luna) ;;
+    gpt-6-astra) fail "codex/agents/$base.toml: Astra is escalation-only, not a default agent model" ;;
+    *) fail "codex/agents/$base.toml: unknown model '$model'" ;;
+  esac
+  effort="$(toml_field "$file" model_reasoning_effort)"
+  case "$effort" in low|medium|high|xhigh|max|ultra) ;; *) fail "codex/agents/$base.toml: unknown reasoning effort '$effort'" ;; esac
+  sandbox="$(toml_field "$file" sandbox_mode)"
+  case "$sandbox" in read-only|workspace-write) ;; *) fail "codex/agents/$base.toml: unknown sandbox '$sandbox'" ;; esac
+  grep -qF "team-lead-playbooks/$base.md" "$file" || fail "codex/agents/$base.toml: does not load its shared playbook"
+  [ -f "$REPO/agents/$base.md" ] || fail "codex/agents/$base.toml: shared playbook agents/$base.md does not exist"
 done
 
 for file in "$REPO"/agents/*.md; do
@@ -66,6 +91,14 @@ while IFS= read -r ref; do
     echo "validate: warning: $ref does not exist in the installed $skill skill" >&2
   fi
 done < <(grep -rhoE '~/\.claude/skills/[A-Za-z0-9_-]+/[A-Za-z0-9_./-]*[A-Za-z0-9_-]' "$REPO/skills" "$REPO/agents" | sort -u)
+
+while IFS= read -r ref; do
+  rel="${ref#\~/.agents/skills/}"
+  skill="${rel%%/*}"
+  if [ -d "$REPO/skills/$skill" ]; then
+    [ -e "$REPO/skills/$rel" ] || fail "broken Codex reference: $ref"
+  fi
+done < <(grep -rhoE '~/\.agents/skills/[A-Za-z0-9_-]+/[A-Za-z0-9_./-]*[A-Za-z0-9_-]' "$REPO/skills" "$REPO/codex" | sort -u)
 
 if [ "$errors" -gt 0 ]; then
   echo "validate: $errors problem(s)" >&2

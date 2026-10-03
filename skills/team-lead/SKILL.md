@@ -1,7 +1,7 @@
 ---
 name: team-lead
-description: "Run one ticket through a local agentic development team: intake and grooming (quill:groom), plan gating, Architect plan on Planbin, Coder, Hardener, Tester, Reviewer, Wrap-up coder, then open the PR and post it to Slack. Tickets come from Linear or Notion. Invoked as /team-lead TICKET [--from <stage>] [--draft] [--no-slack]; /team-lead TICKET --round <PR> [note] to address review comments or a QA verdict on a PR it opened; or /team-lead --configure-repo [path] to record the checks a repo needs."
-argument-hint: "<Linear ID | Notion task ID or URL> [--from <stage>] [--draft] [--no-slack] | <ticket> --round <PR URL or number> [note] | --configure-repo [path]"
+description: "Run one ticket through a local agentic development team: intake and grooming, planning, implementation, risk-gated hardening and testing, review, PR publication and follow-up rounds. Use for /team-lead with a Linear or Notion ticket, or to configure a repository profile."
+argument-hint: "<Linear ID | Notion task ID or URL> [--full] [--from <stage>] [--draft] [--no-slack] | <ticket> --round <PR URL or number> [note] | --configure-repo [path]"
 disable-model-invocation: true
 effort: high
 ---
@@ -20,6 +20,7 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 
 | Flag | Effect |
 |---|---|
+| `--full` | run every specialist stage; in Codex the default is the Plus-friendly risk-gated chain in `references/codex-runtime.md` |
 | `--from <stage>` | resume at `coder`, `hardener`, `tester`, `reviewer`, `wrapup`, `pr` or `assess`, reusing the run directory (`assess` runs only step 11, for example after a stopped run) |
 | `--draft` | open the PR as a draft, and skip the Slack post (a post asks peers to review, and a draft is not ready for that) |
 | `--no-slack` | skip the Slack post (for dry runs of the pipeline) |
@@ -37,6 +38,16 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 | 6 Review | `team-reviewer` | opus | no | no |
 | 7 Wrap-up | `team-wrapup` | sonnet | yes | yes |
 | 11 Assess | `team-assessor` | opus | no | no |
+
+## Runtime
+
+When the session exposes Codex collaboration actions (`spawn_agent`,
+`followup_task`, `wait_agent`), read
+`~/.agents/skills/team-lead/references/codex-runtime.md` before any other
+reference. It maps the Claude-oriented names and paths below to Codex, defines
+the GPT models, and replaces the unconditional coding-stage chain with a
+Plus-friendly risk-gated chain. Its rules override this file where they
+conflict. Without those actions, continue with the Claude workflow below.
 
 Shared references, all under `~/.claude/skills/team-lead/references/`:
 
@@ -78,7 +89,7 @@ can resume with `--from`:
 ticket.md          ticket, acceptance criteria, decisions (the brief)
 groom.md           answer table and scores, when quill:groom ran
 plan.json          {"plan_id": "...", "url": "..."} when the Architect ran
-run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main", "profiles": ["<path>", ...],
+run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main", "profiles": ["<path>", ...], "mode": "full|lean", "chain": ["architect", ...],
                     "pr": "<url>", "rounds": [{"n": 1, "started_at": "...", "base": "<sha>", "chain": ["coder", ...]}]}
 setup.log          worktree setup output (preflight step 7)
 reports/<stage>.md each stage report, verbatim
@@ -170,7 +181,8 @@ committed.
      worktree (`npm ci`, `bundle install`, `uv sync`, as the repo uses).
    If a later stage fails on missing build or generated output, run the
    repo's documented build or generate command in the worktree and retry.
-8. Record the main checkout, worktree, branch, base commit
+8. Record the main checkout, worktree, branch, base commit, runtime mode and
+   selected stage chain (update the chain after Codex risk gates are known)
    (`git -C <worktree> rev-parse HEAD`) and `started_at` (from
    `date -u +%FT%TZ`, never from memory) in `run.json`. A resumed run keeps the first `started_at`. Every agent works in
    this worktree and diffs against this SHA.

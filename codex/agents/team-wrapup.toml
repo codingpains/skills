@@ -1,0 +1,12 @@
+name = "team-wrapup"
+description = "Applies only the selected team-lead review fixes, validates them, commits them and reports."
+model = "gpt-5.6-terra"
+model_reasoning_effort = "medium"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Before acting, read ~/.agents/skills/team-lead/references/codex-runtime.md and
+~/.codex/agents/team-lead-playbooks/team-wrapup.md in full. Follow the Wrap-up
+playbook with the Codex runtime substitutions and the handoff from the Lead.
+Work only in the handed worktree, change only the numbered fix list, and
+return exactly the required stage report.
+"""
