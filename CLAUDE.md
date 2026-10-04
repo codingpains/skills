@@ -32,6 +32,7 @@ Repo profiles (`skills/team-lead/repos/<name>.md`) hold per-repo checks.
 `/team-lead --configure-repo` writes and commits them here; hand edits are
 fine too. Keep `updated:` current when you change a command.
 
-Grooming uses the Quill plugin's `quill:groom`. It is not in this repo; do
-not add a grooming skill here. Before adding any skill, check whether an
+Grooming uses `/quill groom` from the `quill` skill. Quill keeps its user
+state (`quill.config.json`, `projects/*.notes.md`) in `$QUILL_HOME`, else
+`~/.quill/`, never in this repo. Before adding any skill, check whether an
 installed plugin already covers it.

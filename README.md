@@ -49,7 +49,7 @@ The Lead (a skill in the main session) runs one ticket through a pipeline of
 subagents, then opens the PR and posts it to Slack channel `C0BULBDLXUK`.
 
 ```
-Intake ──► unclear? ──► quill:groom (Lead answers from code, scored 1–3; score 1 → ask the human)
+Intake ──► unclear? ──► /quill groom (Lead answers from code, scored 1–3; score 1 → ask the human)
    │
    ▼
 estimate > 1 point (or none)? ──► Architect (opus) ───► plan on Planbin
@@ -66,7 +66,7 @@ Coder (sonnet) ──► Hardener (opus) ──► Tester (opus) ──► Revie
 | Piece | File | Model |
 |---|---|---|
 | Lead | `skills/team-lead/SKILL.md` | main session |
-| Grooming | `quill:groom` (Quill plugin, not in this repo) | main session |
+| Grooming | `/quill groom` (`skills/quill/SKILL.md`) | main session |
 | Architect | `agents/team-architect.md` | opus |
 | Coder | `agents/team-coder.md` | sonnet |
 | Hardener | `agents/team-hardener.md` | opus |
@@ -121,7 +121,7 @@ Flags: `--from <stage>` resumes a stopped run from
 Slack post, so peers are not asked to review it; `--no-slack` skips the Slack
 post for a ready PR.
 
-**Needs:** `gh` logged in; the Quill plugin set up (`/quill:setup`) for
+**Needs:** `gh` logged in; Quill set up (`/quill setup`) for
 grooming; the Linear, Notion and Slack connectors authorized in Claude; the `planbin-cli` skill and `npx planbin login` done once. The
 Hardener and Tester use the complexity, duplication and coverage scripts in
 `~/.claude/agents/references/` when present, and fall back to standard tools

@@ -87,7 +87,7 @@ can resume with `--from`:
 
 ```
 ticket.md          ticket, acceptance criteria, decisions (the brief)
-groom.md           answer table and scores, when quill:groom ran
+groom.md           answer table and scores, when /quill groom ran
 plan.json          {"plan_id": "...", "url": "..."} when the Architect ran
 run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main", "profiles": ["<path>", ...], "mode": "full|lean", "chain": ["architect", ...],
                     "pr": "<url>", "rounds": [{"n": 1, "started_at": "...", "base": "<sha>", "chain": ["coder", ...]}]}
@@ -205,9 +205,8 @@ Tickets live in **Linear** or in a **Notion** tasks database. Nothing else.
   `mcp__claude_ai_Notion__notion-query-data-sources` and
   `mcp__claude_ai_Notion__notion-get-comments` with `ToolSearch`.
   - A URL: `notion-fetch` the page.
-  - A bare number: find the tasks database the way `quill:groom` does.
-    Resolve Quill's config (`$QUILL_HOME`, else the nearest
-    `quill.config.json` walking up from the main checkout, else
+  - A bare number: find the tasks database the way `/quill groom` does.
+    Resolve Quill's config (`$QUILL_HOME/quill.config.json`, else
     `~/.quill/quill.config.json`), take
     `projects[activeProject].notionTasks.dataSourceId`, and query
     `SELECT * FROM "collection://<dataSourceId>" WHERE "Task ID" = ?` with the
@@ -273,8 +272,8 @@ or behavior is named without a way to find it; two statements conflict; an
 obvious case (empty input, error path, permission, existing data) has no
 defined behavior that the change cannot avoid. List each gap as a question.
 
-If there is any gap, groom the ticket with **`quill:groom`** (`Skill` tool,
-`skill: "quill:groom"`, `args: "<TICKET_ID>"`). Follow that skill's phases
+If there is any gap, groom the ticket with **`/quill groom`** (`Skill` tool,
+`skill: "quill"`, `args: "groom <TICKET_ID>"`). Follow that skill's phases
 exactly, with one change the team makes on top of it, **answer before you
 ask**:
 
@@ -297,20 +296,20 @@ ask**:
 - A category where every question scored 3 or 2 needs no answer from the
   human; say so and move on.
 
-`quill:groom` keeps its own gates: the human approves the groomed ticket
+`/quill groom` keeps its own gates: the human approves the groomed ticket
 before it is written back to Linear or Notion, and approves the Notion user
 story sync.
 Do not skip them. If it stops because Quill is not set up (no
 `quill.config.json` or no active project), stop too and tell the human to run
-`/quill:setup`.
+`/quill setup`.
 
-When `quill:groom` finishes, re-fetch the ticket and rebuild `ticket.md` from
+When `/quill groom` finishes, re-fetch the ticket and rebuild `ticket.md` from
 the groomed version: its acceptance criteria are now the source. Write every
 answer into `## Decisions` with its score and evidence, or `human decision`
 when the human gave or changed it, and save the full answer table to
 `groom.md`.
 
-When the ticket is already clear, skip `quill:groom`. Acceptance criteria you
+When the ticket is already clear, skip `/quill groom`. Acceptance criteria you
 derived yourself are then an escalation: show them to the human in one
 `AskUserQuestion` call and ask for approval or edits before planning.
 
