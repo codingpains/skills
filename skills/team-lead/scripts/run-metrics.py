@@ -14,7 +14,8 @@ repeated calls and errors. The team-assessor's own work is left out. Time the Le
 is reported apart, so it never reads as a bottleneck.
 
 Tool-result tokens are estimated as characters / 4. Cost uses
-~/.claude/pricing-cache.json (USD per million tokens) when it exists.
+~/.claude/pricing-cache.json (USD per million tokens) when it exists, over the
+built-in KNOWN_PRICES; tokens of a model neither prices are reported as unpriced.
 Reads only; writes nothing but the --json and --md files.
 """
 import argparse
@@ -29,10 +30,33 @@ from datetime import datetime
 PROJECTS = os.path.expanduser("~/.claude/projects")
 PRICING = os.path.expanduser("~/.claude/pricing-cache.json")
 TOP = 8
-# Models the pricing cache is known to lack. Without an entry, price_for falls
-# back to the family (claude-opus-5-5 -> claude-opus-5) and bills the old rates.
+
+
+def rates(inp, out, read=None):
+    """USD per million tokens. Cache writes are 1.25x input (5 min) and 2x (1 h);
+    reads are 0.1x input unless the model has its own rate."""
+    return {"input": inp, "cache_write_5m": inp * 1.25, "cache_write_1h": inp * 2,
+            "cache_read": inp * 0.1 if read is None else read, "output": out}
+
+
+# First-party API list prices (checked 2026-10-06), used when the pricing cache
+# is missing or lacks a model. price_for drops trailing -N parts, so a dated id
+# (claude-haiku-4-5-20251001) finds its model. A model with no price at all is
+# reported as unpriced, never billed as $0 in silence.
 KNOWN_PRICES = {
-    "claude-opus-5-5": {"input": 4.0, "cache_write_5m": 5.0, "cache_write_1h": 8.0, "cache_read": 0.20, "output": 20.0},
+    "claude-fable-5-1": rates(10.0, 50.0, read=0.25),
+    "claude-mythos-5-1": rates(10.0, 50.0, read=0.25),
+    "claude-fable-5": rates(10.0, 50.0),
+    "claude-mythos-5": rates(10.0, 50.0),
+    "claude-opus-5-5": rates(4.0, 20.0, read=0.20),
+    "claude-opus-5": rates(5.0, 25.0),
+    "claude-opus-4-8": rates(5.0, 25.0),
+    "claude-opus-4-7": rates(5.0, 25.0),
+    "claude-opus-4-6": rates(5.0, 25.0),
+    "claude-sonnet-5-5": rates(2.0, 10.0),
+    "claude-sonnet-5": rates(2.0, 10.0),
+    "claude-sonnet-4-6": rates(3.0, 15.0),
+    "claude-haiku-4-5": rates(1.0, 5.0),
 }
 
 
@@ -114,7 +138,7 @@ def text_len(content):
 def analyze(rows, label, kind, table, start=None):
     rows = [r for r in rows if not start or (r.get("timestamp") and ts(r["timestamp"]) >= start)]
     stamps = [ts(r["timestamp"]) for r in rows if r.get("timestamp")]
-    usage, models, peak = collections.Counter(), collections.Counter(), 0
+    usage, models, unpriced, peak = collections.Counter(), collections.Counter(), collections.Counter(), 0
     seen, cost, calls, first_prompt = set(), 0.0, {}, 0
     human_wait, prev, handed_back = 0.0, None, False
     for r in rows:
@@ -166,6 +190,8 @@ def analyze(rows, label, kind, table, start=None):
         p = price_for(msg.get("model"), table)
         if p:
             cost += sum(part[k] * p.get(k, 0) for k in part) / 1e6
+        elif any(part.values()):
+            unpriced[msg.get("model", "?")] += sum(part.values())
 
     by_tool = collections.defaultdict(lambda: {"calls": 0, "errors": 0, "result_tokens": 0, "seconds": 0.0})
     repeats = collections.Counter()
@@ -193,6 +219,7 @@ def analyze(rows, label, kind, table, start=None):
         "active_seconds": round(wall - human_wait),
         "turns": len(seen), "models": dict(models), "tokens": dict(usage),
         "total_tokens": sum(usage.values()), "peak_context": peak, "cost_usd": round(cost, 2),
+        "unpriced_tokens": dict(unpriced),
         "handoff_tokens": first_prompt // 4 if kind == "subagent" else None,
         "tools": {k: dict(v, seconds=round(v["seconds"])) for k, v in sorted(by_tool.items(), key=lambda kv: -kv[1]["result_tokens"])},
         "heaviest_results": [brief(c) for c in sorted(calls.values(), key=lambda c: -c["chars"])[:TOP]],
@@ -243,11 +270,16 @@ def cell(text):
     return text.replace("|", "\\|").replace("`", "'")
 
 
+def unpriced_note(totals):
+    return ", ".join(f"{m} ({fmt_k(n)} tokens)" for m, n in sorted(totals["unpriced_tokens"].items()))
+
+
 def markdown(report):
     t = report["totals"]
     out = [f"# Run metrics — {report['ticket']}", "",
            f"Sessions: {len(report['sessions'])}. Wall time {fmt_secs(t['wall_seconds'])}, of which waiting on the human {fmt_secs(t['human_wait_seconds'])}. "
-           f"Tokens {fmt_k(t['total_tokens'])} (cache read {fmt_k(t['cache_read'])}). Estimated cost ${t['cost_usd']:.2f}.", "",
+           f"Tokens {fmt_k(t['total_tokens'])} (cache read {fmt_k(t['cache_read'])}). Estimated cost ${t['cost_usd']:.2f}"
+           + (f", excluding unpriced {unpriced_note(t)}." if t["unpriced_tokens"] else "."), "",
            "## Per agent", "",
            "| Agent | Model | Active | Turns | Tool calls | Input+cache write | Cache read | Output | Peak context | Handoff | Cost | Errors |",
            "|---|---|---|---|---|---|---|---|---|---|---|---|"]
@@ -325,9 +357,12 @@ def main():
     totals.update(
         total_tokens=sum(a["total_tokens"] for a in agents),
         cost_usd=round(sum(a["cost_usd"] for a in agents), 2),
+        unpriced_tokens=dict(sum((collections.Counter(a["unpriced_tokens"]) for a in agents), collections.Counter())),
         wall_seconds=sum(a["wall_seconds"] for a in leads),
         human_wait_seconds=sum(a["human_wait_seconds"] for a in leads),
     )
+    if totals["unpriced_tokens"]:
+        print(f"run-metrics: no price for {unpriced_note(totals)}; cost excludes them", file=sys.stderr)
     report = {"ticket": args.ticket, "sessions": sessions, "totals": totals, "agents": agents}
     for a in agents:
         a.pop("agent_calls", None)
