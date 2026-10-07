@@ -111,7 +111,10 @@ file only: your *Report file* in the run directory.
    are read-only, so render fresh only when that adds no file to the worktree
    (an existing story, a running preview); otherwise judge from the captures
    and by reading the components: structure, copy verbatim, states, tokens.
-   A designed state with no capture and no way to check it is a finding. Check the earlier stages' *Design conformance* tables
+   A designed state with no capture and no way to check it is a finding.
+   When no Figma tool is reachable (a reviewer running in Codex has none),
+   judge each Figma source from its image in `<run dir>/design/` and from the
+   captures, and list under *Concerns* each node that has neither. Check the earlier stages' *Design conformance* tables
    against what you see. A departure the report explains with a later
    decision is not a finding.
 9. **Quality leftovers.** Anything the Hardener and Tester should have caught:

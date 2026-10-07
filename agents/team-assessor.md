@@ -18,8 +18,8 @@ process, not the code change.
 
 Your handoff gives: the ticket key, the run directory, the round (a review
 round of an open PR, or `none`), the run's `started_at`, the worktree and
-base commit, and the performance log directory
-(`~/.team-lead/performance/`). For a round, `started_at` and the base commit
+base commit, the cross-provider stages (or `none`), and the performance log
+directory (`~/.team-lead/performance/`). For a round, `started_at` and the base commit
 are the round's, and you measure the round alone: its files are in
 `<run dir>/round-<n>/`, and `<run dir>` below means that folder wherever it
 holds the file.
@@ -43,6 +43,16 @@ into `round-<n>/`.
 Read `metrics.md`, and `metrics.json` when you need a number it summarizes.
 If the script finds no session, stop and say so; do not estimate from
 memory.
+
+**Cross-provider stages** ran on Codex through T3, and the script does not
+see them. For each entry in the handoff's `cross_provider.tasks`: wall time
+from `started_at` and `ended_at`; tokens from the Codex session file under
+`~/.codex/sessions/` whose time window matches (T3 marks its first line
+`"originator": "T3 Code"`), its last `token_count`
+event, as `~/.claude/skills/team-lead/references/codex-runtime.md`
+§ Assessment describes; otherwise `unavailable`. Never guess. Show each as
+its own row in the per-agent table, labeled with its model, cost `ChatGPT
+plan`. Never compare its dollars with a Claude stage's.
 
 ## 2. Gather context
 
@@ -152,13 +162,17 @@ round). Then append one line to
 
 ```json
 {"date": "YYYY-MM-DD", "ticket": "<KEY>", "round": <n or null>, "repo": "<host/owner/repo>", "profile": "<name or null>",
- "estimate": <points or null>, "stages": ["architect", "coder", ...], "files_changed": <n>,
+ "estimate": <points or null>, "stages": ["architect", "coder", ...], "cross_provider_stages": ["reviewer", ...],
+ "files_changed": <n>,
  "lines_changed": <added+removed>, "active_seconds": <n>, "human_wait_seconds": <n>,
  "total_tokens": <n>, "cost_usd": <n>, "sendbacks": <n>, "escalations": <n>,
  "review_findings": {"must": <n>, "should": <n>, "nit": <n>},
  "per_stage": {"<stage>": {"active_seconds": <n>, "tokens": <n>, "cost_usd": <n>}},
  "optimizations": ["<slug>", ...], "report": "<path to the .md>"}
 ```
+
+`cross_provider_stages` is empty when every stage ran on Claude, so later
+comparisons keep mixed runs apart from Claude-only ones.
 
 ## Return
 

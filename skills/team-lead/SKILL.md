@@ -1,7 +1,7 @@
 ---
 name: team-lead
 description: "Run one ticket through a local agentic development team: intake and grooming, planning, implementation, risk-gated hardening and testing, review, PR publication and follow-up rounds. Use for /team-lead with a Linear or Notion ticket, or to configure a repository profile."
-argument-hint: "<Linear ID | Notion task ID or URL> [--full] [--from <stage>] [--draft] [--no-slack] | <ticket> --round <PR URL or number> [note] | --configure-repo [path]"
+argument-hint: "<Linear ID | Notion task ID or URL> [--full] [--from <stage>] [--draft] [--no-slack] [--cross-provider <stages>] | <ticket> --round <PR URL or number> [--cross-provider <stages>] [note] | --configure-repo [path]"
 disable-model-invocation: true
 effort: high
 ---
@@ -25,6 +25,7 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 | `--draft` | open the PR as a draft, and skip the Slack post (a post asks peers to review, and a draft is not ready for that) |
 | `--no-slack` | skip the Slack post (for dry runs of the pipeline) |
 | `--round <PR> [note]` | address review comments, a QA verdict or a requested change on an open PR of this ticket, in a new session (§ Review rounds). Text after the PR is the human's note for the round. With `--from <stage>`, resume the latest round at that stage |
+| `--cross-provider <stages>` | run the named stages on Codex through T3 instead of on Claude (`references/cross-provider.md`). Today only `reviewer`. Off unless passed on this call, so a `--from` or `--round` call without it runs on Claude. The stage list is required, so the flag can sit before or after a round's note |
 | `--configure-repo [path]` | no ticket: create or refresh this repo's validation profile, optionally for one folder of a monorepo (§ Configure a repo) |
 
 ## The team
@@ -35,7 +36,7 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 | 3 Implement | `team-coder` | sonnet | yes | yes |
 | 4 Harden | `team-hardener` | opus | yes | yes |
 | 5 Test | `team-tester` | opus | yes | yes |
-| 6 Review | `team-reviewer` | opus | no | no |
+| 6 Review | `team-reviewer` | opus; with `--cross-provider reviewer`, the model in `~/.codex/agents/team-reviewer.toml` | no | no |
 | 7 Wrap-up | `team-wrapup` | sonnet | yes | yes |
 | 11 Assess | `team-assessor` | opus | no | no |
 
@@ -47,6 +48,12 @@ When the session exposes Codex collaboration actions (`spawn_agent`,
 reference. It maps the Claude-oriented names and paths below to Codex and
 defines the GPT models. Its rules override this file where they
 conflict. Without those actions, continue with the Claude workflow below.
+
+With `--cross-provider`, read
+`~/.claude/skills/team-lead/references/cross-provider.md` before step 1. It
+owns the preflight check, the handoff to Codex, the wait, the fallback and
+what to record. A run without the flag never reads it, so it is not in the
+table below.
 
 Shared references, all under `~/.claude/skills/team-lead/references/`:
 
@@ -100,7 +107,9 @@ groom.md           answer table and scores, when /quill groom ran
 plan.json          {"plan_id": "...", "url": "..."} when the Architect ran
 handoff-common.md  the handoff parts every stage shares (handoff.md)
 run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main", "profiles": ["<path>", ...], "mode": "full|lean", "chain": ["architect", ...],
-                    "pr": "<url>", "rounds": [{"n": 1, "started_at": "...", "base": "<sha>", "chain": ["coder", ...]}]}
+                    "cross_provider": {...}, "pr": "<url>",
+                    "rounds": [{"n": 1, "started_at": "...", "base": "<sha>", "chain": ["coder", ...], "cross_provider": {...}}]}
+                   (`cross_provider` only with the flag, as cross-provider.md § What to record says)
 setup.log          worktree setup output (preflight step 7)
 reports/<stage>.md each stage report, written by the stage's agent
 design/            design.md (the design brief) and the design images, when the ticket has a design
@@ -135,7 +144,9 @@ committed.
    (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`, falling
    back to `origin/HEAD`). The main checkout may be dirty or on any branch;
    you never touch it.
-2. `gh auth status` must pass; you need it for the PR.
+2. `gh auth status` must pass; you need it for the PR. With
+   `--cross-provider`, run the preflight check of `cross-provider.md` here,
+   so a missing Codex surfaces before any work, not at the stage.
 3. Resolve the ticket and its key with the intake reader (§ 1 Intake). Pick the
    branch: Linear's suggested `branchName` when there is one, otherwise
    `<ticket-key-lowercase>-<short-slug>`. Pick the worktree path:
@@ -381,6 +392,10 @@ and the next stage's handoff says why (`stage-gates.md` § A skipped stage).
 | Test | `team-tester` | the Coder's and, when it ran, the Hardener's report files |
 | Review | `team-reviewer` | every report file so far |
 
+With `--cross-provider`, each stage it names goes through T3 as
+`cross-provider.md` § The handoff says, not through `Agent`. The report
+checks below apply unchanged, and a send-back to it is a new delegation.
+
 **A plan with blocks** (the Architect's report says `Blocks: B1, B2...`)
 gets one Coder per block, in order. A Coder's context only grows, and every
 turn re-reads all of it, so the second half of a large plan costs about
@@ -540,6 +555,7 @@ started_at: <from run.json; for a round, the round's>
 Worktree: <path>   Base commit: <sha; for a round, the round's base>
 Repo profile: <path or none>
 Log directory: ~/.team-lead/performance/
+Cross-provider stages: <the run.json cross_provider object; for a round, the round's; or none>
 ```
 
 It measures the run from Claude Code's own transcripts with
@@ -572,7 +588,8 @@ section.
 
 ### R1. Load
 
-Run preflight steps 1, 2 and 6 (main checkout, `gh`, profiles), and the
+Run preflight steps 1, 2 and 6 (main checkout, `gh`, profiles, and the
+`cross-provider.md` check when the flag was passed), and the
 `guildhall-watch` skill from step 3. R2 replaces
 steps 3 to 5 and 8, and a round skips intake, grooming and stage gating.
 
@@ -676,6 +693,8 @@ Run the chosen stages as in § 3 to § 9, with these changes:
   agent's *Report file* is `round-<n>/reports/<stage>.md`, and the fix list
   goes to `round-<n>/review-fixes.md`. The report checks of § 4–7 apply as
   they are.
+- A stage `--cross-provider` names runs on Codex when the chain has it,
+  as in § 4–7.
 - With no Reviewer in the chain, check yourself, before the push, that the
   round's diff (`git diff <round base>..HEAD`) addresses every non-`answer`
   item and nothing else.
@@ -753,7 +772,9 @@ End with, in plain words:
 - the PR URL and whether Slack was notified (for a draft: not posted, and
   post it with the message above once the PR is marked ready);
 - one line per stage: status, commit count, validations passed, and each
-  stage the gates skipped, with the reason;
+  stage the gates skipped, with the reason. A stage `--cross-provider`
+  named also says the model it ran on, or that it fell back to Claude and
+  why;
 - decisions the human made, and deferred follow-ups;
 - anything you dropped from the review and why;
 - the self-assessment: the report path, active time, tokens and cost, and
