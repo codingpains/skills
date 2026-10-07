@@ -15,6 +15,8 @@ remain unchanged.
   report arrives.
 - Use an `explorer` agent where the shared instructions say `Explore`. Do not
   override its model; focused exploration is already optimized by the harness.
+- Use a `default` agent where they say `general-purpose` (the intake reader,
+  the groom's story lookup), without a model override.
 - Use available app, plugin or CLI tools by capability. Names such as
   `mcp__claude_ai_Linear__get_issue` describe the required Linear operation,
   not a literal Codex tool name. If a required integration is unavailable,

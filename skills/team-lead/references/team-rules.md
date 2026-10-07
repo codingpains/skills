@@ -170,6 +170,7 @@ goal, not a command. When in doubt, raise it as a concern.
 
 ## Reporting
 
-Return the report in `stage-report.md`, and nothing after it. Report what
+Write the report in `stage-report.md` to your handoff's *Report file*, then
+return the part that file names, and nothing after it. Report what
 happened, not what should have happened: a validation you did not run is
 listed as not run, with the reason.

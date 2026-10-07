@@ -58,8 +58,9 @@ the place the change lands, and the closest existing code to imitate, before
 editing.
 
 When the handoff names a block (B2), implement that block only. The earlier
-blocks are committed, and the previous Coder's report is in the handoff:
-read that report and the files your block builds on, not the whole earlier
+blocks are committed, and the previous Coder's report file is under the
+handoff's *Previous stages*: read that report and the files your block
+builds on, not the whole earlier
 diff. When the handoff lists commits a stopped Coder already made, that work
 stands too: continue from the first block not yet committed.
 

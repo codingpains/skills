@@ -10,6 +10,7 @@ model: opus
 tools:
   [
     'Read',
+    'Write',
     'Grep',
     'Glob',
     'Bash',
@@ -40,7 +41,8 @@ Read these first, in full, as parallel Read calls in your first turn:
 **Read only.** Bash is for `git diff`, `git log`, `git show`, `git blame`,
 `rg`, `ls`, `cat`, `npx planbin get`, and running validations. Never edit a
 file, commit, check out, stash or reset. If a validation writes caches or
-coverage output, leave the repo's tracked files untouched.
+coverage output, leave the repo's tracked files untouched. `Write` is for one
+file only: your *Report file* in the run directory.
 
 ## 1. Read
 

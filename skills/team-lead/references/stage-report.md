@@ -1,6 +1,8 @@
 # Stage report
 
-Every agent ends with exactly this report, and nothing after it. Sections
+Every agent ends by writing exactly this report to the *Report file* path in
+its handoff (`mkdir -p` its folder; overwrite a file a stopped run left).
+Then it returns the **returned part**, below, and nothing after it. Sections
 that do not apply say `none`; never drop a section.
 
 ```
@@ -40,6 +42,25 @@ edge cases, findings, applied fixes>
 ### Escalations
 <score-1 items in the format of confidence-scoring.md>, or none
 ```
+
+## The returned part
+
+The Lead carries everything you return through the rest of the run, so
+return only what it acts on: the heading line, *Status*, *Summary*,
+*Commits*, *Validations*, *Concerns* and *Escalations*, as written in the
+file. Add *Stage-specific* for these stages, whose lines the Lead routes on:
+
+| Stage | Also return |
+|---|---|
+| Architect | *Stage-specific* |
+| Coder | *Stage-specific* |
+| Reviewer | *Acceptance criteria* and *Stage-specific* |
+| Wrap-up | *Stage-specific* |
+
+*Files changed*, *Acceptance criteria* and the Hardener's and Tester's
+*Stage-specific* stay in the file; later stages and the Lead read them
+there. If the file cannot be written, say so on the first line and return
+the whole report instead.
 
 `BLOCKED` means you could not finish and the Lead must act: say exactly what
 stopped you and what you tried. `DONE_WITH_CONCERNS` means the work is

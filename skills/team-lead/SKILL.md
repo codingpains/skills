@@ -65,9 +65,17 @@ still pass its path in each handoff.
 
 Stages run one after another, each in the foreground (`run_in_background:
 false`): each stage builds on the previous one's commits. Subagents do not see
-this conversation. Everything an agent needs goes in its handoff. Give every
-`Agent` call the description `<Stage> — <TICKET_ID>`: the self-assessment
-reads it to tell the stages apart.
+this conversation. Everything an agent needs goes in its handoff. Write the
+parts every stage shares once, to `handoff-common.md`, before the first
+stage, and rewrite it when the decisions, the plan or the round change; each
+stage's own packet then stays short (`handoff.md`). Give every `Agent` call
+the description `<Stage> — <TICKET_ID>`: the self-assessment reads it to
+tell the stages apart.
+
+Each agent writes its full report to its *Report file*
+(`reports/<stage>.md`) and returns only the part `stage-report.md` names.
+Read a report file only when a check below needs more than the returned
+part.
 
 ## One worktree per ticket
 
@@ -86,13 +94,15 @@ checkout.
 can resume with `--from`:
 
 ```
+ticket-source.md   the ticket and its context, verbatim, written by the intake reader
 ticket.md          ticket, acceptance criteria, decisions (the brief)
 groom.md           answer table and scores, when /quill groom ran
 plan.json          {"plan_id": "...", "url": "..."} when the Architect ran
+handoff-common.md  the handoff parts every stage shares (handoff.md)
 run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main", "profiles": ["<path>", ...], "mode": "full|lean", "chain": ["architect", ...],
                     "pr": "<url>", "rounds": [{"n": 1, "started_at": "...", "base": "<sha>", "chain": ["coder", ...]}]}
 setup.log          worktree setup output (preflight step 7)
-reports/<stage>.md each stage report, verbatim
+reports/<stage>.md each stage report, written by the stage's agent
 design/            design.md (the design brief) and the design images, when the ticket has a design
 review-fixes.md    the fix list you sent the Wrap-up coder
 notes.md           one line per event, as it happens: `<time> <event>`, with
@@ -126,7 +136,7 @@ committed.
    back to `origin/HEAD`). The main checkout may be dirty or on any branch;
    you never touch it.
 2. `gh auth status` must pass; you need it for the PR.
-3. Resolve the ticket and its key (§ 1 Intake, *Find the ticket*). Pick the
+3. Resolve the ticket and its key with the intake reader (§ 1 Intake). Pick the
    branch: Linear's suggested `branchName` when there is one, otherwise
    `<ticket-key-lowercase>-<short-slug>`. Pick the worktree path:
    `<parent of main checkout>/<repo folder name>-worktrees/<ticket-id-lowercase>`,
@@ -195,40 +205,26 @@ committed.
 
 Tickets live in **Linear** or in a **Notion** tasks database. Nothing else.
 
-**Find the ticket**, by the shape of the argument:
+**Find the ticket and pull its context** through an intake reader, never
+with the ticket tools yourself: their schemas and raw results (30–45k tokens)
+would ride along in your context for the whole run. The argument must be a
+Linear identifier (`ONB-123`) or `linear.app` URL, a `notion.so` or
+`notion.site` URL, or a bare number (a Notion task's `Task ID`). Anything
+else: stop and ask the human for a Linear identifier or a Notion task.
 
-- **Linear**: an identifier like `ONB-123`, or a `linear.app` URL. Load
-  `mcp__claude_ai_Linear__get_issue` with `ToolSearch` and fetch it. Key: the
-  identifier.
-- **Notion**: a `notion.so` or `notion.site` URL, or a bare number (the
-  task's `Task ID`). Load `mcp__claude_ai_Notion__notion-fetch`,
-  `mcp__claude_ai_Notion__notion-query-data-sources` and
-  `mcp__claude_ai_Notion__notion-get-comments` with `ToolSearch`.
-  - A URL: `notion-fetch` the page.
-  - A bare number: find the tasks database the way `/quill groom` does.
-    Resolve Quill's config (`$QUILL_HOME/quill.config.json`, else
-    `~/.quill/quill.config.json`), take
-    `projects[activeProject].notionTasks.dataSourceId`, and query
-    `SELECT * FROM "collection://<dataSourceId>" WHERE "Task ID" = ?` with the
-    number. Without a `notionTasks` block, ask the human for the task's URL.
-  - Key: the `Task ID` value with its prefix when the property has one,
-    otherwise `TASK-<number>`.
-- Anything else, or a ticket that cannot be fetched: stop and ask the human
-  for a Linear identifier or a Notion task.
+Spawn one `general-purpose` agent with `model: "sonnet"`, the description
+`Intake — <argument>`, and the prompt: `Read
+~/.claude/skills/team-lead/references/intake-reader.md and follow it.
+Ticket: <argument>`. Do not read that file yourself. It writes
+`ticket-source.md` (the ticket, every property and comment, the linked
+issues, tasks and documents, all verbatim) to the run directory, saves the
+ticket's images to `design/source/`, and returns the key, title, estimate,
+Linear branch name and the file's path. Read `ticket-source.md` once, with
+`Read`. `NOT FOUND`: ask the human for a Linear identifier or a Notion task,
+or, without a Notion tasks database configured, for the task's URL.
 
-**Pull all its context:**
-
-- **Linear**: the issue, its comments (`mcp__claude_ai_Linear__list_comments`),
-  its parent and sub-issues, and linked issues and documents when the
-  description leans on them. Pull images with
-  `mcp__claude_ai_Linear__extract_images` when a screenshot carries a
-  requirement.
-- **Notion**: the page body, every property (`Acceptance Criteria`,
-  `Status`, `Priority`, and an estimate property when there is one), the
-  page's comments, and the titles and bodies of tasks linked through
-  `Depends On` / `Blocks` relations when the task leans on them.
-
-**Collect the design.** Follow `design-context.md`: find every Figma link,
+**Collect the design.** Follow `design-context.md`: start from the reader's
+*Design sources* and *Images*, and find every Figma link,
 pasted image, prototype folder and design requirements page the ticket
 reaches (its parent epic too, when the ticket changes UI and carries none),
 check Figma is reachable, look at each source, and write the design brief to
@@ -274,15 +270,31 @@ defined behavior that the change cannot avoid. List each gap as a question.
 
 If there is any gap, groom the ticket with **`/quill groom`** (`Skill` tool,
 `skill: "quill"`, `args: "groom <TICKET_ID>"`). Follow that skill's phases
-exactly, with one change the team makes on top of it, **answer before you
-ask**:
+exactly, with two changes the team makes on top of it.
+
+**Keep the groom out of your context.**
+
+- Read Quill's `overview.md` and `commands/groom.md` with `Read`, once each.
+  `cat` overflows the Bash output limit, and you end up reading them twice.
+- Phase 1: the ticket is already fetched. Take it from `ticket-source.md`;
+  do not fetch it again.
+- Load a ticket tool only when a phase writes: Linear's `save_issue`, or
+  Notion's `notion-update-page`, found with `ToolSearch` by name. The labels
+  to merge are in `ticket-source.md`.
+- Phase 6, finding the existing story and checking the stories database for
+  the back-link property: give both to one `general-purpose` agent with
+  `model: "sonnet"`, which returns the story's URL (or `none`) and whether
+  the property exists.
+
+**Answer before you ask.**
 
 - At its question phase ("Grill in batches"), before showing a category's
-  questions to the human, try to answer each one yourself from the code,
-  docs, git history and related tickets, and score each answer with
-  `confidence-scoring.md`. Spawn `Explore` agents in parallel when the
-  questions span unrelated parts of the codebase, asking each for file:line
-  evidence.
+  questions to the human, try to answer each one from the code, docs, git
+  history and related tickets, and score each answer with
+  `confidence-scoring.md`. Send the code and doc research to `Explore`
+  agents with `model: "sonnet"`, in parallel when the questions span
+  unrelated areas, each asked for `path:line` evidence. Do not read source
+  files into your own context: the Architect reads them again anyway.
 - Score 3 or 2: do not ask it. Show it in the batch as a proposed answer with
   its score and evidence, so the human can correct it but does not have to
   answer it.
@@ -303,8 +315,9 @@ Do not skip them. If it stops because Quill is not set up (no
 `quill.config.json` or no active project), stop too and tell the human to run
 `/quill setup`.
 
-When `/quill groom` finishes, re-fetch the ticket and rebuild `ticket.md` from
-the groomed version: its acceptance criteria are now the source. Write every
+When `/quill groom` finishes, rebuild `ticket.md` from the groomed version
+the human approved in its Phase 4, which you already hold, without fetching
+the ticket again: its acceptance criteria are now the source. Write every
 answer into `## Decisions` with its score and evidence, or `human decision`
 when the human gave or changed it, and save the full answer table to
 `groom.md`.
@@ -333,9 +346,10 @@ worktree setup has not ended yet, say so in the handoff: `node_modules`,
 `dist` and generated code may be missing or partial, so read source, not
 build output.
 
-- Save `plan.json`.
+- Save `plan.json`, and put the plan ID and URL in `handoff-common.md`.
 - If it returned escalations (score 1), ask the human exactly as in step 1,
-  add the answers to `## Decisions`, then have the Architect revise the plan
+  add the answers to `## Decisions` (in `ticket.md` and
+  `handoff-common.md`), then have the Architect revise the plan
   under the **same plan ID** (`npx planbin update`). Within 5 minutes of the
   Architect's report, continue the same agent with `SendMessage` (load it
   with `ToolSearch`). After that its cached context has expired, and
@@ -357,37 +371,43 @@ Before the first of them, confirm worktree setup ended cleanly (preflight
 step 7). For each stage, in order, spawn its agent with the handoff and wait
 for its report:
 
-| Stage | Agent | Extra in the handoff |
+| Stage | Agent | *Previous stages* in the handoff |
 |---|---|---|
-| Implement | `team-coder` | plan ID, or `no plan: trivial ticket, the brief is the spec` |
-| Harden | `team-hardener` | the Coder's reports |
-| Test | `team-tester` | the Coder's and Hardener's reports |
-| Review | `team-reviewer` | all reports so far, the plan ID |
+| Implement | `team-coder` | none |
+| Harden | `team-hardener` | the Coder's report files |
+| Test | `team-tester` | the Coder's and Hardener's report files |
+| Review | `team-reviewer` | every report file so far |
 
 **A plan with blocks** (the Architect's report says `Blocks: B1, B2...`)
 gets one Coder per block, in order. A Coder's context only grows, and every
 turn re-reads all of it, so the second half of a large plan costs about
 twice the first in one session. Give each spawn the description
-`Implement B<n> — <TICKET_ID>`, and in its handoff the plan ID, its block,
-and the earlier blocks' Coder reports. Check each report as below before the
-next spawn, and save it to `reports/coder-b<n>.md`.
+`Implement B<n> — <TICKET_ID>`, its block in *Your task*, the earlier
+blocks' report files in *Previous stages*, and the report file
+`reports/coder-b<n>.md`. Check each report as below before the next spawn.
 
 After each report, before moving on, **check it** (this is your
-sanity-check, not a second review):
+sanity-check, not a second review). One command covers the mechanical
+checks:
 
-1. Save it verbatim to `reports/<stage>.md`.
-2. The report has every section in `stage-report.md`, and every line of the
-   *Stage-specific* block its agent file names (the Hardener's *Rules
+```sh
+bash ~/.claude/skills/team-lead/scripts/check-stage.sh <worktree> <base> <run dir>/reports/<stage>.md
+```
+
+It prints one line per check and exits non-zero when any fails:
+
+1. The report file exists, has every section in `stage-report.md` and the
+   *Stage-specific* lines its agent file names (the Hardener's *Rules
    checked* and *Claims checked*, the Tester's *Coverage* table), and its
-   status is not `BLOCKED`. A missing line is a failed check.
-3. The commits it lists exist: `git log --format='%h %s' <base>..HEAD`.
-4. No commit carries co-attribution:
-   `git log --format=%B <base>..HEAD | grep -iE 'co-authored-by|generated with'`
-   prints nothing. If it prints anything, send the agent back to reword its
-   own commits before the next stage.
-5. Every validation it ran passed, or its failure is shown to exist on the
-   base commit too.
-6. The worktree is clean after the stage (`git -C <worktree> status --porcelain`).
+   status is not `BLOCKED`. A missing file: write the returned report there
+   yourself and re-run the script; a missing section is a failed check.
+2. Every commit it lists exists in `<base>..HEAD`.
+3. No commit carries co-attribution. If one does, send the agent back to
+   reword its own commits before the next stage.
+4. The worktree is clean after the stage.
+
+Then, from the returned part, check that every validation it ran passed, or
+that its failure is shown to exist on the base commit too.
 
 If a check fails, send the same agent back once with the specific failure
 (`SendMessage`, or a new spawn with the report and the failure), and note
@@ -416,7 +436,8 @@ what to change and why. An empty list skips step 9.
 
 ## 9. Wrap-up
 
-Spawn `team-wrapup` with the handoff and `review-fixes.md`. It applies those
+Spawn `team-wrapup` with the handoff, its *Your task* the fix list from
+`review-fixes.md`. It applies those
 fixes and nothing else. Check its report as in steps 4–7, and check the diff
 of its commits (`git diff <last-sha-before-wrapup>..HEAD`) touches only what
 the fix list names. A must-fix it could not apply stops the pipeline and goes
@@ -424,7 +445,8 @@ to the human.
 
 ## 10. PR and notification
 
-**Final sanity check.** Read every report together. Confirm:
+**Final sanity check.** Read the returned parts together, and a report file
+where they fall short. Confirm:
 
 - every acceptance criterion is marked met in the Reviewer's report, and any
   it marked unmet was on the fix list and the Wrap-up coder applied it;
@@ -559,9 +581,8 @@ steps 3 to 5 and 8, and a round skips intake, grooming and plan gating.
 2. Find the run directory: the one whose `run.json` has this PR as `pr` or
    its head branch as `branch` (`rg -l` over `~/.team-lead/runs/*/run.json`),
    else `~/.team-lead/runs/<TICKET_ID>/`. With none, create
-   `<TICKET_ID>/`, fetch the ticket (§ 1, *Find the ticket* and *Pull all
-   its context*, no grooming), and write `ticket.md` and `run.json` from the
-   PR.
+   `<TICKET_ID>/`, fetch the ticket with the intake reader (§ 1, no
+   grooming), and write `ticket.md` and `run.json` from the PR.
 3. Read `ticket.md`, `plan.json`, `notes.md`, and the last Reviewer and
    Wrap-up reports (`reports/`, or the latest `round-<n>/reports/`). Do not
    read every report: the PR and the code are the current state.
@@ -648,9 +669,10 @@ Run the chosen stages as in § 3 to § 9, with these changes:
 - With no Architect, *Plan* reads
   `no plan: review round <n>, the items in Round are the spec`. With one,
   it updates the existing plan (`plan.json`) under the same plan ID.
-- Reports go to `round-<n>/reports/<stage>.md`, and the fix list to
-  `round-<n>/review-fixes.md`. The report checks of § 4–7 apply as they
-  are.
+- Rewrite `handoff-common.md` for the round before its first stage. Each
+  agent's *Report file* is `round-<n>/reports/<stage>.md`, and the fix list
+  goes to `round-<n>/review-fixes.md`. The report checks of § 4–7 apply as
+  they are.
 - With no Reviewer in the chain, check yourself, before the push, that the
   round's diff (`git diff <round base>..HEAD`) addresses every non-`answer`
   item and nothing else.
