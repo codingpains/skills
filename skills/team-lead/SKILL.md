@@ -140,7 +140,14 @@ committed.
 1. Confirm you are inside a git repository. Find the **main checkout**, the
    folder holding the shared `.git` (the parent of
    `git rev-parse --path-format=absolute --git-common-dir`), even when the
-   session was started from another worktree. Find the default branch
+   session was started from another worktree. When the session's folder is
+   not a repository, look for a **workspace profile** in
+   `~/.claude/skills/team-lead/repos/` whose `workspace` is that folder
+   (`repo-profiles.md` § Workspace profiles) and read it in full: it names
+   the repos the folder holds and how to pick one for a ticket. Run intake
+   (step 3) first, pick the repo as the profile says, and take that repo as
+   the main checkout for everything after. No workspace profile: ask the
+   human which repo the ticket belongs to. Find the default branch
    (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`, falling
    back to `origin/HEAD`). The main checkout may be dirty or on any branch;
    you never touch it.
@@ -174,8 +181,10 @@ committed.
    (`already locked` is fine).
 6. **Find the repo profiles.** Match the main checkout's remote against the
    profiles in `~/.claude/skills/team-lead/repos/` as `repo-profiles.md`
-   § Matching says, and read every match in full. Record their paths in
-   `run.json`; every handoff lists them. With no match, say in one line that
+   § Matching says, and read every match in full. Record their paths, and
+   the workspace profile's when there is one, in `run.json`; every handoff
+   lists them. A profile's *Conventions* section (PR title, Slack, PR body)
+   overrides the defaults in § 10. With no match, say in one line that
    agents will work out the checks themselves and that
    `/team-lead --configure-repo` records them for next time. Do not stop.
 7. **Set up the worktree, in the background.** A new worktree has no
@@ -521,13 +530,16 @@ opening the PR.
    No co-attribution lines and no "Generated with" footer in the title or
    body.
 3. `cd <worktree> && gh pr create --base <default> --head <branch> --title
-   "<ID>: <title>" --body-file <file>`, with `--draft` when the flag was passed.
+   "<ID>: <title>" --body-file <file>` (the title in a profile's
+   *Conventions* when it gives one), with `--draft` when the flag was passed.
    Save the PR URL as `pr` in `run.json`.
 4. If a `link_pull_request` tool is available in this session, register the
    PR URL with it.
 
 **Notify.** Skip this with `--draft` or `--no-slack`: the post asks peers to
-review, and a draft is not ready for that. Otherwise load
+review, and a draft is not ready for that. Skip it too when a profile's
+*Conventions* say `Slack: none`, without searching for the tool. A profile
+that names a channel replaces the one below. Otherwise load
 `mcp__claude_ai_Slack__slack_send_message` with `ToolSearch` and post to
 channel `C0BULBDLXUK`:
 

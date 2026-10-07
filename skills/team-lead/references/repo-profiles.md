@@ -72,6 +72,11 @@ components live, the UI rules to read before a visual change, how to render
 one component or page without the whole stack, how to capture it, and where
 design prototypes live in the repo.
 
+## Conventions
+Optional: where the repo's own conventions differ from SKILL.md's defaults:
+the PR title format, the Slack channel (or `Slack: none`), additions to the
+PR body. The Lead applies them in SKILL.md § 10.
+
 ## Never
 Commands agents must not run (full suite, anything that needs docker or a
 live database, destructive setup scripts), each with the reason.
@@ -83,6 +88,43 @@ shared package, a slow test file).
 
 Keep a profile short and factual. Every command in it has been checked to
 exist in the repo on the date in `updated`.
+
+## Workspace profiles
+
+Some sessions start in a folder that is not a repository but holds several
+(`~/src/weride-go` holds `weride-api` and `weride-ui`). A workspace profile
+tells the Lead which repo a ticket belongs to (SKILL.md § 0 step 1). It
+lives in the same folder, with `workspace` instead of `remote`:
+
+```markdown
+---
+name: <folder name>
+workspace: ~/src/<folder>        # the session folder; ~ is allowed
+repos: [<profile name>, ...]     # the repo profiles of the repos it holds
+updated: YYYY-MM-DD
+---
+
+# <folder> (workspace)
+
+The repos it holds, each with its folder, remote and profile.
+
+## Picking the repo
+How to tell from a ticket which repo it belongs to (a ticket property, the
+acceptance criteria).
+
+## Full-stack tickets
+How a ticket that needs more than one repo runs: order, run directories,
+how one repo consumes another's unmerged change.
+
+## Conventions
+As in a repo profile; applies to every repo it holds unless that repo's
+profile says otherwise.
+
+## Gotchas
+```
+
+The Lead reads the workspace profile and the chosen repo's profile, and
+records both in `run.json`.
 
 ## Creating or refreshing a profile
 

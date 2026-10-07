@@ -37,7 +37,7 @@ else
     architect) lines="Plan ID:|Retained:" ;;
     coder) lines="Deviations from plan:" ;;
     hardener) lines="Rules checked:|Claims checked:" ;;
-    tester) lines="Coverage:" ;;
+    tester) lines="Coverage[^:]*:" ;;
     reviewer) lines="Verdict:" ;;
     *) lines="" ;;
   esac

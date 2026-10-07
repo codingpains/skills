@@ -73,10 +73,20 @@ for file in "$REPO"/skills/team-lead/repos/*.md; do
   name="$(field "$file" name)"
   [ "$name" = "$base" ] || fail "repos/$base.md: name '$name' does not match file name"
   remote="$(field "$file" remote)"
-  case "$remote" in
-    */*/*) ;;
-    *) fail "repos/$base.md: remote '$remote' is not host/owner/repo" ;;
-  esac
+  workspace="$(field "$file" workspace)"
+  if [ -n "$workspace" ]; then
+    [ -z "$remote" ] || fail "repos/$base.md: has both remote and workspace"
+    repos="$(field "$file" repos | tr -d '[] ' | tr ',' ' ')"
+    [ -n "$repos" ] || fail "repos/$base.md: workspace profile lists no repos"
+    for repo in $repos; do
+      [ -f "$REPO/skills/team-lead/repos/$repo.md" ] || fail "repos/$base.md: no profile repos/$repo.md"
+    done
+  else
+    case "$remote" in
+      */*/*) ;;
+      *) fail "repos/$base.md: remote '$remote' is not host/owner/repo" ;;
+    esac
+  fi
 done
 
 # References like ~/.claude/skills/team-lead/references/x.md must exist when the skill lives here.
