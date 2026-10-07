@@ -181,6 +181,11 @@ Retained: yes
 Files the plan touches: <count>
 Blocks: <B1: n files, B2: n files, ...> | none
 Decisions: <n> (x at 3, y at 2, z pending human decision)
+Risk triggers: <the full-risk triggers in stage-gates.md the change hits, each with the plan section, or none>
+Refactor: yes | no
 ```
+
+The Lead picks the later stages from *Risk triggers* and *Refactor*
+(`~/.claude/skills/team-lead/references/stage-gates.md`).
 
 Every `PENDING HUMAN DECISION` appears under *Escalations*.

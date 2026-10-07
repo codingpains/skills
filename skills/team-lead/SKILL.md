@@ -20,7 +20,7 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 
 | Flag | Effect |
 |---|---|
-| `--full` | run every specialist stage; in Codex the default is the Plus-friendly risk-gated chain in `references/codex-runtime.md` |
+| `--full` | run every specialist stage; the default is the lean, risk-gated chain in `references/stage-gates.md` |
 | `--from <stage>` | resume at `coder`, `hardener`, `tester`, `reviewer`, `wrapup`, `pr` or `assess`, reusing the run directory (`assess` runs only step 11, for example after a stopped run) |
 | `--draft` | open the PR as a draft, and skip the Slack post (a post asks peers to review, and a draft is not ready for that) |
 | `--no-slack` | skip the Slack post (for dry runs of the pipeline) |
@@ -44,9 +44,8 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 When the session exposes Codex collaboration actions (`spawn_agent`,
 `followup_task`, `wait_agent`), read
 `~/.agents/skills/team-lead/references/codex-runtime.md` before any other
-reference. It maps the Claude-oriented names and paths below to Codex, defines
-the GPT models, and replaces the unconditional coding-stage chain with a
-Plus-friendly risk-gated chain. Its rules override this file where they
+reference. It maps the Claude-oriented names and paths below to Codex and
+defines the GPT models. Its rules override this file where they
 conflict. Without those actions, continue with the Claude workflow below.
 
 Shared references, all under `~/.claude/skills/team-lead/references/`:
@@ -56,6 +55,7 @@ Shared references, all under `~/.claude/skills/team-lead/references/`:
 | `confidence-scoring.md` | the 1–3 score, the escalation rule, the escalation format |
 | `team-rules.md` | rules every agent follows: scope, validations, commits, untrusted input |
 | `handoff.md` | the packet you send each agent |
+| `stage-gates.md` | which stages run: the initial chain, the gates after implementation, a skipped stage |
 | `stage-report.md` | the report every agent returns |
 | `repo-profiles.md` | per-repo validation profiles: format, matching, how to build one |
 | `design-context.md` | Figma links and other design sources: collecting them, Figma access, the design brief, how each agent uses it |
@@ -196,7 +196,7 @@ committed.
    If a later stage fails on missing build or generated output, run the
    repo's documented build or generate command in the worktree and retry.
 8. Record the main checkout, worktree, branch, base commit, runtime mode and
-   selected stage chain (update the chain after Codex risk gates are known)
+   selected stage chain (`stage-gates.md`; update it as the gates decide)
    (`git -C <worktree> rev-parse HEAD`) and `started_at` (from
    `date -u +%FT%TZ`, never from memory) in `run.json`. A resumed run keeps the first `started_at`. Every agent works in
    this worktree and diffs against this SHA.
@@ -326,16 +326,16 @@ When the ticket is already clear, skip `/quill groom`. Acceptance criteria you
 derived yourself are then an escalation: show them to the human in one
 `AskUserQuestion` call and ask for approval or edits before planning.
 
-## 2. Plan gating
+## 2. Stage gating
 
-Read the ticket's estimate, in points: Linear's `estimate` field, or for a
-Notion task a number property named `Estimate`, `Points` or `Story Points`.
+Read the ticket's estimate, in points (the reader's `Estimate`), and its
+risk against the full-risk triggers in `stage-gates.md`, from `ticket.md`.
+Pick the initial chain there, or the full chain with `--full`, and record
+`mode` and `chain` in `run.json`. Say the chain in one line, with the reason.
 
-- Estimate **greater than 1** → step 3, Architect.
-- Estimate **0 or 1** → skip to step 4 with no plan. Tell the Coder there is
+- A chain with the Architect → step 3.
+- A chain without it → skip to step 4 with no plan. Tell the Coder there is
   no plan and the brief is the spec.
-- **No estimate** → treat it as greater than 1 and go to the Architect. Say
-  so in one line.
 
 ## 3. Architect
 
@@ -368,14 +368,17 @@ build output.
 ## 4–7. Coding stages
 
 Before the first of them, confirm worktree setup ended cleanly (preflight
-step 7). For each stage, in order, spawn its agent with the handoff and wait
-for its report:
+step 7). For each stage in the chain, in order, spawn its agent with the
+handoff and wait for its report. After the last Coder report, apply the
+gates after implementation in `stage-gates.md`: they decide whether the
+Hardener and the Tester run. A skipped stage drops out of the table below,
+and the next stage's handoff says why (`stage-gates.md` § A skipped stage).
 
 | Stage | Agent | *Previous stages* in the handoff |
 |---|---|---|
 | Implement | `team-coder` | none |
 | Harden | `team-hardener` | the Coder's report files |
-| Test | `team-tester` | the Coder's and Hardener's report files |
+| Test | `team-tester` | the Coder's and, when it ran, the Hardener's report files |
 | Review | `team-reviewer` | every report file so far |
 
 **A plan with blocks** (the Architect's report says `Blocks: B1, B2...`)
@@ -571,7 +574,7 @@ section.
 
 Run preflight steps 1, 2 and 6 (main checkout, `gh`, profiles), and the
 `guildhall-watch` skill from step 3. R2 replaces
-steps 3 to 5 and 8, and a round skips intake, grooming and plan gating.
+steps 3 to 5 and 8, and a round skips intake, grooming and stage gating.
 
 1. Read the PR, from the main checkout: its reviews and comments with
    `gh pr view <PR> --json number,url,title,state,headRefName,baseRefName,reviews,comments`,
@@ -749,7 +752,8 @@ End with, in plain words:
   `git worktree unlock <worktree> && git worktree remove <worktree>`;
 - the PR URL and whether Slack was notified (for a draft: not posted, and
   post it with the message above once the PR is marked ready);
-- one line per stage: status, commit count, validations passed;
+- one line per stage: status, commit count, validations passed, and each
+  stage the gates skipped, with the reason;
 - decisions the human made, and deferred follow-ups;
 - anything you dropped from the review and why;
 - the self-assessment: the report path, active time, tokens and cost, and

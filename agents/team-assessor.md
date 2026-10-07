@@ -85,7 +85,10 @@ be.
    *Never*; stale profile commands agents reported.
 4. **Quality leaks.** Reviewer findings by severity, and which earlier stage
    should have caught each. A must-fix the Hardener or Tester should have
-   caught is a prompt gap, and costs a Wrap-up stage.
+   caught is a prompt gap, and costs a Wrap-up stage. When that stage was
+   skipped by a gate (`run.json` `mode` and `chain`, the gate lines in
+   `notes.md`), name the gate that skipped it: the leak is a gate gap, and
+   the fix belongs in `references/stage-gates.md`.
 5. **Model fit.** A stage whose work was simple for its model (few
    decisions, mostly mechanical) or too hard for it (retries, errors,
    send-backs).

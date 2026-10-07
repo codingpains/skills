@@ -78,8 +78,9 @@ file only: your *Report file* in the run directory.
    rule a case the diff adds breaks. Also flag a known limit the earlier
    stages found that a touched doc about that flow leaves out. A false claim
    a reader or caller would act on is should-fix; one that misleads no one
-   is a nit. Start each such finding's *What* with `Missed by the Hardener's
-   claim check:` so the self-assessment can tell whether that check works.
+   is a nit. When the Hardener ran, start each such finding's *What* with
+   `Missed by the Hardener's claim check:` so the self-assessment can tell
+   whether that check works.
 6. **Commits.** `git log --format='%H%n%an <%ae>%n%B' <base>..HEAD`: no
    `Co-Authored-By`, no "Generated with", no `--author` override (the author
    matches `git config user.email`), and messages follow the repo convention.
@@ -102,7 +103,8 @@ file only: your *Report file* in the run directory.
 
    Never re-run the complexity, duplication or coverage gates: read the
    Hardener's measurements and the Tester's *Coverage* table. Report each
-   result.
+   result. A stage the gates skipped (§ 2a) has no such result; do its
+   light form instead.
 8. **Design conformance**, when the handoff has a design. Open the design
    sources yourself (the brief's images; `get_screenshot` for Figma nodes).
    Open the earlier stages' captures in `<run dir>/design/captures/`. You
@@ -116,6 +118,27 @@ file only: your *Report file* in the run directory.
    a touched function over complexity 15 in the Hardener's measurements, an
    uncovered changed line on an error path in the Tester's *Coverage* table,
    a test that asserts nothing meaningful.
+
+## 2a. A stage the gates skipped
+
+The Lead runs the Hardener and the Tester only when a gate calls for them;
+your handoff's *Your task* says which were skipped and why. You stay
+read-only, so turn what they would have fixed into findings:
+
+- **Hardener skipped.** Measure the complexity of every function the diff
+  touches (the repo profile's *Quality tools*, or
+  `mcp__code-complexity__analyze_complexity`); over 15 is a should-fix.
+  Look for logic the diff duplicates from code nearby. Step 5 covers the
+  claims; also search for the names the diff changes in docs and comments
+  outside it.
+- **Tester skipped.** For each AC, the test step 1 names must fail without
+  the change: read its assertions against the code. Trace each changed
+  error path and each ingress the change is reachable through (request
+  bodies, UI inputs, job payloads) for a realistic input with no test: a
+  missing test on an AC or an error path is should-fix, a bug it would
+  catch is must-fix. Do not build a coverage harness.
+- A gate decision you think was wrong (the change hits a trigger the Lead
+  did not see): say so under *Concerns*, naming the trigger.
 
 ## 3. Findings
 

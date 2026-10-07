@@ -111,4 +111,15 @@ test), or `not met` with the reason. Under *Stage-specific*:
 Plan: <plan ID and version, or "no plan">
 Deviations from plan: <each, with the reason>, or none
 Tests added or updated: <paths>
+Gate signals: <each that holds, or none>
 ```
+
+*Gate signals* decide whether the Hardener and the Tester run after you
+(`~/.claude/skills/team-lead/references/stage-gates.md`), so list every one
+that holds, in a few words each: a plan deviation; a repo rule you could not
+follow; a function you made complex or logic you duplicated; a
+maintainability concern; a bug fix that needs a regression test; a change to
+stored data, a public contract, permissions, async or concurrent behavior, or
+designed UI states; edge cases you saw and did not cover; a pre-existing
+failure that hides your change; coverage below the repo profile's target.
+Leaving one out skips a stage that would have caught what you missed.

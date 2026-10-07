@@ -51,52 +51,12 @@ model for a run or stage.
 
 ## Stage policy
 
-Codex defaults to **lean** mode so a Plus subscription does not pay for every
-specialist on every ticket. All stages remain available. Record `mode` and the
-selected `chain` in `run.json`. `--full` selects full mode.
-
-### Initial chain
-
-- Estimate 0 or 1: Coder, Reviewer.
-- Estimate 2 or 3: Architect, Coder, Reviewer.
-- Estimate 5 or more, or any full-risk trigger below: full chain — Architect,
-  Coder, Hardener, Tester, Reviewer, Wrap-up when review produces fixes.
-- No estimate: use Architect, then decide from its plan and risk section. Do
-  not select full merely because the estimate is absent.
-
-Full-risk triggers are schema or data migration, authentication or
-authorization, secrets, payments, concurrency, cross-service contracts,
-public API compatibility, destructive operations, a security-sensitive path,
-or a plan spanning both backend and frontend. The human's `--full` always wins.
-
-### Gates after implementation
-
-Before Review, add Hardener when any of these holds:
-
-- full mode;
-- the Coder changed more than 8 production files or 400 non-generated lines;
-- the Coder reports a plan deviation, rule exception, complexity warning,
-  duplicated logic, or maintainability concern;
-- the plan includes a refactor or one of the full-risk triggers.
-
-Add Tester when any of these holds:
-
-- full mode;
-- the change fixes a bug that needs regression proof;
-- it changes stored data, a public contract, permissions, asynchronous or
-  concurrent behavior, or designed UI states;
-- the Coder reports missing edge-case coverage, a pre-existing failure that
-  obscures the change, or coverage below a repo-profile target.
-
-Reviewer always runs. Wrap-up runs only when the selected review fix list is
-non-empty. Assessor runs once after PR publication; it never runs between
-stages. When a skipped stage would have been the immediately previous report,
-hand the next agent the latest available report and state which gates were
-evaluated and why the stage was skipped.
-
-Do not add a stage merely because usage remains. Do not skip a triggered stage
-merely because usage is low; persist the run and ask the human whether to wait
-for reset or continue with an explicitly chosen smaller chain.
+Codex uses the same lean, risk-gated chain as Claude, in
+`~/.agents/skills/team-lead/references/stage-gates.md`, so a Plus
+subscription does not pay for every specialist on every ticket. `--full`
+selects full mode. When usage is the constraint, persist the run and ask the
+human whether to wait for the usage reset or continue with an explicitly
+chosen smaller chain.
 
 ## Agent playbooks
 
