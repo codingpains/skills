@@ -31,6 +31,7 @@ Run directory: ~/.team-lead/runs/<TICKET_ID>/  # the Lead's state; write here on
 ## Ticket
 Link: <url>
 Estimate: <points | none>
+Notion tools: <mcp__<server>__ from the intake reader, or none>
 
 ### Goal
 <from ticket.md>

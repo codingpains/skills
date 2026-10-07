@@ -9,17 +9,23 @@ URL, a Notion task URL, or a bare number (a Notion task's `Task ID`).
 
 ## 1. Find the ticket
 
-Load the tools with `ToolSearch` by what they do (`linear get issue`,
-`notion fetch`), not by a fixed prefix: the workspace decides the prefix
-(`mcp__claude_ai_Linear__`, `mcp__plugin_Notion_notion__`,
-`mcp__claude_ai_Notion__`).
+Load Linear's tools with `ToolSearch` by what they do (`linear get issue`),
+not by a fixed prefix: the workspace decides the prefix
+(`mcp__claude_ai_Linear__`). Notion's server comes from Quill's config, below.
 
 - **Linear** (an identifier or a `linear.app` URL): `get_issue`. Key: the
   identifier.
+- **Notion**: resolve Quill's config first (`$QUILL_HOME/quill.config.json`,
+  else `~/.quill/quill.config.json`). The Notion server is
+  `projects[activeProject].notionTasks.mcpServer` when set (a repo whose
+  tasks live in another Notion account, such as `notion-personal`), else
+  `claude_ai_Notion`. Load `mcp__<server>__notion-fetch`,
+  `mcp__<server>__notion-query-data-sources` and
+  `mcp__<server>__notion-get-comments` with `ToolSearch`, and use them for
+  every Notion call on this ticket.
 - **Notion URL** (`notion.so`, `notion.site`): `notion-fetch` the page with
   its discussions included.
-- **Bare number**: resolve Quill's config (`$QUILL_HOME/quill.config.json`,
-  else `~/.quill/quill.config.json`), take
+- **Bare number**: take
   `projects[activeProject].notionTasks.dataSourceId`, and query
   `SELECT * FROM "collection://<dataSourceId>" WHERE "Task ID" = ?` with the
   number. Then `notion-fetch` the row's page. Without a `notionTasks` block,
@@ -88,6 +94,7 @@ Title: <title>
 Link: <url>
 Estimate: <points | none>
 Branch name: <name | none>
+Notion server: <server | none>
 File: <absolute path of ticket-source.md>
 Size: <wc -c of the file>
 Design sources: <count>; images saved: <count>

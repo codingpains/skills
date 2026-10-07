@@ -20,6 +20,7 @@ tools:
     'mcp__claude_ai_Linear__list_comments',
     'mcp__claude_ai_Linear__list_issues',
     'mcp__claude_ai_Notion__notion-fetch',
+    'mcp__notion-personal__notion-fetch',
     'mcp__plugin_quill_figma__get_screenshot',
     'mcp__plugin_quill_figma__get_design_context',
     'mcp__plugin_quill_figma__get_metadata',

@@ -279,7 +279,7 @@ exactly, with two changes the team makes on top of it.
 - Phase 1: the ticket is already fetched. Take it from `ticket-source.md`;
   do not fetch it again.
 - Load a ticket tool only when a phase writes: Linear's `save_issue`, or
-  Notion's `notion-update-page`, found with `ToolSearch` by name. The labels
+  `mcp__<server>__notion-update-page` on the reader's *Notion server*. The labels
   to merge are in `ticket-source.md`.
 - Phase 6, finding the existing story and checking the stories database for
   the back-link property: give both to one `general-purpose` agent with
