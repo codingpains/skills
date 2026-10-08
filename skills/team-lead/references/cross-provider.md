@@ -44,9 +44,8 @@ failure:
    `models`; the pinned reasoning value must be one of that model's
    `reasoningEffort` options.
 
-Never choose a model by name or version: only the pinned ID is used. The
-catalog lists models the account may not be allowed to run, with no marker
-saying which.
+Never choose a model by name or version: only the pinned ID is used. To
+change a stage's model, edit its pin file.
 
 Any failure: one `AskUserQuestion` naming the failed check, with the options
 "Run on Claude (recommended)" and "Stop". Record the answer in `notes.md`.
