@@ -600,6 +600,11 @@ without `--round`, ask once with `AskUserQuestion`: start a new session
 to paste), or run the round here. Either way it is a round: follow this
 section.
 
+The same holds when `--round` itself is typed in a session that already ran
+the ticket, compacted or not. Before R1, say in one line that a new session
+saves about $0.50 after a compaction and $1.50–4 without one, give the line
+to paste, and go on unless the human stops you. Do not ask it as a question.
+
 ### R1. Load
 
 Run preflight steps 1, 2 and 6 (main checkout, `gh`, profiles, and the
