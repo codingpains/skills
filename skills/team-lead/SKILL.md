@@ -103,6 +103,7 @@ can resume with `--from`:
 ```
 ticket-source.md   the ticket and its context, verbatim, written by the intake reader
 ticket.md          ticket, acceptance criteria, decisions (the brief)
+carry-over.md      decisions from the session that started the run, when it moved to a new one
 groom.md           answer table and scores, when /quill groom ran
 plan.json          {"plan_id": "...", "url": "..."} when the Architect ran
 handoff-common.md  the handoff parts every stage shares (handoff.md)
@@ -134,6 +135,23 @@ and ask the human whether to discard them. With `--from coder`, the Coder's
 commits stay: its handoff carries `git log --format='%h %s' <base>..HEAD`
 and the instruction to continue from the first block of the plan not yet
 committed.
+
+## Start in a clean session
+
+Every Lead turn re-reads the whole session, so work done before
+`/team-lead` (writing or grooming tickets, a long discussion, an earlier
+run) rides along for the whole run: GH-6's Lead cost $3.94 instead of about
+$2.30. When this session did such work, before preflight:
+
+1. Write what the human said or decided here that the ticket page may not
+   hold (intent, scope calls, rejected approaches) to
+   `~/.team-lead/carry-over/<slug>.md`, one line each. `<slug>` is the first
+   word of the arguments with every character outside `A-Za-z0-9_-` turned
+   into `_`. Nothing worth keeping: skip the file.
+2. Say in one line that a new session saves about $1.50, and give the exact
+   `/team-lead ...` line to paste. Continue here only if the human says so.
+
+§ 1 folds the file into `ticket.md`, so the new session loses nothing.
 
 ## 0. Preflight
 
@@ -280,6 +298,10 @@ AC2. ...
 ## Design
 <`design/design.md`: sources D1..Dn in one line each, or "none">
 ```
+
+When `~/.team-lead/carry-over/<slug>.md` exists (§ Start in a clean
+session), read it, add each line to `## Decisions` as `human decision
+(earlier session)`, and move the file to `<run dir>/carry-over.md`.
 
 **Is the ticket clear?** Read the design brief's *Gaps* and *Behavior the
 design implies* as part of the ticket. It is unclear when any of these hold: there are no
