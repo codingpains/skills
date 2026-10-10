@@ -53,6 +53,8 @@ file only: your *Report file* in the run directory.
   them yourself, with the search team-rules describes, even when the handoff
   lists *Rules*: you are the check on that list. Name any file it missed
   under *Concerns*.
+- *Settled concerns* in `handoff-common.md`: re-check one only when its
+  evidence does not hold up when you read it.
 - Around every hunk: the enclosing function, its callers, its tests. New
   files whole.
 

@@ -12,7 +12,7 @@ into every prompt costs the Lead output and context on every transition.
 ## handoff-common.md
 
 Write it before the first stage. Rewrite it when the decisions, the plan,
-the rule list or the round change: a stale shared file misleads every later stage.
+the rule list, the settled concerns or the round change: a stale shared file misleads every later stage.
 
 ```
 # <TICKET_ID>: <title> — shared handoff
@@ -57,6 +57,11 @@ How to use it: ~/.claude/skills/team-lead/references/design-context.md § How ea
 <Planbin plan ID and URL; "none yet: you are the Architect";
 "no plan: trivial ticket, the brief is the spec";
 or "no plan: review round <n>, the items in Round are the spec">
+
+## Settled concerns
+<"none", or one line per concern a stage settled with a reproduction:
+Settled by <stage>: <the concern, one line> — evidence: <the test or command that shows it>.
+Do not re-verify these. The Reviewer may.>
 
 ## Round
 <"none", or for a review round (`review-rounds.md`):

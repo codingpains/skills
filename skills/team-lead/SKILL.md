@@ -470,6 +470,12 @@ It prints one line per check and exits non-zero when any fails:
 Then, from the returned part, check that every validation it ran passed, or
 that its failure is shown to exist on the base commit too.
 
+When the report settles a concern an earlier stage raised, with a
+reproduction (a test, or a command anyone can re-run), add it under
+*Settled concerns* in `handoff-common.md`, so later stages do not
+investigate it again. A concern settled by reasoning alone, with no
+reproduction, stays open.
+
 If a check fails, send the same agent back once with the specific failure
 (`SendMessage`, or a new spawn with the report and the failure), and note
 the send-back in `notes.md`. A second
