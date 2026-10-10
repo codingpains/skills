@@ -703,9 +703,9 @@ The largest size picks the default chain:
 
 | Largest size | Chain | Measured cost |
 |---|---|---|
-| `wording`, `fix`, `answer` | Coder | $5.01 and 23 min for two small PRs (ONB-1290) |
-| `behavior` | Coder, Tester, Reviewer, Wrap-up if needed | not measured yet; between the rows above and below |
-| `design` | Architect (updates the plan), Coder, Hardener, Tester, Reviewer, Wrap-up | $9.12 and 36 min for one PR (ONB-1336, no Architect); $11.64 and 45 min for two (ONB-1290-3) |
+| `wording`, `fix`, `answer` | Coder | median $1.76 and 5 min active over 7 rounds, range $1.46–3.09 (ONB-1340 r1 to ONB-1377 r1); same-session rounds and rounds with an Explore sit at the top |
+| `behavior` | Coder, Tester, Reviewer, Wrap-up if needed | median $6.00 and 19 min over 3 rounds, range $4.82–10.63 (ONB-1332 r1, ONB-1303 r1, ONB-1352 r3) |
+| `design` | Architect (updates the plan), Coder, Hardener, Tester, Reviewer, Wrap-up | $18.09 and 58 min with the Architect (ONB-1352 r1); $9.12 and 36 min without it (ONB-1336) |
 
 Prefer newer numbers: rows in `~/.team-lead/performance/index.jsonl` with a
 `round` field. Ask everything in **one** `AskUserQuestion` call, before any
