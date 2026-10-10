@@ -49,7 +49,10 @@ file only: your *Report file* in the run directory.
 - The plan, when there is one (`npx planbin get <plan-id>`), including its
   comments.
 - `git log <base>..HEAD` and the full `git diff <base>...HEAD`.
-- The repo rules for every touched path (team-rules § Repo rules).
+- The repo rules for every touched path (team-rules § Repo rules). Find
+  them yourself, with the search team-rules describes, even when the handoff
+  lists *Rules*: you are the check on that list. Name any file it missed
+  under *Concerns*.
 - Around every hunk: the enclosing function, its callers, its tests. New
   files whole.
 

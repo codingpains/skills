@@ -417,9 +417,13 @@ build output.
 
 Before the first of them, confirm worktree setup ended cleanly (preflight
 step 7). For each stage in the chain, in order, spawn its agent with the
-handoff and wait for its report. After the last Coder report, apply the
-gates after implementation in `stage-gates.md`: they decide whether the
-Hardener and the Tester run. A skipped stage drops out of the table below,
+handoff and wait for its report. After the last Coder report, list the
+rule files once for the stages after it, so each does not search for them:
+`python3 ~/.claude/skills/team-lead/scripts/list-rules.py <worktree> --base <base>`
+prints every `CLAUDE.md`, `AGENTS.md` and matching `.claude/rules/` file
+for the branch's diff. Put its output under *Rules* in `handoff-common.md`.
+Then apply the gates after implementation in `stage-gates.md`: they decide
+whether the Hardener and the Tester run. A skipped stage drops out of the table below,
 and the next stage's handoff says why (`stage-gates.md` § A skipped stage).
 
 | Stage | Agent | *Previous stages* in the handoff |

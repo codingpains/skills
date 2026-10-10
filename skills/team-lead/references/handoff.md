@@ -11,8 +11,8 @@ into every prompt costs the Lead output and context on every transition.
 
 ## handoff-common.md
 
-Write it before the first stage. Rewrite it when the decisions, the plan or
-the round change: a stale shared file misleads every later stage.
+Write it before the first stage. Rewrite it when the decisions, the plan,
+the rule list or the round change: a stale shared file misleads every later stage.
 
 ```
 # <TICKET_ID>: <title> — shared handoff
@@ -26,6 +26,7 @@ Branch: <branch> (checked out in the worktree)
 Base commit: <sha>   # diff everything against this: git diff <sha>...HEAD (in a review round, the round's base)
 Default branch: <name>
 Repo profiles: <absolute paths, each with its `paths` scope, or "none: work the checks out yourself">
+Rules: <after the last Coder: the output of scripts/list-rules.py, one path per line; before it: "not listed yet: find them as team-rules § Repo rules says">
 Run directory: ~/.team-lead/runs/<TICKET_ID>/  # the Lead's state; write here only your report file and what your agent file says
 
 ## Ticket

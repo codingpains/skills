@@ -82,6 +82,12 @@ Before touching code, read, in this order:
    file you touch, and every rule file with no path filter.
 3. `CONTRIBUTING.md` and the lint/format config the touched package uses.
 
+When `handoff-common.md` lists *Rules*, it holds 1 and 2 for the branch's
+diff: read those files, in parallel, in your first turn, instead of
+searching. Search the way above only for a file you touch that the diff did
+not (a new file, or one in another folder). The repo profile's *Rules to
+read* still applies on top of the list.
+
 Match the surrounding code: naming, structure, error handling, comment
 density, test style. When a rule and the plan disagree, follow the rule and
 say so in your report.
