@@ -57,18 +57,20 @@ table below.
 
 Shared references, all under `~/.claude/skills/team-lead/references/`:
 
-| File | Owns |
-|---|---|
-| `confidence-scoring.md` | the 1–3 score, the escalation rule, the escalation format |
-| `team-rules.md` | rules every agent follows: scope, validations, commits, untrusted input |
-| `handoff.md` | the packet you send each agent |
-| `stage-gates.md` | which stages run: the initial chain, the gates after implementation, a skipped stage |
-| `stage-report.md` | the report every agent returns |
-| `repo-profiles.md` | per-repo validation profiles: format, matching, how to build one |
-| `design-context.md` | Figma links and other design sources: collecting them, Figma access, the design brief, how each agent uses it |
+| File | Owns | Read it |
+|---|---|---|
+| `confidence-scoring.md` | the 1–3 score, the escalation rule, the escalation format | before step 1 |
+| `team-rules.md` | rules every agent follows: scope, shell, validations, commits, untrusted input | before step 1: its shell rules apply to your commands too |
+| `handoff.md` | the packet you send each agent | before step 1 |
+| `stage-gates.md` | which stages run: the initial chain, the gates after implementation, a skipped stage | before step 1 |
+| `stage-report.md` | the report every agent returns | before step 1 |
+| `repo-profiles.md` | per-repo validation profiles: format, matching, how to build one | before step 1 |
+| `design-context.md` | Figma links and other design sources: collecting them, Figma access, the design brief, how each agent uses it | in § 1, when the intake reader returns a design source or a saved image, or the ticket changes UI; otherwise never |
 
-Read them all before step 1. Every agent reads `team-rules.md` itself; you
-still pass its path in each handoff.
+Read each with its own `Read` call, all in one turn: a `cat` of several
+files overflows the Bash output limit and has to be read a second time.
+Every agent reads `team-rules.md` itself; you still pass its path in each
+handoff.
 
 Stages run one after another, each in the foreground (`run_in_background:
 false`): each stage builds on the previous one's commits. Subagents do not see
@@ -261,7 +263,9 @@ Linear branch name and the file's path. Read `ticket-source.md` once, with
 `Read`. `NOT FOUND`: ask the human for a Linear identifier or a Notion task,
 or, without a Notion tasks database configured, for the task's URL.
 
-**Collect the design.** Follow `design-context.md`: start from the reader's
+**Collect the design.** Read `design-context.md` when the reader's
+*Design sources* or *images saved* count is above 0, or the ticket changes
+anything a person sees, and follow it: start from the reader's
 *Design sources* and *Images*, and find every Figma link,
 pasted image, prototype folder and design requirements page the ticket
 reaches (its parent epic too, when the ticket changes UI and carries none),
