@@ -743,8 +743,13 @@ Run the chosen stages as in § 3 to § 9, with these changes:
 ### R6. Push and replies
 
 `git -C <worktree> push origin <head>`. Never force-push; a rejected push
-means the remote moved: stop and tell the human. Leave the PR body as it
-is, and post nothing to Slack: the PR was already announced.
+means the remote moved: stop and tell the human. Rewrite the PR body when
+the round changes what it says: behavior, a shared-code change, a risk, or
+what was tested. Save the old body first, as `round-<n>/pr-body-before.md`
+(`gh pr view <PR> --json body -q .body`), and the new one as
+`round-<n>/pr-body.md`, then `gh pr edit <PR> --body-file` it. The repo's
+PR rules and word budgets still apply. Otherwise leave the body as it is.
+Post nothing to Slack: the PR was already announced.
 
 Write `round-<n>/replies.md`: one draft reply per item, in plain words,
 under the thread or comment it answers: what changed and the commit
