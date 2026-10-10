@@ -715,8 +715,15 @@ Prefer newer numbers: rows in `~/.team-lead/performance/index.jsonl` with a
 work starts: the chain (the default first, marked recommended, then a
 cheaper and a fuller one where they exist, each with its price), and each
 `decline` and each `answer` you cannot answer from the code, as a question
-with your recommendation. Put the items table in the message above it. Record the
-chosen `chain` in the round's `run.json` entry. Adding a stage later costs
+with your recommendation. Put the items table in the message above it.
+
+A small round does not wait for the question. When the largest size is
+`wording` or `fix`, no item is a `decline`, and the default is Coder only,
+show the items table, state the chain and its price, and start the Coder.
+Ask the remaining questions, plus whether to add a Reviewer, in one
+`AskUserQuestion` after the Coder's report and before the push.
+
+Record the chosen `chain` in the round's `run.json` entry. Adding a stage later costs
 its price on top, so a change of chain mid-round is a new question with its
 price.
 
