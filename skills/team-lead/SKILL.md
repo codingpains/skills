@@ -693,9 +693,12 @@ Size each item from the code, not from the comment's tone:
 - `decline`: you think it should not change. Give the reason. A reviewer is
   a person, so a decline goes to the human, never dropped silently.
 
-Read the cited code yourself. Spawn `Explore` agents only when items span
-unrelated areas, with `model: "sonnet"`, a brief of one area each, and a
-request for `path:line` evidence.
+Read the cited code yourself. When an item cites `path:line`, read that
+range yourself, even when it lies in a framework. Spawn `Explore` agents
+only for claims with no citation that span unrelated areas, with
+`model: "sonnet"`, a brief of one area each, and a request for `path:line`
+evidence. Questions about how to build a test go in the Coder's brief, not
+in an `Explore`.
 
 ### R4. Chain and price
 
