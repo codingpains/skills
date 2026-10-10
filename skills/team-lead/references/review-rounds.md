@@ -86,6 +86,8 @@ Size each item from the code, not from the comment's tone:
   result, a different error.
 - `design`: a different approach, a new structure, or files the plan did not
   touch.
+- `merge`: bring the default branch into this one and resolve its
+  conflicts; no new behavior.
 - `answer`: a question for the author; it needs a reply, not code.
 - `decline`: you think it should not change. Give the reason. A reviewer is
   a person, so a decline goes to the human, never dropped silently.
@@ -106,6 +108,28 @@ The largest size picks the default chain:
 | `wording`, `fix`, `answer` | Coder | median $1.76 and 5 min active over 7 rounds, range $1.46–3.09 (ONB-1340 r1 to ONB-1377 r1); same-session rounds and rounds with an Explore sit at the top |
 | `behavior` | Coder, Tester, Reviewer, Wrap-up if needed | median $6.00 and 19 min over 3 rounds, range $4.82–10.63 (ONB-1332 r1, ONB-1303 r1, ONB-1352 r3) |
 | `design` | Architect (updates the plan), Coder, Hardener, Tester, Reviewer, Wrap-up | $18.09 and 58 min with the Architect (ONB-1352 r1); $9.12 and 36 min without it (ONB-1336) |
+
+A `merge` item rides with the chain of the other items (Coder alone when
+it is the only one): $1.60 for ONB-1290 r4, and $3.33 for ONB-1338 r2,
+where the commit hook blocked the merge three times.
+
+**Check a merge before the question.** A merge commit stages every file
+main changed, so the commit hook lints and gates folders this branch never
+touched, and each one fails only when the Coder reaches it. For a `merge`
+item, before you ask:
+
+1. List the top-level folders main changed since the merge base:
+   `git -C <worktree> diff --name-only HEAD...origin/<default>`.
+2. Start the profile's *Merge of main* installs for those folders in the
+   background now (preflight step 7's way). Without that section, run each
+   touched folder's dependency install as the repo does.
+3. When main changed a lockfile the hook checks, run the profile's check on
+   main's own copy. If main's lockfile fails it, the failure is main's: put
+   the choice in the R4 question, with the evidence. Wait for main's fix,
+   or (the human's call only, since team-rules forbid it by default) commit
+   the merge alone without the hook once
+   `git diff --cached origin/<default> -- <lockfile>` prints nothing, with
+   every later commit going through the hook.
 
 Prefer newer numbers: rows in `~/.team-lead/performance/index.jsonl` with a
 `round` field. Ask everything in **one** `AskUserQuestion` call, before any
@@ -151,6 +175,9 @@ Run the chosen stages as in § 3 to § 9, with these changes:
   then. A reset counts. Name each `K1`, `K2`. The Coder answers each under
   *Behaviors kept*. ONB-1353 lost a reset effect in such a merge, and it
   cost a whole extra round.
+- For a `merge` item, check after the Coder that
+  `git diff origin/<default> HEAD --stat` names the same files as before
+  the merge: a merge adds main's changes, not new differences from it.
 - With no Reviewer in the chain, check yourself, before the push, that the
   round's diff (`git diff <round base>..HEAD`) addresses every non-`answer`
   item and nothing else. When the handoff listed behaviors to keep, find

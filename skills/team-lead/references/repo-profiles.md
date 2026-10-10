@@ -43,6 +43,11 @@ from (for example "every command runs from apps/wx-system").
 Commands that make a fresh worktree able to lint, typecheck and run unit
 tests. Replaces the generic bootstrap script when present.
 
+## Merge of main
+Optional: what a merge commit of the default branch needs before the
+commit hook accepts it (installs for the folders main changed, lockfile
+checks), for review rounds that bring main in.
+
 ## Checks by change
 | Changed | Run | Notes |
 |---|---|---|

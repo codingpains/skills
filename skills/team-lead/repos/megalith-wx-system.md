@@ -2,7 +2,7 @@
 name: megalith-wx-system
 remote: github.com/onboardiq/megalith
 paths: [apps/wx-system/]
-updated: 2026-09-30
+updated: 2026-10-09
 ---
 
 # megalith / wx-system
@@ -60,6 +60,19 @@ failure with `npm install`: it rewrites `package-lock.json`.
 Built output (`dist/`) is not copied. Before running a workspace's tests,
 build it and what it depends on: `npx tsc -b <workspace>` (incremental, fast
 after the first run).
+
+## Merge of main
+
+A merge commit runs lint-staged and each app's gate on every file main
+changed (`piped: true`, so they fail one at a time). Each app it reaches
+needs its own `node_modules`: run
+`npm ci --ignore-scripts --no-audit --no-fund` in that app under its
+`.nvmrc` (`apps/hire` for stylelint, `hire-ui`, `hire-go`, `fountain-ai`;
+`nvm install` first when its Node is missing). About 2 minutes for all four.
+When main changed `apps/wx-system/package-lock.json`, check main's copy:
+run `npm install --package-lock-only --ignore-scripts` in `apps/wx-system`,
+compare the result with main's file, then restore it. A difference there is
+main's, not the branch's. (From ONB-1338 rounds 2 and 3.)
 
 ## Checks by change
 
