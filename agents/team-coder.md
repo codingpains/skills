@@ -112,6 +112,8 @@ Plan: <plan ID and version, or "no plan">
 Deviations from plan: <each, with the reason>, or none
 Tests added or updated: <paths>
 Gate signals: <each that holds, or none>
+Behaviors kept: none (the handoff listed none), or one line per K<n> it lists:
+- K1 — kept: <test or file:line that shows it> | dropped on purpose: <reason>
 ```
 
 *Gate signals* decide whether the Hardener and the Tester run after you

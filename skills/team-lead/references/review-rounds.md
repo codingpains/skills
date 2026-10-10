@@ -143,9 +143,19 @@ Run the chosen stages as in § 3 to § 9, with these changes:
   they are.
 - A stage `--cross-provider` names runs on Codex when the chain has it,
   as in § 4–7.
+- **Behaviors to keep.** When an item merges, splits or replaces a
+  function, hook or effect, read it at the round base and list, under
+  *Round* in the Coder's handoff, each effect or state the item touches:
+  what it reacts to (its inputs or dependencies, and transitions such as
+  set → cleared → set again, loading → error → success) and what it does
+  then. A reset counts. Name each `K1`, `K2`. The Coder answers each under
+  *Behaviors kept*. ONB-1353 lost a reset effect in such a merge, and it
+  cost a whole extra round.
 - With no Reviewer in the chain, check yourself, before the push, that the
   round's diff (`git diff <round base>..HEAD`) addresses every non-`answer`
-  item and nothing else.
+  item and nothing else. When the handoff listed behaviors to keep, find
+  each `K<n>` in the new code (`rg` its trigger) and confirm it is still
+  there.
 
 ## R6. Push and replies
 
