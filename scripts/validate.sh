@@ -6,6 +6,7 @@
 #   codex/agents/<name>.toml has matching name, description, GPT model, effort and sandbox
 #   skills/team-lead/repos/<name>.md  repo profile with name == <name> and a host/owner/repo remote
 #   installed Claude and Codex references to a skill in this repo point at a real file
+#   skills/team-lead/SKILL.md stays under its size budget (the Lead re-reads it every turn)
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -109,6 +110,13 @@ while IFS= read -r ref; do
     [ -e "$REPO/skills/$rel" ] || fail "broken Codex reference: $ref"
   fi
 done < <(grep -rhoE '~/\.agents/skills/[A-Za-z0-9_-]+/[A-Za-z0-9_./-]*[A-Za-z0-9_-]' "$REPO/skills" "$REPO/codex" | sort -u)
+
+# The Lead carries SKILL.md through every turn of a run. Move a section that
+# only some runs need into references/ rather than raise the budget.
+lead_budget=36000
+lead_size=$(wc -c < "$REPO/skills/team-lead/SKILL.md")
+[ "$lead_size" -le "$lead_budget" ] \
+  || fail "skills/team-lead/SKILL.md is $lead_size bytes, over its $lead_budget budget"
 
 if [ "$errors" -gt 0 ]; then
   echo "validate: $errors problem(s)" >&2

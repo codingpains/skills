@@ -29,7 +29,7 @@ call again.
 
 ## Preflight check
 
-Run it at preflight step 2 (and § Review rounds R1), so a missing Codex
+Run it at preflight step 2 (and `review-rounds.md` § R1), so a missing Codex
 surfaces before any work, not at the stage. In order, stopping at the first
 failure:
 

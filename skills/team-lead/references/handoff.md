@@ -58,7 +58,7 @@ How to use it: ~/.claude/skills/team-lead/references/design-context.md § How ea
 or "no plan: review round <n>, the items in Round are the spec">
 
 ## Round
-<"none", or for a review round (SKILL.md § Review rounds):
+<"none", or for a review round (`review-rounds.md`):
 Round: <n>   PR: <url>   PR base: <run.json base>   # Base commit above is the round's base
 Items (the round's acceptance criteria; the ticket's ACs must still hold):
 | # | Source | Asks for | Files | Size |
