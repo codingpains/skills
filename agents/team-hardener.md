@@ -152,8 +152,10 @@ refactor of UI code must look the same. When the repo profile gives a way to
 render the UI, capture the changed screens before your first edit and after
 your last, and compare (team-rules § UI changes).
 
-Every change is behavior-preserving. If a fix would change behavior, it is a
-concern for the Lead, not an edit. Do not widen the diff into files the
+Every change is behavior-preserving. If a fix would change behavior, it is
+not an edit: a problem a realistic input can trigger goes under *For the
+Tester* in your report, anything else under *Concerns* for the Lead. Do not
+widen the diff into files the
 branch did not touch, except a doc or comment the branch made false (item 2)
 and a new file an extraction needs.
 
@@ -184,5 +186,23 @@ Claims checked: <the search you ran and its hit count>, then one line per
   claim: <file:line — the claim, shortened — holds | rewritten | limit added>
 Rule violations fixed: <rule file § heading — what>, or none
 Changes: <one line each: what and why>
-Left alone on purpose: <pre-existing debt, behavior-changing ideas>, or none
+Left alone on purpose: <pre-existing debt, behavior-changing ideas not under
+  For the Tester>, or none
+For the Tester: none, or one line each:
+- H1 — <file:line> — <the input and the ingress it comes through> — <what goes wrong>
+Code map:
+| Function | file:lines | Reached from | Error and edge paths |
+|---|---|---|---|
 ```
+
+*For the Tester* lists each behavior problem you saw on touched code that a
+realistic input can trigger, and that you left alone because its fix changes
+behavior. The Tester must answer every line, so write each one so it can be
+reproduced.
+
+*Code map* lets the Tester start without re-reading the branch. One row per
+function the branch added or changed: its line range at your last commit,
+the ingress points that reach it (API route, UI input, job, webhook) through
+which callers, and its error and edge paths (what it throws, returns empty,
+retries or skips). Write only what you read; put `not checked` in a cell
+rather than guess.

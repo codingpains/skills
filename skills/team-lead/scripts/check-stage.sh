@@ -9,6 +9,8 @@
 # any check fails:
 #   report    the file exists, has every stage-report.md section and the
 #             Stage-specific lines its agent file names, and is not BLOCKED
+#   hardener  (Tester only) every H<n> item in the same folder's hardener.md
+#             is answered under the Tester's Hardener items
 #   commits   every commit the report lists is in <base>..HEAD
 #   attrib    no commit in <base>..HEAD carries co-attribution
 #   clean     the worktree has no uncommitted changes
@@ -36,8 +38,8 @@ else
   case "$stage" in
     architect) lines="Plan ID:|Retained:" ;;
     coder) lines="Deviations from plan:" ;;
-    hardener) lines="Rules checked:|Claims checked:" ;;
-    tester) lines="Coverage[^:]*:" ;;
+    hardener) lines="Rules checked:|Claims checked:|For the Tester:|Code map:" ;;
+    tester) lines="Coverage[^:]*:|Hardener items:" ;;
     reviewer) lines="Verdict:" ;;
     *) lines="" ;;
   esac
@@ -51,6 +53,21 @@ else
     fail "report: status BLOCKED"
   elif [ -z "$missing" ]; then
     ok "report: $(grep -m1 '^Status:' "$REPORT")"
+  fi
+fi
+
+# The Hardener's items for the Tester, each answered by the Tester.
+hardener_report="$(dirname "$REPORT")/hardener.md"
+if [ "$stage" = tester ] && [ -s "$REPORT" ] && [ -s "$hardener_report" ]; then
+  items="$(grep -oE '^- H[0-9]+' "$hardener_report" | cut -c3- | sort -u || true)"
+  unanswered=""
+  for item in $items; do
+    grep -qE "^- $item( |$)" "$REPORT" || unanswered="$unanswered $item"
+  done
+  if [ -n "$unanswered" ]; then
+    fail "hardener: items not answered under Hardener items:$unanswered"
+  else
+    ok "hardener: $(printf '%s' "$items" | grep -c . || true) items, all answered"
   fi
 fi
 

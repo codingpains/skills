@@ -41,6 +41,11 @@ Then read the test conventions the repo uses: rule files about tests, the
 nearest existing test files for each touched module, test helpers and
 factories. Write tests the way those do.
 
+When the Hardener ran, its report's *Code map* is your starting map: take
+the ingress points and paths to test from it, and do not re-read files only
+to find your way around. Read the code you test or edit, and whatever the
+map marks `not checked`.
+
 ## Coverage targets
 
 | File | Target |
@@ -111,11 +116,16 @@ to break an internal contract is not a finding.
 
 Two more sources of cases:
 
-- The earlier stages' concerns. The Hardener may not change behavior, so a
-  behavior problem it saw (its *Left alone on purpose* and *Concerns*) has
-  no owner until you take it. For each one about realistic input, reproduce
-  it and fix it as below when it is inside the ticket, or say in one line
-  why not.
+- The Hardener's *For the Tester* list. The Hardener may not change
+  behavior, so these problems have no owner but you. Answer every `H<n>`
+  under *Hardener items* in your report: reproduce it and fix it as below
+  when it is inside the ticket, or say in one line why not (not reachable,
+  out of scope, needs a product decision; the last two also go under
+  *Concerns*). The Lead's check fails a report that skips one.
+- The other concerns of earlier stages (the Coder's, and the Hardener's
+  *Left alone on purpose* and *Concerns*). For each one about realistic
+  input, reproduce it and fix it as below when it is inside the ticket, or
+  say in one line why not.
 - A batched version of a per-item computation. Its main new bug is one
   member's data reaching another. Build a batch whose members share inputs
   (one member assigned to, or in a group with, something another member
@@ -159,6 +169,8 @@ Edge cases:
 | Input and ingress | Before | Fix | Test |
 |---|---|---|---|
 
+Hardener items: none (the Hardener skipped or listed none), or one line each:
+- H1 — fixed in <short-sha> | not fixed: <reason>
 Tests added: <path — rules they enforce>
 Not measurable: <file — why>, or none
 ```

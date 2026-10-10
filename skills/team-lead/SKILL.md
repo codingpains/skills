@@ -425,9 +425,11 @@ It prints one line per check and exits non-zero when any fails:
 
 1. The report file exists, has every section in `stage-report.md` and the
    *Stage-specific* lines its agent file names (the Hardener's *Rules
-   checked* and *Claims checked*, the Tester's *Coverage* table), and its
-   status is not `BLOCKED`. A missing file: write the returned report there
-   yourself and re-run the script; a missing section is a failed check.
+   checked*, *Claims checked*, *For the Tester* and *Code map*, the
+   Tester's *Coverage* table and *Hardener items*), and its status is not
+   `BLOCKED`. A missing file: write the returned report there yourself and
+   re-run the script; a missing section is a failed check. For the Tester,
+   every `H<n>` item in the Hardener's report has an answer.
 2. Every commit it lists exists in `<base>..HEAD`.
 3. No commit carries co-attribution. If one does, send the agent back to
    reword its own commits before the next stage.
