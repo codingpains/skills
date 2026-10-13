@@ -17,7 +17,7 @@ to make it cheaper and faster without making it worse. You judge the
 process, not the code change.
 
 Your handoff gives: the ticket key, the run directory, the round (a review
-round of an open PR, or `none`), the run's `started_at`, the worktree and
+round of an open PR, or `none`), whether the run is a takeover, the run's `started_at`, the worktree and
 base commit, the cross-provider stages (or `none`), and the performance log
 directory (`~/.team-lead/performance/`). For a round, `started_at` and the base commit
 are the round's, and you measure the round alone: its files are in
@@ -65,7 +65,9 @@ plan`. Never compare its dollars with a Claude stage's.
   runs on the same repo profile first, then all runs. Compare a round with
   rounds, never with full tickets: lines with a `round` field, and the
   review-fix runs logged before rounds existed (ONB-1294's second line,
-  ONB-1290-3, ONB-1290 of 2026-09-30, ONB-1290-r3, ONB-1336). Fewer than three comparable runs:
+  ONB-1290-3, ONB-1290 of 2026-09-30, ONB-1290-r3, ONB-1336). Compare a
+  takeover with takeovers (lines with `"takeover": true`), then with full
+  chains. Fewer than three comparable runs:
   say the comparison is thin.
 - The skill files you will point changes at:
   `~/.claude/skills/team-lead/SKILL.md`, its `references/`, the matching
@@ -161,7 +163,7 @@ round). Then append one line to
 `<log dir>/index.jsonl` (create the file if missing):
 
 ```json
-{"date": "YYYY-MM-DD", "ticket": "<KEY>", "round": <n or null>, "repo": "<host/owner/repo>", "profile": "<name or null>",
+{"date": "YYYY-MM-DD", "ticket": "<KEY>", "round": <n or null>, "takeover": <true or false>, "repo": "<host/owner/repo>", "profile": "<name or null>",
  "estimate": <points or null>, "stages": ["architect", "coder", ...], "cross_provider_stages": ["reviewer", ...],
  "files_changed": <n>,
  "lines_changed": <added+removed>, "active_seconds": <n>, "human_wait_seconds": <n>,

@@ -12,7 +12,7 @@ into every prompt costs the Lead output and context on every transition.
 ## handoff-common.md
 
 Write it before the first stage. Rewrite it when the decisions, the plan,
-the rule list, the settled concerns or the round change: a stale shared file misleads every later stage.
+the rule list, the settled concerns, the round or a takeover's base change: a stale shared file misleads every later stage.
 
 ```
 # <TICKET_ID>: <title> — shared handoff
@@ -69,6 +69,18 @@ Round: <n>   PR: <url>   PR base: <run.json base>   # Base commit above is the r
 Items (the round's acceptance criteria; the ticket's ACs must still hold):
 | # | Source | Asks for | Files | Size |
 ...the rows of round-<n>/items.md>
+
+## Takeover
+<"none", or for a takeover (`takeover.md`):
+PR: <url>   Opened by: <login>   Takeover start: <sha>
+Another agent wrote the commits before Takeover start, and this team never
+reviewed them. Base commit is where the PR left its base branch: the whole PR
+is yours to harden, test and review. Never reword, rebase or amend those
+commits; the commit checks start at Takeover start.
+Note: <the human's note, verbatim, or "none">
+Conditions (each must be met or answered when the PR is done):
+| # | Source | Asks for | Files | Size | Goes to |
+...the rows of conditions.md>
 ```
 
 ## Each stage's prompt

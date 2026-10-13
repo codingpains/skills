@@ -1,7 +1,7 @@
 ---
 name: team-lead
 description: "Run one ticket through a local agentic development team: intake and grooming, planning, implementation, risk-gated hardening and testing, review, PR publication and follow-up rounds. Use for /team-lead with a Linear or Notion ticket, or to configure a repository profile."
-argument-hint: "<Linear ID | Notion task ID or URL> [--full] [--from <stage>] [--draft] [--no-slack] [--cross-provider <stages>] | <ticket> --round <PR URL or number> [--cross-provider <stages>] [note] | --configure-repo [path]"
+argument-hint: "<Linear ID | Notion task ID or URL> [--full] [--from <stage>] [--draft] [--no-slack] [--cross-provider <stages>] | <ticket> --round <PR URL or number> [--cross-provider <stages>] [note] | <ticket> --takeover <PR URL or number> [note] | --configure-repo [path]"
 disable-model-invocation: true
 effort: high
 ---
@@ -25,6 +25,7 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 | `--draft` | open the PR as a draft, and skip the Slack post (a post asks peers to review, and a draft is not ready for that) |
 | `--no-slack` | skip the Slack post (for dry runs of the pipeline) |
 | `--round <PR> [note]` | address review comments, a QA verdict or a requested change on an open PR of this ticket, in a new session (`references/review-rounds.md`). Text after the PR is the human's note for the round. With `--from <stage>`, resume the latest round at that stage |
+| `--takeover <PR> [note]` | finish an open PR another agent started, on its branch: the whole PR goes through the team (`references/takeover.md`). Text after the PR is the human's note. With `--from <stage>`, resume it |
 | `--cross-provider <stages>` | run the named stages on Codex through T3 instead of on Claude (`references/cross-provider.md`). Today only `reviewer`. Off unless passed on this call, so a `--from` or `--round` call without it runs on Claude. The stage list is required, so the flag can sit before or after a round's note |
 | `--configure-repo [path]` | no ticket: create or refresh this repo's validation profile, optionally for one folder of a monorepo (`references/configure-repo.md`) |
 
@@ -67,6 +68,7 @@ Shared references, all under `~/.claude/skills/team-lead/references/`:
 | `repo-profiles.md` | per-repo validation profiles: format, matching, how to build one | before step 1 |
 | `design-context.md` | Figma links and other design sources: collecting them, Figma access, the design brief, how each agent uses it | in § 1, when the intake reader returns a design source or a saved image, or the ticket changes UI; otherwise never |
 | `review-rounds.md` | a review round on an open PR: load, items, chain and price, push, replies | with `--round`, before anything else; otherwise never |
+| `takeover.md` | taking over another agent's PR: conditions, chain, push, replies, Slack | with `--takeover`, before anything else; otherwise never |
 | `configure-repo.md` | building or refreshing a repo profile | with `--configure-repo`; otherwise never |
 
 Read each with its own `Read` call, all in one turn: a `cat` of several
@@ -126,6 +128,7 @@ notes.md           one line per event, as it happens: `<time> <event>`, with
                    yourself, and anything that surprised you
 metrics.json/.md   written by the self-assessment
 performance.md     the self-assessment report
+conditions.md      a takeover's open conditions; takeover-*.md its fix list, replies, old PR body
 round-<n>/         one folder per review round (`references/review-rounds.md`): items.md,
                    reports/, review-fixes.md, replies.md, metrics, performance.md
 ```
@@ -606,6 +609,7 @@ Round: <n, or none>
 started_at: <from run.json; for a round, the round's>
 Worktree: <path>   Base commit: <sha; for a round, the round's base>
 Repo profile: <path or none>
+Takeover: <yes or no>
 Log directory: ~/.team-lead/performance/
 Cross-provider stages: <the run.json cross_provider object; for a round, the round's; or none>
 ```
@@ -627,6 +631,11 @@ skills repo.
 ticket: read `~/.claude/skills/team-lead/references/review-rounds.md` in
 full and follow it. It owns sizing the items, pricing the chain, and the
 round's push and replies.
+
+## Takeover
+
+`--takeover <PR> [note]`: read
+`~/.claude/skills/team-lead/references/takeover.md` in full and follow it.
 
 ## Configure a repo
 

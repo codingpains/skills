@@ -1,5 +1,8 @@
 # Stage gates
 
+A takeover (`--takeover`) does not use these gates: its chain is fixed in
+`takeover.md`.
+
 The Lead picks which specialist stages a ticket runs. By default the chain is
 **lean**: the Architect, Hardener and Tester run when the ticket's size or
 risk calls for them, not on every ticket. `--full` selects **full** mode,

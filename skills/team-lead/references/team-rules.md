@@ -164,6 +164,10 @@ When your stage changes, tests or reviews anything a person sees:
   `git status` for stray files: build output, coverage reports, lockfile
   churn you did not intend. Leave the tree clean after your last commit.
 - Never `--no-verify`. If a hook fails, fix the cause.
+- In a takeover (the handoff's *Takeover* section), the commits before
+  *Takeover start* are another agent's. Never reword, rebase, amend or
+  squash them, even to remove co-attribution: the branch is already pushed.
+  These rules apply to the commits you add.
 - Small, coherent commits beat one large one; each should pass the
   validations on its own when practical.
 

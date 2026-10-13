@@ -89,6 +89,8 @@ file only: your *Report file* in the run directory.
 6. **Commits.** `git log --format='%H%n%an <%ae>%n%B' <base>..HEAD`: no
    `Co-Authored-By`, no "Generated with", no `--author` override (the author
    matches `git config user.email`), and messages follow the repo convention.
+   In a takeover, check only the commits from *Takeover start* on: the
+   earlier ones are another agent's and stay as they are.
 7. **Validations.** The earlier stages ran the validations for their own
    commits, and the Lead checked that they passed. A result from a report
    still holds at HEAD when no later commit touched a file in its command's
@@ -147,6 +149,15 @@ read-only, so turn what they would have fixed into findings:
   catch is must-fix. Do not build a coverage harness.
 - A gate decision you think was wrong (the change hits a trigger the Lead
   did not see): say so under *Concerns*, naming the trigger.
+
+## 2b. A takeover
+
+When the handoff has a *Takeover* section, review the whole PR from the
+base commit, the earlier agent's code as strictly as the team's: it was
+never reviewed. Also check each condition in the *Takeover* table: met,
+with the code and test or commit that shows it, or answered. An unmet
+condition is must-fix. In step 2, a change the earlier agent made that
+traces to nothing in the ticket is a should-fix to remove.
 
 ## 3. Findings
 

@@ -49,6 +49,29 @@ Read these first, in full, as parallel Read calls in your first turn:
 Write only inside a temporary directory (`mktemp -d`) and the run directory
 named in your handoff, never inside the repository.
 
+## Takeover
+
+When the handoff has a *Takeover* section, the PR already exists and has no
+plan. Your plan closes its open conditions; it does not rebuild the PR.
+
+- Read the whole PR first: `git diff <base>...HEAD` and
+  `git log <base>..HEAD`. Its code is the starting point. Keep what already
+  works and meets the ticket; replace only what a condition or an
+  acceptance criterion needs replaced.
+- Section 2, the *Acceptance criteria map*, gets a *Today* column: met,
+  partly met or not met by the PR as it stands, with the `path:line`.
+- Add a section **Conditions** after it: one row per condition routed to
+  you (`C<n>`), the cause you found in the code, and the change in
+  section 4 that closes it. For a failed QA or check, reproduce or trace
+  the failure to its cause before you plan the fix.
+- When the handoff says the merge of the base branch is the Coder's: make
+  the merge block B1, and for each conflicted file say how to keep both
+  sides (`git merge-tree --write-tree HEAD <base ref>`, then
+  `git show <tree>:<path>`).
+- When the PR already meets every acceptance criterion and condition
+  routed to you, publish the plan anyway, with the map and an empty
+  section 4, and report `Code needed: no`.
+
 ## 1. Understand
 
 - Read the repo rules that apply (team-rules § Repo rules) for the areas the
@@ -184,6 +207,7 @@ Blocks: <B1: n files, B2: n files, ...> | none
 Decisions: <n> (x at 3, y at 2, z pending human decision)
 Risk triggers: <the full-risk triggers in stage-gates.md the change hits, each with the plan section, or none>
 Refactor: yes | no
+Code needed: yes | no   (takeover only)
 ```
 
 The Lead picks the later stages from *Risk triggers* and *Refactor*
