@@ -34,8 +34,9 @@ steps 3 to 5 and 8, and a round skips intake, grooming and stage gating.
 1. Read the PR, from the main checkout: its reviews and comments with
    `gh pr view <PR> --json number,url,title,state,headRefName,baseRefName,reviews,comments`,
    and its line-comment threads, resolved or not, with
-   `gh api graphql -F owner=<owner> -F repo=<repo> -F n=<number> -f query='query($owner:String!,$repo:String!,$n:Int!){repository(owner:$owner,name:$repo){pullRequest(number:$n){reviewThreads(first:100){nodes{isResolved isOutdated path line comments(first:20){nodes{author{login} body url}}}}}}}'`.
-   A merged or closed PR: stop and say so.
+   `gh api graphql -F owner=<owner> -F repo=<repo> -F n=<number> -f query='query($owner:String!,$repo:String!,$n:Int!){repository(owner:$owner,name:$repo){pullRequest(number:$n){reviewThreads(first:100){nodes{id isResolved isOutdated path line comments(first:20){nodes{author{login} body url}}}}}}}'`.
+   Each thread's `id` is what R6 replies to. A merged or closed PR: stop
+   and say so.
 2. Find the run directory: the one whose `run.json` has this PR as `pr` or
    its head branch as `branch` (`rg -l` over `~/.team-lead/runs/*/run.json`),
    else `~/.team-lead/runs/<TICKET_ID>/`. With none, create
@@ -195,10 +196,20 @@ what was tested. Save the old body first, as `round-<n>/pr-body-before.md`
 PR rules and word budgets still apply. Otherwise leave the body as it is.
 Post nothing to Slack: the PR was already announced.
 
-Write `round-<n>/replies.md`: one draft reply per item, in plain words,
-under the thread or comment it answers: what changed and the commit
-(`abc1234`), the answer, or the reason it did not change. Do not post them
-or resolve threads; the human does, with what they know of the reviewer.
+Reply to every item that came from the PR, on the PR, after the push, in
+plain words: what changed and the commit (`abc1234`), the answer, or the
+reason it did not change. A `decline` says what the human decided in R4.
+Items from the human's note get no reply. Write the replies to
+`round-<n>/replies.md` first, one under each thread or comment it answers,
+then post each:
+
+- a line-comment thread: `gh api graphql -f query='mutation($id:ID!,$body:String!){addPullRequestReviewThreadReply(input:{pullRequestReviewThreadId:$id,body:$body}){comment{url}}}' -F id=<thread id> -f body=<reply>`;
+- a review or PR comment: one `gh pr comment <PR> --body-file <file>` that
+  quotes each comment it answers and links it.
+
+Do not resolve threads: the reviewers resolve their own in their next pass.
+Add each posted reply's URL to `replies.md`. When a post fails, say so in
+the final message and leave that reply in `replies.md` for the human.
 Register the PR with `link_pull_request` when that tool is available.
 
 ## R7. Assess
@@ -207,10 +218,11 @@ As § 11, with `Round: <n>` and the round's `started_at` in the handoff.
 
 **Final message** for a round: the worktree, the PR, the items with what
 happened to each (changed in `<sha>`, answered, declined), the path to
-`replies.md`, one line per stage, and the self-assessment as in the final
+`replies.md` and how many replies were posted, one line per stage, and the self-assessment as in the final
 message below.
 
 **Resume** with `--round <PR> --from <stage>`: read the latest
 `round-<n>/` and its `run.json` entry, keep its items and chain, and continue
-at that stage.
+at that stage. A reply with a URL in `replies.md` is already posted: do not
+post it again.
 

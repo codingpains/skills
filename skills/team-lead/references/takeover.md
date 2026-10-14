@@ -48,8 +48,8 @@ OK, in the T4 question.
 1. Read the PR, from the main checkout:
    `gh pr view <PR> --json number,url,title,state,isDraft,author,headRefName,baseRefName,isCrossRepository,mergeable,mergeStateStatus,body,reviews,comments`,
    its checks with `gh pr checks <PR>`, and its line-comment threads as
-   `review-rounds.md` R1 does, adding `id` to each thread and `databaseId`
-   to each comment, so T7 can reply to them. A merged or closed PR: stop.
+   `review-rounds.md` R1 does, which carries each thread's `id`, adding
+   `databaseId` to each comment, so T7 can reply to them. A merged or closed PR: stop.
    A PR from a fork (`isCrossRepository`): stop, since its branch is not
    ours to push to.
 2. Run the intake reader (§ 1) for the ticket. Its comments carry the QA
