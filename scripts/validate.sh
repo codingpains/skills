@@ -5,6 +5,7 @@
 #   agents/<name>.md        frontmatter has name == <name>, a description, and a known model
 #   codex/agents/<name>.toml has matching name, description, GPT model, effort and sandbox
 #   skills/team-lead/repos/<name>.md  repo profile with name == <name> and a host/owner/repo remote
+#   skills/team-lead/repos/<repo>.gates.json  valid JSON with a host/owner/repo remote and known gate kinds
 #   installed Claude and Codex references to a skill in this repo point at a real file
 #   skills/team-lead/SKILL.md stays under its size budget (the Lead re-reads it every turn)
 set -euo pipefail
@@ -88,6 +89,24 @@ for file in "$REPO"/skills/team-lead/repos/*.md; do
       *) fail "repos/$base.md: remote '$remote' is not host/owner/repo" ;;
     esac
   fi
+done
+
+for file in "$REPO"/skills/team-lead/repos/*.gates.json; do
+  [ -f "$file" ] || continue
+  problem="$(python3 - "$file" 2>&1 <<'PY'
+import json, sys
+try:
+    data = json.load(open(sys.argv[1]))
+except ValueError as error:
+    sys.exit(f"not valid JSON: {error}")
+if data.get("remote", "").count("/") != 2:
+    sys.exit(f"remote '{data.get('remote')}' is not host/owner/repo")
+kinds = {"checks", "human", "reef", "visual-qa"}
+for gate in data.get("gates") or sys.exit("no gates"):
+    if not gate.get("id") or gate.get("kind") not in kinds:
+        sys.exit(f"gate {gate.get('id')!r} has unknown kind {gate.get('kind')!r}")
+PY
+)" || fail "repos/$(basename "$file"): $problem"
 done
 
 # References like ~/.claude/skills/team-lead/references/x.md must exist when the skill lives here.
