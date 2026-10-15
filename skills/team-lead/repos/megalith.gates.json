@@ -1,0 +1,37 @@
+{
+  "remote": "github.com/onboardiq/megalith",
+  "updated": "2026-10-15",
+  "gates": [
+    {
+      "id": "reef",
+      "kind": "reef",
+      "check": "reef/review",
+      "authors": ["fountain-reef-*"],
+      "pass_conclusions": ["no_blockers"]
+    },
+    {
+      "id": "qa",
+      "kind": "visual-qa",
+      "check": "qa",
+      "authors": ["fountain-visual-qa-app*"],
+      "skip_labels": ["visual-qa: skip"],
+      "max_blocked": 2
+    },
+    {
+      "id": "human",
+      "kind": "human",
+      "min_approvals": 1,
+      "ignore_authors": ["fountain-*", "linear-code", "github-actions"],
+      "ignore_body_markers": ["hegbot-code-review"]
+    },
+    {
+      "id": "ci",
+      "kind": "checks",
+      "required": ["RWX: CI", "ci-passed"],
+      "details": {
+        "url_pattern": "cloud\\.rwx\\.com/[^/]+/runs/([0-9a-f]+)",
+        "command": "rwx results {id}"
+      }
+    }
+  ]
+}

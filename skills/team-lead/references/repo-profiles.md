@@ -131,6 +131,39 @@ profile says otherwise.
 The Lead reads the workspace profile and the chosen repo's profile, and
 records both in `run.json`.
 
+## PR gates
+
+What a PR in a repo needs before it merges: the bots that review it, the
+human approvals, the CI checks. The PR watcher reads them from
+`repos/<repo>.gates.json`, one file per repository whatever its `paths`
+profiles, matched by `remote` like a profile.
+`~/.claude/skills/team-lead/scripts/pr-gates.py <PR URL> --summary` scores
+a PR against them. Without a file: every check on the PR's latest commit,
+and one human approval.
+
+```json
+{
+  "remote": "github.com/<owner>/<repo>",
+  "updated": "YYYY-MM-DD",
+  "gates": [
+    {"id": "ci", "kind": "checks", "required": ["<check or status name>"],
+     "details": {"url_pattern": "<regex, group 1 the run id>", "command": "<cli> {id}"}},
+    {"id": "human", "kind": "human", "min_approvals": 1,
+     "ignore_authors": ["<login glob>"], "ignore_body_markers": ["<text a bot review carries>"]}
+  ]
+}
+```
+
+| `kind` | Reads | Fails on |
+|---|---|---|
+| `checks` | the named check runs and commit statuses, or every one with `"required": "all"` | any failed, cancelled or timed-out one |
+| `human` | reviews from people: not bots, not the PR's author or the watcher's user, not `ignore_authors`, not a body with an `ignore_body_markers` text | a standing "changes requested", or a person's unresolved thread or comment that we have not answered last |
+| `reef` | the `check` run, and the newest verdict comment by `authors` whose `reef-head-sha` is the head | a conclusion outside `pass_conclusions`, a finding not in an optional fold, or an unanswered Reef thread |
+| `visual-qa` | the `check` run and the newest `visual-qa-report:1` comment by `authors` for the head; `skip_labels` pass it | any `fail` or `blocked` case not waived by an `@qa` `waive:` line; `max_blocked` caps how many blocked cases a round may waive |
+
+A gate with nothing on a commit younger than `start_grace_minutes` (15 by
+default) counts as running: bots and CI take a moment to start.
+
 ## Creating or refreshing a profile
 
 Run by `/team-lead --configure-repo [path]`. See the team-lead skill, section
