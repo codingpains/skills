@@ -46,6 +46,7 @@ DEFAULT_GATES = {
     ]
 }
 START_GRACE_MINUTES = 15
+DETAIL_LIMIT = 4000
 PASS = {"success", "neutral", "skipped"}
 FAIL = {"failure", "timed_out", "cancelled", "action_required", "error", "startup_failure", "stale"}
 THREADS_QUERY = """query($owner:String!,$repo:String!,$n:Int!,$after:String){
@@ -181,7 +182,9 @@ def thread_item(thread, author, first, kind):
     return {"key": f"thread:{thread['id']}", "kind": kind, "thread_id": thread["id"],
             "file": f"{thread['path']}:{thread['line']}" if thread.get("path") else None,
             "outdated": thread["isOutdated"], "author": author.get("login"),
-            "title": body.splitlines()[0][:200] if body else "", "url": first["url"]}
+            "title": body.splitlines()[0][:200] if body else "", "url": first["url"],
+            "detail": "\n\n".join(f"{(c.get('author') or {}).get('login')}: {c['body'].strip()}"
+                                  for c in thread["comments"]["nodes"])[:DETAIL_LIMIT]}
 
 
 def threads_for(pr, spec, kind):
@@ -258,7 +261,7 @@ def reef_gate(pr, spec):
         return not_started(pr, spec, "Reef review")
     summary = f"{verdict['conclusion'] or 'no conclusion'}, risk {verdict['risk'] or 'unknown'}"
     items = [{"key": f"reef:{f['id']}@{pr.head[:12]}", "kind": "reef", "finding": f["id"], "file": f["file"],
-              "title": f["text"][:300], "section": f["section"], "url": url,
+              "title": f["text"][:200], "detail": f["text"], "section": f["section"], "url": url,
               "optional": not (f["section"] or "").lower().startswith("to fix")}
              for f in verdict["findings"]]
     items += threads_for(pr, spec, "reef-thread")
@@ -271,14 +274,24 @@ QA_REPORT = re.compile(r"<!-- visual-qa-report:1 (\{.*\}) -->")
 QA_WAIVE = re.compile(r"^\s*waive:\s*(.+)$", re.MULTILINE)
 
 
+def qa_row(body, case_id):
+    """Expected and actual of a case, from its row in the report's tables (the JSON lacks them)."""
+    for line in body.splitlines():
+        if f"**{case_id}**" in line and line.startswith("|"):
+            cells = [c.strip() for c in line.strip().strip("|").split(" | ")]
+            if len(cells) >= 6:
+                return {"expected": cells[3], "actual": cells[4]}
+    return {}
+
+
 def qa_gate(pr, spec):
     if pr.labels & set(spec.get("skip_labels", [])):
         return gate(spec, "pass", "skipped by label")
-    report, url = None, None
+    report, url, body = None, None, ""
     for comment in pr.comments_by(spec.get("authors")):
         match = QA_REPORT.search(comment["body"])
         if match:
-            report, url = json.loads(match.group(1)), comment["html_url"]
+            report, url, body = json.loads(match.group(1)), comment["html_url"], comment["body"]
     found = check_state(pr, spec["check"])
     run = pr.check_runs.get(spec["check"]) or {}
     title = (run.get("output") or {}).get("title") or ""
@@ -301,7 +314,8 @@ def qa_gate(pr, spec):
         if case["status"] in ("fail", "blocked") and case["id"] not in waived:
             items.append({"key": f"qa:{case['id']}@{pr.head[:12]}", "kind": f"qa-{case['status']}",
                           "case": case["id"], "title": case.get("title"), "section": case.get("section"),
-                          "evidence": case.get("evidence", []), "excerpt": case.get("excerpt"), "url": url})
+                          "evidence": case.get("evidence", []), "excerpt": case.get("excerpt"), "url": url,
+                          **qa_row(body, case["id"])})
     blocked_waived = sum(1 for c in report.get("cases", []) if c["status"] == "blocked" and c["id"] in waived)
     summary = ", ".join(f"{n} {s}" for s, n in sorted(counts.items()))
     if waived:
@@ -329,7 +343,8 @@ def human_gate(pr, spec):
             latest[review["user"]["login"]] = review
     approvals = sorted(login for login, r in latest.items() if r["state"] == "APPROVED")
     items = [{"key": f"review:{r['id']}", "kind": "changes-requested", "author": login,
-              "title": (r.get("body") or "").strip()[:300], "url": r["html_url"]}
+              "title": (r.get("body") or "").strip()[:200], "detail": (r.get("body") or "").strip()[:DETAIL_LIMIT],
+              "url": r["html_url"]}
              for login, r in latest.items() if r["state"] == "CHANGES_REQUESTED"]
     items += [thread_item(t, a, f, "thread") for t, a, f in pr.unanswered_threads()
               if is_human({"login": a.get("login"), "type": a.get("__typename")})]
@@ -340,7 +355,8 @@ def human_gate(pr, spec):
         if any(pr.ours(c["user"]["login"]) for c in pr.comments[n + 1:]):
             continue
         items.append({"key": f"comment:{comment['id']}", "kind": "comment", "author": comment["user"]["login"],
-                      "title": body.splitlines()[0][:200] if body else "", "url": comment["html_url"]})
+                      "title": body.splitlines()[0][:200] if body else "", "detail": body[:DETAIL_LIMIT],
+                      "url": comment["html_url"]})
     need = spec.get("min_approvals", 1)
     summary = f"{len(approvals)}/{need} approvals" + (f" ({', '.join(approvals)})" if approvals else "")
     summary += "; reviewed this commit" if reviewed_head else "; no review on this commit"
