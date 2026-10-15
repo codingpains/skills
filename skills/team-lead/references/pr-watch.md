@@ -105,23 +105,26 @@ Your message is the notice. Post nothing else on the PR or in Slack.
 
 ## W5. Start a round
 
-1. **Limit.** Stop and ask the human when `watch.auto_rounds` has reached
+1. **Nothing new.** When the state has items and every item key is already
+   in an earlier trigger, a round has had them all (a round that only replied pushes nothing):
+   go back to W2.
+2. **Limit.** Stop and ask the human when `watch.auto_rounds` has reached
    `max_auto_rounds`, or when an item's key without its `@<commit>` suffix
    (`qa:CT4`, `reef:F7`, `ci:RWX: CI`) is in two earlier triggers: the
-   rounds are not converging. Give the context file from step 2 and the
-   round line from step 3 so the human can start it by hand.
-2. **Context.** Write every item key of earlier triggers to
+   rounds are not converging. Give the context file from step 3 and the
+   round line from step 4 so the human can start it by hand.
+3. **Context.** Write every item key of earlier triggers to
    `<watch dir>/handled`, then run
    `pr-context.py <watch dir>/state.json --out <watch dir>/context-<head7>.md --skip-keys <watch dir>/handled`.
    For a conflict, add the note at the top of the file.
-3. **Round line.** `/team-lead <TICKET_ID> --round <PR URL> --auto --context <context file>`.
-4. **Start it.** With `--dry-run`, print the line and the context file's
+4. **Round line.** `/team-lead <TICKET_ID> --round <PR URL> --auto --context <context file>`.
+5. **Start it.** With `--dry-run`, print the line and the context file's
    path, and stop. With a `t3_thread_launch` tool, launch a thread titled
    `<TICKET_ID> round <n>`, with
    `workspaceStrategy: {"type": "existing_worktree", "worktreePath": <run.json worktree>, "branch": <head branch>}`
    and the round line as `message`. Otherwise give the human the line to
    paste into a new session.
-5. Add `{"at", "head", "keys", "context", "thread"}` to `watch.triggers`
+6. Add `{"at", "head", "keys", "context", "thread"}` to `watch.triggers`
    and add 1 to `watch.auto_rounds`.
 
 While the round runs, the PR's state stays the same, so the watcher sleeps
