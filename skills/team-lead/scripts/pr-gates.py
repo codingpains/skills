@@ -3,6 +3,7 @@
 
     pr-gates.py <PR URL | number> [--repo owner/repo] [--gates FILE] [--me LOGIN]
                 [--summary]
+    pr-gates.py --show <saved result>    the --summary of a saved result
 
 Reads the PR, its reviews, comments, review threads, check runs and commit
 statuses with `gh`, scores each gate in the repo's gates file on the PR's
@@ -10,7 +11,7 @@ latest commit, and prints one JSON object:
 
     {"pr", "url", "state", "head", "head_age_minutes", "mergeable",
      "auto_merge", "overall", "waiting_on", "gates": [{"id", "kind",
-     "status", "summary", "items": [...]}], "gates_file"}
+     "status", "summary", "items": [...]}], "gates_file", "signature"}
 
 A gate's status is `running` (a bot or check is working on it), `waiting`
 (nothing is working on it: a person has not reviewed, or a bot was not
@@ -387,14 +388,27 @@ def overall(pr, gates):
     return "ready", []
 
 
+def print_summary(result):
+    waiting = f" (waiting on {', '.join(result['waiting_on'])})" if result["waiting_on"] else ""
+    print(f"{result['url']} @ {result['head'][:7]}: {result['overall']}{waiting}")
+    for g in result["gates"]:
+        items = f" [{len(g['items'])} items]" if g["items"] else ""
+        print(f"  {g['id']:<6} {g['status']:<8} {g['summary']}{items}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("pr")
+    parser.add_argument("pr", nargs="?")
     parser.add_argument("--repo", help="owner/repo, when the PR is a number")
     parser.add_argument("--gates", help="a gates file, instead of the one matching the remote")
     parser.add_argument("--me", help="the GitHub login running the watcher (default: gh's user)")
     parser.add_argument("--summary", action="store_true", help="one line per gate instead of JSON")
+    parser.add_argument("--show", metavar="FILE", help="print the summary of a saved result; reads nothing else")
     args = parser.parse_args()
+    if args.show:
+        return print_summary(json.load(open(args.show)))
+    if not args.pr:
+        parser.error("a PR is required")
 
     match = re.match(r"https://(github\.com)/([^/]+/[^/]+)/pull/(\d+)", args.pr)
     if match:
@@ -413,10 +427,11 @@ def main():
               "base": pr.view["baseRefName"], "mergeable": pr.view.get("mergeable"),
               "auto_merge": bool(pr.view.get("autoMergeRequest")), "overall": state,
               "waiting_on": waiting_on, "gates": gates, "gates_file": gates_file or "default"}
+    # What the watcher compares with what it last acted on: a change here is news.
+    result["signature"] = "|".join([state, pr.head, ",".join(waiting_on)]
+                                   + sorted(i["key"] for g in gates for i in g["items"]))
     if args.summary:
-        print(f"{result['url']} @ {pr.head[:7]}: {state}" + (f" (waiting on {', '.join(waiting_on)})" if waiting_on else ""))
-        for g in gates:
-            print(f"  {g['id']:<6} {g['status']:<8} {g['summary']}" + (f" [{len(g['items'])} items]" if g["items"] else ""))
+        print_summary(result)
     else:
         json.dump(result, sys.stdout, indent=1)
         print()
