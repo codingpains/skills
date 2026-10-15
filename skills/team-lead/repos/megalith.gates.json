@@ -1,6 +1,8 @@
 {
   "remote": "github.com/onboardiq/megalith",
   "updated": "2026-10-15",
+  "max_auto_rounds": 3,
+  "merge": "gh pr merge {pr} --auto --squash",
   "gates": [
     {
       "id": "reef",
@@ -15,7 +17,8 @@
       "check": "qa",
       "authors": ["fountain-visual-qa-app*"],
       "skip_labels": ["visual-qa: skip"],
-      "max_blocked": 2
+      "max_blocked": 2,
+      "request": "@qa done"
     },
     {
       "id": "human",

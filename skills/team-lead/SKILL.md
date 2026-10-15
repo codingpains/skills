@@ -1,7 +1,7 @@
 ---
 name: team-lead
-description: "Run one ticket through a local agentic development team: intake and grooming, planning, implementation, risk-gated hardening and testing, review, PR publication and follow-up rounds. Use for /team-lead with a Linear or Notion ticket, or to configure a repository profile."
-argument-hint: "<Linear ID | Notion task ID or URL> [--full] [--from <stage>] [--draft] [--no-slack] [--cross-provider <stages>] | <ticket> --round <PR URL or number> [--cross-provider <stages>] [note] | <ticket> --takeover <PR URL or number> [note] | --configure-repo [path]"
+description: "Run one ticket through a local agentic development team: intake and grooming, planning, implementation, risk-gated hardening and testing, review, PR publication, follow-up rounds and watching the PR to its merge. Use for /team-lead with a Linear or Notion ticket, or to configure a repository profile."
+argument-hint: "<Linear ID | Notion task ID or URL> [--full] [--from <stage>] [--draft] [--no-slack] [--cross-provider <stages>] | <ticket> --round <PR URL or number> [--cross-provider <stages>] [note] | <ticket> --takeover <PR URL or number> [note] | <ticket> --watch <PR URL or number> [--dry-run] | --configure-repo [path]"
 disable-model-invocation: true
 effort: high
 ---
@@ -26,6 +26,7 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 | `--no-slack` | skip the Slack post (for dry runs of the pipeline) |
 | `--round <PR> [note]` | address review comments, a QA verdict or a requested change on an open PR of this ticket, in a new session (`references/review-rounds.md`). Text after the PR is the human's note for the round. With `--from <stage>`, resume the latest round at that stage |
 | `--takeover <PR> [note]` | finish an open PR another agent started, on its branch: the whole PR goes through the team (`references/takeover.md`). Text after the PR is the human's note. With `--from <stage>`, resume it |
+| `--watch <PR> [--dry-run]` | babysit an open PR of this ticket until it merges: start a round when every merge gate has finished and one failed, turn on auto-merge when all pass (`references/pr-watch.md`) |
 | `--cross-provider <stages>` | run the named stages on Codex through T3 instead of on Claude (`references/cross-provider.md`). Today only `reviewer`. Off unless passed on this call, so a `--from` or `--round` call without it runs on Claude. The stage list is required, so the flag can sit before or after a round's note |
 | `--configure-repo [path]` | no ticket: create or refresh this repo's validation profile, optionally for one folder of a monorepo (`references/configure-repo.md`) |
 
@@ -69,6 +70,7 @@ Shared references, all under `~/.claude/skills/team-lead/references/`:
 | `design-context.md` | Figma links and other design sources: collecting them, Figma access, the design brief, how each agent uses it | in § 1, when the intake reader returns a design source or a saved image, or the ticket changes UI; otherwise never |
 | `review-rounds.md` | a review round on an open PR: load, items, chain and price, push, replies | with `--round`, before anything else; otherwise never |
 | `takeover.md` | taking over another agent's PR: conditions, chain, push, replies, Slack | with `--takeover`, before anything else; otherwise never |
+| `pr-watch.md` | watching a PR to its merge: gates, rounds, auto-merge, clean-up | with `--watch`, before anything else; otherwise never |
 | `configure-repo.md` | building or refreshing a repo profile | with `--configure-repo`; otherwise never |
 
 Read each with its own `Read` call, all in one turn: a `cat` of several
@@ -636,6 +638,11 @@ round's push and replies.
 
 `--takeover <PR> [note]`: read
 `~/.claude/skills/team-lead/references/takeover.md` in full and follow it.
+
+## PR watch
+
+`--watch <PR>`: read `~/.claude/skills/team-lead/references/pr-watch.md` in
+full and follow it.
 
 ## Configure a repo
 

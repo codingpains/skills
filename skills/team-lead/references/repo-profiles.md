@@ -164,6 +164,12 @@ and one human approval.
 A gate with nothing on a commit younger than `start_grace_minutes` (15 by
 default) counts as running: bots and CI take a moment to start.
 
+Three optional fields drive the watcher (`pr-watch.md`): `request` on a
+gate, the comment that asks its bot to review a commit nobody asked it to
+(`@qa done`); `max_auto_rounds` (3), how many rounds the watcher starts on
+its own before it asks; and `merge`, the command that turns on auto-merge
+once every gate passes (default `gh pr merge {pr} --auto --squash`).
+
 ## Creating or refreshing a profile
 
 Run by `/team-lead --configure-repo [path]`. See the team-lead skill, section
