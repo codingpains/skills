@@ -33,7 +33,8 @@
       "required": ["RWX: CI", "ci-passed"],
       "details": {
         "url_pattern": "cloud\\.rwx\\.com/[^/]+/runs/([0-9a-f]+)",
-        "command": "rwx results {id}"
+        "command": "rwx results {id}",
+        "retry": "rwx retry {id}"
       }
     }
   ]

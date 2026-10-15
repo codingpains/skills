@@ -147,7 +147,7 @@ and one human approval.
   "updated": "YYYY-MM-DD",
   "gates": [
     {"id": "ci", "kind": "checks", "required": ["<check or status name>"],
-     "details": {"url_pattern": "<regex, group 1 the run id>", "command": "<cli> {id}"}},
+     "details": {"url_pattern": "<regex, group 1 the run id>", "command": "<cli> {id}", "retry": "<cli> {id}"}},
     {"id": "human", "kind": "human", "min_approvals": 1,
      "ignore_authors": ["<login glob>"], "ignore_body_markers": ["<text a bot review carries>"]}
   ]

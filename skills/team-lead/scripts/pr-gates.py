@@ -214,6 +214,8 @@ def checks_gate(pr, spec):
             match = re.search(details.get("url_pattern", "$^"), url or "")
             if match:
                 item["details_command"] = details["command"].format(id=match.group(1))
+                if details.get("retry"):
+                    item["retry_command"] = details["retry"].format(id=match.group(1))
             items.append(item)
     summary = ", ".join(f"{n} {s}" for n, s in states.items())
     if any(s == "running" for s in states.values()):

@@ -52,6 +52,8 @@ def item_block(item, limit):
     if item.get("details_command"):
         lines += ["", f"`{item['details_command']}`:", "", "```",
                   run_details(item["details_command"], limit), "```"]
+    if item.get("retry_command"):
+        lines += ["", f"Rerun with `{item['retry_command']}`"]
     if item.get("url"):
         lines += ["", f"Link: {item['url']}"]
     if item.get("thread_id"):
