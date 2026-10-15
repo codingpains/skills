@@ -24,17 +24,28 @@ refresh the validation profile for the repo the session is in, following
    is accepted by that tool's version. Mark anything you could not confirm
    with `(unverified)`. Prefer file-scoped commands; say which checks can
    only run per workspace.
-4. **Show it** to the human, and for a refresh the diff against the old one.
+4. **PR gates.** When `repos/<repo>.gates.json` for this remote is missing,
+   or is older than 30 days, draft it too (`repo-profiles.md` § PR gates). Read
+   three recently merged PRs:
+   `gh pr list --state merged --limit 3 --json number`, then for each
+   `gh pr view <n> --json reviews,labels,statusCheckRollup` and its
+   comments. Find the checks every PR needed (`ci-passed`, `RWX: CI`), the
+   bots that review or QA (their check names and comment markers), and the
+   approvals people gave. Ask the human which of those are required to
+   merge: the PRs show what ran, not what the repo requires. Then test
+   the file: `pr-gates.py <one of those PR URLs> --gates <draft> --summary`
+   must read `merged` with every gate `pass`.
+5. **Show it** to the human, and for a refresh the diff against the old one.
    Ask with `AskUserQuestion`: save it, or make changes (fold them in and
    show it again).
-5. **Save and commit.** Find the skills repo behind the symlink:
+6. **Save and commit.** Find the skills repo behind the symlink:
    `SKILLS_REPO=$(cd "$(dirname "$(readlink ~/.claude/skills/team-lead)")/.." && pwd)`.
    If `~/.claude/skills/team-lead` is not a symlink (a copy install), stop
    and give the human the profile to add by hand. Otherwise write
-   `$SKILLS_REPO/skills/team-lead/repos/<name>.md`, run
-   `$SKILLS_REPO/scripts/validate.sh`, and commit only that file:
-   `git -C "$SKILLS_REPO" commit -m "team-lead: add|refresh <name> repo profile" -- skills/team-lead/repos/<name>.md`.
-   Approval in step 4 covers this commit.
+   `$SKILLS_REPO/skills/team-lead/repos/<name>.md` (and the gates file),
+   run `$SKILLS_REPO/scripts/validate.sh`, and commit only those files:
+   `git -C "$SKILLS_REPO" commit -m "team-lead: add|refresh <name> repo profile" -- skills/team-lead/repos/<name>.md [skills/team-lead/repos/<repo>.gates.json]`.
+   Approval in step 5 covers this commit.
 
 End with the profile path, the commit, and anything marked `(unverified)`.
 
