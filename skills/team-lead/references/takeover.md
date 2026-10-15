@@ -208,7 +208,8 @@ say so; the PR still stands.
 ## T9. Assess
 
 As § 11, with `Takeover: yes`, the run's `started_at`, and the PR's base as
-the base commit.
+the base commit. Then start the PR watcher (`pr-watch.md` § Start a
+watcher).
 
 **Final message**: as § Final message, plus each condition with what
 happened to it (closed in `<sha>`, answered, declined), the path to

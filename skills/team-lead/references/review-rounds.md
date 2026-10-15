@@ -275,6 +275,7 @@ Register the PR with `link_pull_request` when that tool is available.
 ## R7. Assess
 
 As § 11, with `Round: <n>` and the round's `started_at` in the handoff.
+Then start the PR watcher (`pr-watch.md` § Start a watcher).
 
 **Final message** for a round: the worktree, the PR, the items with what
 happened to each (changed in `<sha>`, answered, declined, waived, rerun),

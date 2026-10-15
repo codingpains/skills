@@ -18,6 +18,20 @@ every wake. Started fresh, a wake-up costs a few thousand tokens.
 With `--dry-run` it does everything up to starting a round or turning on
 auto-merge, writes the context, says what it would have done, and stops.
 
+## Start a watcher
+
+Called from § 10, T9 and R7, once the PR is pushed. Skip it when `run.json`
+`watch.status` is `watching`: a watcher already runs. Skip it for a draft
+PR too, and say in the final message to start it once the PR is ready.
+
+With a `t3_thread_launch` tool, launch a thread titled
+`<TICKET_ID> watch`, with `workspaceStrategy: {"type": "root"}` (the
+watcher works from the main checkout, never from the worktree it may
+remove) and the message `/team-lead <TICKET_ID> --watch <PR URL>`. Save its
+thread ID as `watch.thread` in `run.json`. Otherwise give the human that
+line to paste into a new session. A watcher that died is restarted the same
+way: it resumes from `run.json`.
+
 ## The tools
 
 All under `~/.claude/skills/team-lead/scripts/`. They read GitHub and never

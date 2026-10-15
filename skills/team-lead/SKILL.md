@@ -580,6 +580,7 @@ opening the PR.
    Save the PR URL as `pr` in `run.json`.
 4. If a `link_pull_request` tool is available in this session, register the
    PR URL with it.
+5. Start the PR watcher (`references/pr-watch.md` § Start a watcher).
 
 **Notify.** Skip this with `--draft` or `--no-slack`: the post asks peers to
 review, and a draft is not ready for that. Skip it too when a profile's
@@ -667,5 +668,5 @@ End with, in plain words:
 - anything you dropped from the review and why;
 - the self-assessment: the report path, active time, tokens and cost, and
   its top three optimizations;
-- how to address review comments or a QA verdict later: in a new session,
-  `/team-lead <TICKET_ID> --round <PR URL> [note]`.
+- the PR watcher's thread, or its line to paste; a round by hand is
+  `/team-lead <TICKET_ID> --round <PR URL> [note]` in a new session.
