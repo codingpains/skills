@@ -113,7 +113,7 @@ ticket-source.md   the ticket and its context, verbatim, written by the intake r
 ticket.md          ticket, acceptance criteria, decisions (the brief)
 carry-over.md      decisions from the session that started the run, when it moved to a new one
 groom.md           answer table and scores, when /quill groom ran
-plan.json          {"plan_id": "...", "url": "..."} when the Architect ran
+plan.md            the Architect's plan, when it ran; every later stage reads it from here
 handoff-common.md  the handoff parts every stage shares (handoff.md)
 run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main", "profiles": ["<path>", ...], "mode": "full|lean", "chain": ["architect", ...],
                     "cross_provider": {...}, "pr": "<url>",
@@ -393,30 +393,27 @@ Pick the initial chain there, or the full chain with `--full`, and record
 ## 3. Architect
 
 Spawn `team-architect` with the handoff (`handoff.md`). It explores the code,
-scores its own open decisions with the same scale, publishes the plan
-to Planbin, and returns the plan ID, the URL and any escalations. When
+scores its own open decisions with the same scale, writes the plan to
+`<run dir>/plan.md`, and returns its version and any escalations. When
 worktree setup has not ended yet, say so in the handoff: `node_modules`,
 `dist` and generated code may be missing or partial, so read source, not
-build output.
+build output. Do not read the plan yourself: the report has what you route
+on, and `check-stage.sh` checks the file exists.
 
-- Save `plan.json`, and put the plan ID and URL in `handoff-common.md`.
+- Put the plan's path and version under *Plan* in `handoff-common.md`.
 - If it returned escalations (score 1), ask the human exactly as in step 1,
   add the answers to `## Decisions` (in `ticket.md` and
-  `handoff-common.md`), then have the Architect revise the plan
-  under the **same plan ID** (`npx planbin update`). Within 5 minutes of the
-  Architect's report, continue the same agent with `SendMessage` (load it
-  with `ToolSearch`). After that its cached context has expired, and
-  resuming pays to write all of it again (about $1.40 for a 230k context),
-  so spawn a new `team-architect` with the plan ID, the decisions, the plan
-  sections they change, and the instruction to update that plan. Do the
-  same when `SendMessage` is not available.
-- Check the plan is retrievable: `npx planbin get <plan-id> --json` must
-  return HTML. If it does not, stop and report.
-- Check the Architect's report says `Retained: yes`. A plan uploaded without
-  `--retain` is deleted after 7 days, and an update cannot fix that: send the
-  Architect back to upload it again with `--retain`, and use the new plan ID.
-- Post the plan URL in chat in one line so the human can read it while the
-  pipeline runs.
+  `handoff-common.md`), then have the Architect revise `plan.md` in place.
+  Within 5 minutes of the Architect's report, continue the same agent with
+  `SendMessage` (load it with `ToolSearch`). After that its cached context
+  has expired, and resuming pays to write all of it again (about $1.40 for
+  a 230k context), so spawn a new `team-architect` with the decisions, the
+  plan sections they change, and the instruction to revise `plan.md` (its
+  § 4). Do the same when `SendMessage` is not available.
+- Post the plan's path in chat in one line so the human can read it while
+  the pipeline runs. A human who edits it, or asks for a change, is a
+  revision: bump `Version:` (or have the Architect revise it) before the
+  next stage starts.
 
 ## 4–7. Coding stages
 
@@ -564,9 +561,6 @@ opening the PR.
 
    ## Validations
    | Stage | Command | Result |
-
-   ## Plan
-   <Planbin URL, or "No plan: trivial ticket">
 
    ## Follow-ups
    <deferred should-fix items, or "None">

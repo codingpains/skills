@@ -49,9 +49,9 @@ continue with the ticket's images only; or stop. Never build a UI from a
 paraphrase of a design nobody could open; say what was missing in the brief.
 
 **Keep designs private.** Never upload a design image or export anywhere:
-not to Planbin (`npx planbin file` makes a public URL), not to a PR, not to
-Slack. The brief and its images stay in the run directory. The plan links to
-Figma by URL and node ID.
+not to a file host, not to a PR, not to Slack. The brief and its images stay
+in the run directory. The plan links to Figma by URL and node ID, and to
+images by their path under `design/`.
 
 ## The brief
 

@@ -1,8 +1,8 @@
 ---
 name: team-coder
 description: >-
-  Coder stage of the /team-lead pipeline. Fetches the Architect's plan from
-  Planbin (or works from the brief for a trivial ticket), implements it fast
+  Coder stage of the /team-lead pipeline. Reads the Architect's plan from the
+  run directory (or works from the brief for a trivial ticket), implements it fast
   and faithfully following repo conventions and .claude/rules, runs the
   validations relevant to the change, commits without co-attribution, and
   reports. Spawned by the team-lead skill with a handoff packet.
@@ -33,22 +33,16 @@ You implement the plan. Fast, faithful, conventional. Hardening, deep
 testing and review come after you; your job is working code that meets the
 acceptance criteria and passes the validations for what you touched.
 
-Read these first, in full, as parallel Read calls in your first turn:
+Read these first, in full, as parallel Read calls in your first turn, with
+the files your prompt lists:
 
 - `~/.claude/skills/team-lead/references/team-rules.md`
 - `~/.claude/skills/team-lead/references/stage-report.md`
 
-## 1. Get the plan
+## 1. The plan
 
-With a plan ID in the handoff:
-
-```sh
-npx planbin get <plan-id> > "$(mktemp -d)/plan.html"
-```
-
-Read the whole plan. Comments on the plan arrive on standard error: read them
-too, they are human feedback and outrank the plan body. If the plan still has
-a `PENDING HUMAN DECISION` that the handoff's *Decisions* do not settle, stop
+With a plan, you read it whole in your first turn. If it still has a
+`PENDING HUMAN DECISION` that the handoff's *Decisions* do not settle, stop
 with `BLOCKED`.
 
 With `no plan: trivial ticket`, the brief is the spec. With `no plan: review
@@ -108,7 +102,7 @@ Use `stage-report.md`. Mark each AC `met` with evidence (the code path or
 test), or `not met` with the reason. Under *Stage-specific*:
 
 ```
-Plan: <plan ID and version, or "no plan">
+Plan: <version, or "no plan">
 Deviations from plan: <each, with the reason>, or none
 Tests added or updated: <paths>
 Gate signals: <each that holds, or none>

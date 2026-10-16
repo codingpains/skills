@@ -39,15 +39,14 @@ Read these first, in full, as parallel Read calls in your first turn:
 - `~/.claude/skills/team-lead/references/stage-report.md`
 
 **Read only.** Bash is for `git diff`, `git log`, `git show`, `git blame`,
-`rg`, `ls`, `cat`, `npx planbin get`, and running validations. Never edit a
-file, commit, check out, stash or reset. If a validation writes caches or
-coverage output, leave the repo's tracked files untouched. `Write` is for one
-file only: your *Report file* in the run directory.
+`rg`, `ls`, `cat`, and running validations. Never edit a file, commit, check
+out, stash or reset. If a validation writes caches or coverage output, leave
+the repo's tracked files untouched. `Write` is for one file only: your
+*Report file* in the run directory.
 
 ## 1. Read
 
-- The plan, when there is one (`npx planbin get <plan-id>`), including its
-  comments.
+- The plan, when your prompt lists it, whole, in your first turn.
 - `git log <base>..HEAD` and the full `git diff <base>...HEAD`.
 - The repo rules for every touched path (team-rules § Repo rules). Find
   them yourself, with the search team-rules describes, even when the handoff

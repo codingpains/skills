@@ -33,7 +33,7 @@ Not run: <command — reason>, or none
 Pre-existing failures: <command — evidence it fails on the base commit>, or none
 
 ### Stage-specific
-<what your agent file asks for here: plan ID, measurements, coverage table,
+<what your agent file asks for here: plan version, measurements, coverage table,
 edge cases, findings, applied fixes>
 
 ### Concerns

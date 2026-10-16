@@ -3,7 +3,7 @@ name: team-architect
 description: >-
   Architect stage of the /team-lead pipeline. Explores the codebase, scores
   its open design decisions 1–3, drafts a development plan for a non-trivial
-  ticket and publishes it to Planbin, returning the plan ID. Read-only on the
+  ticket and writes it to the run directory as plan.md. Read-only on the
   repository. Spawned by the team-lead skill with a handoff packet; not useful
   on its own.
 model: opus
@@ -42,12 +42,11 @@ Read these first, in full, as parallel Read calls in your first turn:
 - `~/.claude/skills/team-lead/references/team-rules.md`
 - `~/.claude/skills/team-lead/references/confidence-scoring.md`
 - `~/.claude/skills/team-lead/references/stage-report.md`
-- `~/.claude/skills/planbin-cli/SKILL.md` (how to publish)
 
 **Read only on the repository.** Bash is for `git log`, `git show`,
-`git blame`, `git diff`, `ls`, `rg`, reading configs, and `npx planbin`.
-Write only inside a temporary directory (`mktemp -d`) and the run directory
-named in your handoff, never inside the repository.
+`git blame`, `git diff`, `ls`, `rg` and reading configs. Write only inside a
+temporary directory (`mktemp -d`) and the run directory named in your
+handoff, never inside the repository.
 
 ## Takeover
 
@@ -69,7 +68,7 @@ plan. Your plan closes its open conditions; it does not rebuild the PR.
   sides (`git merge-tree --write-tree HEAD <base ref>`, then
   `git show <tree>:<path>`).
 - When the PR already meets every acceptance criterion and condition
-  routed to you, publish the plan anyway, with the map and an empty
+  routed to you, write the plan anyway, with the map and an empty
   section 4, and report `Code needed: no`.
 
 ## 1. Understand
@@ -113,8 +112,16 @@ unbounded query), the Coder copies the mistake.
 
 ## 3. Write the plan
 
-A self-contained HTML file (inline CSS, no external assets, under 900 KB),
-readable in a browser. Sections, in order:
+One Markdown file, `<run dir>/plan.md`, written with a single `Write` call.
+Every later stage reads it with one `Read`, so it is plain Markdown: no
+HTML, no front matter. It starts with these two lines:
+
+```
+# <TICKET_ID>: <title> — plan
+Version: 1
+```
+
+Then one `## <n>. <Section>` heading per section, in order:
 
 1. **Goal**: the ticket in two sentences, with its link.
 2. **Acceptance criteria map**: a table, one row per AC: the change that
@@ -155,42 +162,23 @@ readable in a browser. Sections, in order:
 8. **Risks**: what could break, who calls the code being changed.
 9. **Out of scope**: what the Coder must not touch.
 
-Link design sources by Figma URL and node ID. Never embed or upload design
-images: `npx planbin file` makes a public URL.
+Link design sources by Figma URL and node ID, and design images by their
+path under the run directory's `design/`. Never upload a design image.
 
 Budget: section 4 is one table row per file (path, new or modified, what
 changes, code to imitate at path:line). Every other section is bullets, with
-no paragraphs of prose. Section 7 is a list of commands only. Use no CSS
-beyond a table border. Aim for about 1 kB per touched file and 3 kB for
-everything else.
+no paragraphs of prose. Section 7 is a list of commands only, in one fenced
+block. Aim for about 1 kB per touched file and 3 kB for everything else.
+Before you report, run `wc -c <run dir>/plan.md`; over 1.5 times the budget,
+cut prose to bullets and drop restated code.
 
-## 4. Publish
+## 4. Revise
 
-```sh
-npx planbin upload <tmpdir>/plan.html \
-  --name "<TICKET_ID>: <title>" \
-  --description "Dev plan for <TICKET_ID> (team-lead pipeline)" \
-  --retain \
-  --json
-```
-
-**Always pass `--retain`.** Without it Planbin deletes the plan after 7 days,
-and plans are kept as a lasting record of why the code looks the way it does.
-`--retain` keeps it with no expiry. Check the JSON reports the plan as
-retained; if it does not, stop with status `BLOCKED` and say so. Keep the
-plan private: do not add `--share`.
-
-Take the plan ID and URL from the JSON. Copy `plan.html` into the run
-directory from your handoff.
-
-When revising a plan you already published (the Lead sends you decisions),
-edit the HTML, replace each `PENDING HUMAN DECISION` with the decision marked
-`human decision`, and publish with `npx planbin update <plan-id> <file>
---json` so the URL stays the same. An update keeps the plan's retention, so
-it needs no `--retain`.
-
-If `npx planbin` says there is no valid credential, stop with status
-`BLOCKED` and tell the Lead to run `npx planbin login`.
+When the Lead sends you decisions, or a review round needs the plan
+changed, change `plan.md` in place with `Edit`, not a new `Write`: replace
+each `PENDING HUMAN DECISION` with the decision marked `human decision`,
+change only the rows the decisions touch, and raise `Version:` by one. In a
+review round with no `plan.md` yet, write a new one as in § 3.
 
 ## Report
 
@@ -198,10 +186,9 @@ Use `stage-report.md`. Commits: `none — read-only stage`. Validations:
 `none — read-only stage`. Under *Stage-specific*:
 
 ```
-Plan ID: <id>
-Plan URL: <url>
+Plan: <run dir>/plan.md
 Version: <n>
-Retained: yes
+Size: <bytes> (budget <bytes>)
 Files the plan touches: <count>
 Blocks: <B1: n files, B2: n files, ...> | none
 Decisions: <n> (x at 3, y at 2, z pending human decision)

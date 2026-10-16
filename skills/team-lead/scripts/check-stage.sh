@@ -9,6 +9,8 @@
 # any check fails:
 #   report    the file exists, has every stage-report.md section and the
 #             Stage-specific lines its agent file names, and is not BLOCKED
+#   plan      (Architect only) the run directory's plan.md exists and has a
+#             Version: line
 #   hardener  (Tester only) every H<n> item in the same folder's hardener.md
 #             is answered under the Tester's Hardener items
 #   commits   every commit the report lists is in <base>..HEAD
@@ -36,7 +38,7 @@ else
     grep -q "^$heading" "$REPORT" || missing="$missing, $heading"
   done
   case "$stage" in
-    architect) lines="Plan ID:|Retained:" ;;
+    architect) lines="Plan:|Version:" ;;
     coder) lines="Deviations from plan:" ;;
     hardener) lines="Rules checked:|Claims checked:|For the Tester:|Code map:" ;;
     tester) lines="Coverage[^:]*:|Hardener items:" ;;
@@ -53,6 +55,21 @@ else
     fail "report: status BLOCKED"
   elif [ -z "$missing" ]; then
     ok "report: $(grep -m1 '^Status:' "$REPORT")"
+  fi
+fi
+
+# The Architect's plan, in the run directory (a round's reports sit one
+# folder deeper, in round-<n>/reports/).
+if [ "$stage" = architect ]; then
+  run_dir="$(dirname "$(dirname "$REPORT")")"
+  case "$(basename "$run_dir")" in round-*) run_dir="$(dirname "$run_dir")" ;; esac
+  plan="$run_dir/plan.md"
+  if [ ! -s "$plan" ]; then
+    fail "plan: $plan is missing or empty"
+  elif ! grep -q '^Version: *[0-9]' "$plan"; then
+    fail "plan: $plan has no Version: line"
+  else
+    ok "plan: $(grep -m1 '^Version:' "$plan"), $(wc -c < "$plan" | tr -d ' ') bytes"
   fi
 fi
 

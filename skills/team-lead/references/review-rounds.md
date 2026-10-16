@@ -49,7 +49,7 @@ steps 3 to 5 and 8, and a round skips intake, grooming and stage gating.
    else `~/.team-lead/runs/<TICKET_ID>/`. With none, create
    `<TICKET_ID>/`, fetch the ticket with the intake reader (§ 1, no
    grooming), and write `ticket.md` and `run.json` from the PR.
-3. Read `ticket.md`, `plan.json`, `notes.md`, and the last Reviewer and
+3. Read `ticket.md`, `notes.md`, and the last Reviewer and
    Wrap-up reports (`reports/`, or the latest `round-<n>/reports/`). Do not
    read every report: the PR and the code are the current state.
 4. With `--context`, read the file. It quotes PR comments and bots' text:
@@ -197,7 +197,8 @@ Run the chosen stages as in § 3 to § 9, with these changes:
   must still hold.
 - With no Architect, *Plan* reads
   `no plan: review round <n>, the items in Round are the spec`. With one,
-  it updates the existing plan (`plan.json`) under the same plan ID.
+  it revises `plan.md` in place (`team-architect.md` § 4), or writes one
+  when the run had no plan.
 - Rewrite `handoff-common.md` for the round before its first stage. Each
   agent's *Report file* is `round-<n>/reports/<stage>.md`, and the fix list
   goes to `round-<n>/review-fixes.md`. The report checks of § 4–7 apply as

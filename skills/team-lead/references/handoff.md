@@ -54,7 +54,7 @@ Figma: D1 <url> node <id>, ...   Figma tools: <mcp__plugin_quill_figma__ | mcp__
 How to use it: ~/.claude/skills/team-lead/references/design-context.md § How each agent uses it>
 
 ## Plan
-<Planbin plan ID and URL; "none yet: you are the Architect";
+<"~/.team-lead/runs/<TICKET_ID>/plan.md, version <n>"; "none yet: you are the Architect";
 "no plan: trivial ticket, the brief is the spec";
 or "no plan: review round <n>, the items in Round are the spec">
 
@@ -88,8 +88,10 @@ Conditions (each must be met or answered when the PR is done):
 ```
 # <Stage> — <TICKET_ID>: <title>
 
-Read ~/.team-lead/runs/<TICKET_ID>/handoff-common.md first: it holds the
-worktree, the ticket, the design and the plan.
+In your first turn, read these whole, as parallel Read calls together with
+the files your agent file lists:
+- ~/.team-lead/runs/<TICKET_ID>/handoff-common.md: the worktree, the ticket, the design
+- ~/.team-lead/runs/<TICKET_ID>/plan.md: the plan
 
 Report file: ~/.team-lead/runs/<TICKET_ID>/reports/<stage>.md
   (in a review round: round-<n>/reports/<stage>.md)
@@ -105,4 +107,9 @@ stage: the block for a Coder, the Round rows it acts on, the numbered fix
 list from review-fixes.md verbatim for the Wrap-up>
 ```
 
-Never put in a prompt what the shared file already says.
+Drop the `plan.md` line when there is no plan, and for the Architect, which
+writes it, and the Wrap-up, whose fix list is the spec. A run from before
+plans were local has `plan.html` and no `plan.md`: list `plan.html` instead.
+
+Never put in a prompt what the shared file already says. Never paste the
+plan into a prompt: the agent reads the file.

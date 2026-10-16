@@ -83,7 +83,7 @@ Call `delegate_task` with:
   `options` `{"reasoningEffort": "<pinned value>"}`;
 - `role`: the stage's T3 role from the table;
 - `runtimeMode` `full-access`: Codex's workspace sandbox blocks writing the
-  report to `~/.team-lead/runs/` and the network for `npx planbin get`. The
+  report to `~/.team-lead/runs/`, outside the worktree. The
   playbook keeps the stage read-only, and `check-stage.sh` proves it;
 - `interactionMode` `default`, `mode` `wait`, `timeoutMs` `2400000`
   (40 minutes);
