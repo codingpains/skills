@@ -4,8 +4,6 @@
 #   skills/<name>/SKILL.md  frontmatter has name == <name> and a description
 #   agents/<name>.md        frontmatter has name == <name>, a description, and a known model
 #   codex/agents/<name>.toml has matching name, description, GPT model, effort and sandbox
-#   skills/team-lead/repos/<name>.md  repo profile with name == <name> and a host/owner/repo remote
-#   skills/team-lead/repos/<repo>.gates.json  valid JSON with a host/owner/repo remote and known gate kinds
 #   installed Claude and Codex references to a skill in this repo point at a real file
 #   skills/team-lead/SKILL.md stays under its size budget (the Lead re-reads it every turn)
 set -euo pipefail
@@ -67,46 +65,6 @@ for file in "$REPO"/agents/*.md; do
     ''|sonnet|opus|haiku|fable|inherit|claude-*) ;;
     *) fail "agents/$base.md: unknown model '$model'" ;;
   esac
-done
-
-for file in "$REPO"/skills/team-lead/repos/*.md; do
-  [ -f "$file" ] || continue
-  base="$(basename "$file" .md)"
-  name="$(field "$file" name)"
-  [ "$name" = "$base" ] || fail "repos/$base.md: name '$name' does not match file name"
-  remote="$(field "$file" remote)"
-  workspace="$(field "$file" workspace)"
-  if [ -n "$workspace" ]; then
-    [ -z "$remote" ] || fail "repos/$base.md: has both remote and workspace"
-    repos="$(field "$file" repos | tr -d '[] ' | tr ',' ' ')"
-    [ -n "$repos" ] || fail "repos/$base.md: workspace profile lists no repos"
-    for repo in $repos; do
-      [ -f "$REPO/skills/team-lead/repos/$repo.md" ] || fail "repos/$base.md: no profile repos/$repo.md"
-    done
-  else
-    case "$remote" in
-      */*/*) ;;
-      *) fail "repos/$base.md: remote '$remote' is not host/owner/repo" ;;
-    esac
-  fi
-done
-
-for file in "$REPO"/skills/team-lead/repos/*.gates.json; do
-  [ -f "$file" ] || continue
-  problem="$(python3 - "$file" 2>&1 <<'PY'
-import json, sys
-try:
-    data = json.load(open(sys.argv[1]))
-except ValueError as error:
-    sys.exit(f"not valid JSON: {error}")
-if data.get("remote", "").count("/") != 2:
-    sys.exit(f"remote '{data.get('remote')}' is not host/owner/repo")
-kinds = {"checks", "human", "reef", "visual-qa"}
-for gate in data.get("gates") or sys.exit("no gates"):
-    if not gate.get("id") or gate.get("kind") not in kinds:
-        sys.exit(f"gate {gate.get('id')!r} has unknown kind {gate.get('kind')!r}")
-PY
-)" || fail "repos/$(basename "$file"): $problem"
 done
 
 # References like ~/.claude/skills/team-lead/references/x.md must exist when the skill lives here.

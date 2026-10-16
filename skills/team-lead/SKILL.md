@@ -169,7 +169,7 @@ $2.30. When this session did such work, before preflight:
    `git rev-parse --path-format=absolute --git-common-dir`), even when the
    session was started from another worktree. When the session's folder is
    not a repository, look for a **workspace profile** in
-   `~/.claude/skills/team-lead/repos/` whose `workspace` is that folder
+   `~/.team-lead/repos/` whose `workspace` is that folder
    (`repo-profiles.md` § Workspace profiles) and read it in full: it names
    the repos the folder holds and how to pick one for a ticket. Run intake
    (step 3) first, pick the repo as the profile says, and take that repo as
@@ -207,7 +207,7 @@ $2.30. When this session did such work, before preflight:
    `git -C <main checkout> worktree lock --reason "team-lead <TICKET_ID>" <worktree>`
    (`already locked` is fine).
 6. **Find the repo profiles.** Match the main checkout's remote against the
-   profiles in `~/.claude/skills/team-lead/repos/` as `repo-profiles.md`
+   profiles in `~/.team-lead/repos/` as `repo-profiles.md`
    § Matching says, and read every match in full. Record their paths, and
    the workspace profile's when there is one, in `run.json`; every handoff
    lists them. A profile's *Conventions* section (PR title, Slack, PR body)

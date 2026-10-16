@@ -28,9 +28,10 @@ Pipeline performance reports live in `~/.team-lead/performance/` (outside
 this repo). When asked to improve the pipeline, read `index.jsonl` there
 first: optimizations recurring across runs come first.
 
-Repo profiles (`skills/team-lead/repos/<name>.md`) hold per-repo checks.
-`/team-lead --configure-repo` writes and commits them here; hand edits are
-fine too. Keep `updated:` current when you change a command.
+Repo profiles hold per-repo checks. They live outside this repo, in
+`~/.team-lead/repos/<name>.md`, and are never committed here.
+`/team-lead --configure-repo` writes them; hand edits are fine too. Keep
+`updated:` current when you change a command.
 
 Grooming uses `/quill groom` from the `quill` skill. Quill keeps its user
 state (`quill.config.json`, `projects/*.notes.md`) in `$QUILL_HOME`, else

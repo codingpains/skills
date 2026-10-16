@@ -23,7 +23,7 @@ with a stable `key` so the watcher can tell new items from handled ones.
 gate has finished and one failed), `stalled` (some gate is waiting and none
 is running; `waiting_on` names them).
 
-The gates file is `repos/<name>.gates.json` whose `remote` matches the PR's
+The gates file is `~/.team-lead/repos/<name>.gates.json` whose `remote` matches the PR's
 repo (repo-profiles.md § PR gates). Without one: every check on the head
 commit, and one human approval. Reads only; never writes to GitHub.
 """
@@ -37,8 +37,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-REPOS = os.path.join(HERE, "..", "repos")
+REPOS = os.path.expanduser("~/.team-lead/repos")
 
 DEFAULT_GATES = {
     "gates": [
@@ -87,7 +86,7 @@ def find_gates(remote, explicit):
     for path in sorted(glob.glob(os.path.join(REPOS, "*.gates.json"))):
         data = json.load(open(path))
         if data.get("remote") == remote:
-            return os.path.relpath(path, os.path.join(HERE, "..")), data
+            return path, data
     return None, DEFAULT_GATES
 
 

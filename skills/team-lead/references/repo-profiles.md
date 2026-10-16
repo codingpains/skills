@@ -6,9 +6,13 @@ it. Without a profile, agents work the commands out from the repo each time
 (`team-rules.md` § Validations). With one, they start from commands that are
 already known to work.
 
-Profiles live in `~/.claude/skills/team-lead/repos/<name>.md`. That folder is
-a symlink into the skills git repo, so profiles are versioned with the skill.
-They are never committed to the target repository.
+Profiles live in `~/.team-lead/repos/<name>.md`, on this machine only, next
+to the runs: never in the skills repo, never in the target repository. Their
+helper files (a setup script, a coverage or test config) sit beside them,
+named `<name>.<what>.<ext>`, and the profile calls them by that full path.
+A missing folder means no profiles yet. A `run.json` that lists a profile
+inside the skill's own folder (`.../team-lead/repos/`) is from before the
+move: read the same file name under `~/.team-lead/repos/`.
 
 ## Matching
 
@@ -135,7 +139,7 @@ records both in `run.json`.
 
 What a PR in a repo needs before it merges: the bots that review it, the
 human approvals, the CI checks. The PR watcher reads them from
-`repos/<repo>.gates.json`, one file per repository whatever its `paths`
+`~/.team-lead/repos/<repo>.gates.json`, one file per repository whatever its `paths`
 profiles, matched by `remote` like a profile.
 `~/.claude/skills/team-lead/scripts/pr-gates.py <PR URL> --summary` scores
 a PR against them. Without a file: every check on the PR's latest commit,
