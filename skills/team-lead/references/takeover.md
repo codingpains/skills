@@ -203,7 +203,9 @@ ready and post it). Use the profile's channel, else `C0BULBDLXUK`. Load
    bots pick it up from there.
 
 Save the post's or reply's link as `slack` in `run.json`. If Slack fails,
-say so; the PR still stands.
+say so, or when `ToolSearch` finds no Slack tool, say so and give the
+message and channel to paste by hand (as § Final message); the PR still
+stands.
 
 ## T9. Assess
 

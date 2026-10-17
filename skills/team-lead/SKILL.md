@@ -589,7 +589,10 @@ PR: <pr-url>
 <one-line summary of the change>
 ```
 
-If the Slack post fails, say so; the PR still stands.
+If the Slack post fails, or `ToolSearch` finds no Slack send tool, say so;
+the PR still stands. Write the finished message to `slack-message.md` in the
+run directory and log the reason in `notes.md`, so the final message can
+hand it over to paste.
 
 ## 11. Self-assessment
 
@@ -653,7 +656,9 @@ End with, in plain words:
   merged, the human removes it with
   `git worktree unlock <worktree> && git worktree remove <worktree>`;
 - the PR URL and whether Slack was notified (for a draft: not posted, and
-  post it with the message above once the PR is marked ready);
+  post it with the message above once the PR is marked ready). When the
+  post was skipped for lack of a tool or failed, say so in the first lines
+  and show the message and the channel in a code block to paste by hand;
 - one line per stage: status, commit count, validations passed, and each
   stage the gates skipped, with the reason. A stage `--cross-provider`
   named also says the model it ran on, or that it fell back to Claude and
