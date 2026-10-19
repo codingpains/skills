@@ -174,6 +174,15 @@ gate, the comment that asks its bot to review a commit nobody asked it to
 its own before it asks; and `merge`, the command that turns on auto-merge
 once every gate passes (default `gh pr merge {pr} --auto --squash`).
 
+Two more decide when the watcher asks for a human review in Slack:
+`ask_review_after`, the gate ids that must be far enough along first (every
+gate but the human one by default), and `review_risks` on a `reef` gate, the
+Reef risk levels that count as far enough even with findings (`["low"]`).
+A `reef` gate is far enough when it passes, its risk is in `review_risks`,
+or Reef approved the commit; a `visual-qa` gate when no case failed and at
+most `max_blocked` are blocked, waived or not; any other gate when it
+passes.
+
 ## Creating or refreshing a profile
 
 Run by `/team-lead --configure-repo [path]`. See the team-lead skill, section

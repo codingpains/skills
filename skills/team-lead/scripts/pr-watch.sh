@@ -8,9 +8,11 @@
 # <watch dir>/state.json. It exits as soon as the PR's state is news: not
 # `running`, and a signature (state, head commit, waiting gates, item keys)
 # different from <watch dir>/acted, which `--ack` writes once the Lead has
-# acted on the current state. It also exits after --for seconds (6900, under
-# Claude Code's 2-hour limit for a background command) so the Lead can
-# re-arm it. The last line says why:
+# acted on the current state. It exits too, even while a gate runs, when the
+# PR is ready for a human review (`review_ready`) and <watch dir>/review-asked
+# does not exist: the Lead writes it once it has asked. And it exits after
+# --for seconds (6900, under Claude Code's 2-hour limit for a background
+# command) so the Lead can re-arm it. The last line says why:
 #
 #   watch: news <overall> <head>     state.json holds the news
 #   watch: timeout <overall> <head>  nothing new; run it again
@@ -55,7 +57,14 @@ while :; do
     mv "$dir/state.next" "$dir/state.json"
     overall="$(field "$dir/state.json" overall)"
     head="$(field "$dir/state.json" head)"
+    news=no
     if [ "$overall" != running ] && [ "$(field "$dir/state.json" signature)" != "$(cat "$dir/acted")" ]; then
+      news=yes
+    fi
+    if [ "$(field "$dir/state.json" review_ready)" = True ] && [ ! -e "$dir/review-asked" ]; then
+      news=yes
+    fi
+    if [ "$news" = yes ]; then
       python3 "$HERE/pr-gates.py" --show "$dir/state.json"
       echo "watch: news $overall $head"
       exit 0

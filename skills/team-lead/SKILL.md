@@ -22,8 +22,8 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 |---|---|
 | `--full` | run every specialist stage; the default is the lean, risk-gated chain in `references/stage-gates.md` |
 | `--from <stage>` | resume at `coder`, `hardener`, `tester`, `reviewer`, `wrapup`, `pr` or `assess`, reusing the run directory (`assess` runs only step 11, for example after a stopped run) |
-| `--draft` | open the PR as a draft, and skip the Slack post (a post asks peers to review, and a draft is not ready for that) |
-| `--no-slack` | skip the Slack post (for dry runs of the pipeline) |
+| `--draft` | open the PR as a draft; no watcher starts, so no Slack post asks for a review |
+| `--no-slack` | the watcher never posts in Slack (for dry runs of the pipeline) |
 | `--round <PR> [note]` | address review comments, a QA verdict or a requested change on an open PR of this ticket, in a new session (`references/review-rounds.md`). Text after the PR is the human's note for the round. With `--from <stage>`, resume the latest round at that stage. The watcher adds `--auto --context <file>` |
 | `--takeover <PR> [note]` | finish an open PR another agent started, on its branch: the whole PR goes through the team (`references/takeover.md`). Text after the PR is the human's note. With `--from <stage>`, resume it |
 | `--watch <PR> [--dry-run]` | babysit an open PR of this ticket until it merges: start a round when every merge gate has finished and one failed, turn on auto-merge when all pass (`references/pr-watch.md`) |
@@ -116,7 +116,7 @@ groom.md           answer table and scores, when /quill groom ran
 plan.md            the Architect's plan, when it ran; every later stage reads it from here
 handoff-common.md  the handoff parts every stage shares (handoff.md)
 run.json           {"main_checkout": "...", "worktree": "...", "branch": "...", "base": "<sha>", "base_ref": "origin/main", "profiles": ["<path>", ...], "mode": "full|lean", "chain": ["architect", ...],
-                    "cross_provider": {...}, "pr": "<url>",
+                    "cross_provider": {...}, "pr": "<url>", "slack_channel": "<id>" or "slack_skip": "<reason>", "slack": "<post link, once posted>",
                     "rounds": [{"n": 1, "started_at": "...", "base": "<sha>", "chain": ["coder", ...], "cross_provider": {...}}]}
                    (`cross_provider` only with the flag, as cross-provider.md § What to record says)
 setup.log          worktree setup output (preflight step 7)
@@ -576,23 +576,20 @@ opening the PR.
    PR URL with it.
 5. Start the PR watcher (`references/pr-watch.md` § Start a watcher).
 
-**Notify.** Skip this with `--draft` or `--no-slack`: the post asks peers to
-review, and a draft is not ready for that. Skip it too when a profile's
-*Conventions* say `Slack: none`, without searching for the tool. A profile
-that names a channel replaces the one below. Otherwise load
-`mcp__claude_ai_Slack__slack_send_message` with `ToolSearch` and post to
-channel `C0BULBDLXUK`:
+**Notify.** Prepare the Slack post that asks peers to review; do not post
+it. The PR watcher posts it once Reef and QA say the PR is fit for a person
+to look at (`references/pr-watch.md` W8), so nobody is asked to review a PR
+the bots are about to send back. With `--no-slack`, or when a profile's
+*Conventions* say `Slack: none`, save the reason as `slack_skip` in
+`run.json` and stop here. Otherwise save the channel as `slack_channel` in
+`run.json` (a profile that names a channel replaces `C0BULBDLXUK`), and
+write the message to `slack-message.md` in the run directory:
 
 ```
 <ID>: <title>
 PR: <pr-url>
 <one-line summary of the change>
 ```
-
-If the Slack post fails, or `ToolSearch` finds no Slack send tool, say so;
-the PR still stands. Write the finished message to `slack-message.md` in the
-run directory and log the reason in `notes.md`, so the final message can
-hand it over to paste.
 
 ## 11. Self-assessment
 
@@ -655,10 +652,10 @@ End with, in plain words:
 - the worktree path. It stays locked for review follow-ups; once the PR is
   merged, the human removes it with
   `git worktree unlock <worktree> && git worktree remove <worktree>`;
-- the PR URL and whether Slack was notified (for a draft: not posted, and
-  post it with the message above once the PR is marked ready). When the
-  post was skipped for lack of a tool or failed, say so in the first lines
-  and show the message and the channel in a code block to paste by hand;
+- the PR URL, and that the PR watcher asks for a review in Slack once Reef
+  and QA pass (or why it will not: `--no-slack`, `Slack: none`). For a
+  draft, or when no watcher was started, show the message and the channel
+  in a code block, to post once the PR is ready;
 - one line per stage: status, commit count, validations passed, and each
   stage the gates skipped, with the reason. A stage `--cross-provider`
   named also says the model it ran on, or that it fell back to Claude and

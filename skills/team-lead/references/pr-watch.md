@@ -5,18 +5,20 @@ numbers without a file name (§ 10, preflight step 5) are in `SKILL.md`;
 R-numbers are in `review-rounds.md`.
 
 `--watch <PR> [--dry-run]` babysits an open PR of this ticket until it
-merges. It waits for the repo's merge gates (the bots, a human review, CI)
-to finish on the PR's latest commit. Then it starts a review round with what
-failed, turns on auto-merge once everything passes, and removes the worktree
-after the merge. It never writes code itself: rounds run in their own
-session.
+merges. It waits for the repo's bot and CI gates to finish on the PR's
+latest commit, then starts a review round with what failed, without waiting
+for a person's review. Once the bots say the PR is fit for a person to look
+at, it asks for a review in Slack. It turns on auto-merge once everything
+passes, and removes the worktree after the merge. It never writes code
+itself: rounds run in their own session.
 
 **Run it in a session of its own.** Each wake-up re-reads the session, so a
 watcher in the session that built the PR pays for that whole history on
 every wake. Started fresh, a wake-up costs a few thousand tokens.
 
-With `--dry-run` it does everything up to starting a round or turning on
-auto-merge, writes the context, says what it would have done, and stops.
+With `--dry-run` it does everything up to starting a round, asking for a
+review or turning on auto-merge, writes the context, says what it would
+have done, and stops.
 
 ## Start a watcher
 
@@ -42,7 +44,9 @@ write to it.
 - `pr-watch.sh <PR URL> <watch dir>` re-scores every 5 minutes into
   `<watch dir>/state.json`. It exits when the state is news, or after
   6900 s. `pr-watch.sh --ack <watch dir>` marks the current state as acted
-  on, so the next run waits for something new.
+  on, so the next run waits for something new. It also exits, even while a
+  gate runs, when `review_ready` is true and `<watch dir>/review-asked` does
+  not exist.
 - `pr-context.py <state.json> --out <file> --skip-keys <file>` writes what
   failed: Reef findings, QA cases with expected and actual, people's threads
   and comments, and failed CI with its `rwx results` summary.
@@ -72,12 +76,15 @@ habits). Read only the last lines of its output: the gate summary and the
 ## W3. Act
 
 Act on the `watch:` line and on `overall` in `<watch dir>/state.json`.
-After every action, `pr-watch.sh --ack <watch dir>`, a line in `notes.md`,
-and back to W2, unless the row says stop.
+First, when `review_ready` is true and `<watch dir>/review-asked` does not
+exist, do W8. Then the row below. After every action,
+`pr-watch.sh --ack <watch dir>`, a line in `notes.md`, and back to W2,
+unless the row says stop.
 
 | Line or `overall` | Do |
 |---|---|
 | `watch: timeout` | back to W2 |
+| `running` | nothing more: the watcher woke for W8 only |
 | `watch: error` | back to W2 once; a second error in a row: tell the human the error and stop |
 | `stalled` | W4 |
 | `round-needed` | W5 |
@@ -96,12 +103,13 @@ and back to W2, unless the row says stop.
   add `{"gate", "head", "at"}` to `watch.requests`. Post it only once per
   head: a second request cancels the run the first one started.
 - `human`: tell the human once per head, in one line: who is asked to
-  review (`gh pr view <PR> --json reviewRequests`), and each other gate's
-  summary. With failed gates, add that a round starts as soon as the review
-  lands.
+  review (`gh pr view <PR> --json reviewRequests`), each other gate's
+  summary, and whether W8 asked for a review in Slack. Failed bot or CI
+  gates never wait for a person: they start a round (W5).
 - Any other gate: tell the human its summary once per head.
 
-Your message is the notice. Post nothing else on the PR or in Slack.
+Your message is the notice. Post nothing else on the PR, and nothing in
+Slack beyond W8.
 
 ## W5. Start a round
 
@@ -156,3 +164,29 @@ something new.
 3. **Final message:** the PR and when it merged, the rounds the watcher
    started (one line each: head, items, thread), the requests it posted,
    and whether the worktree was removed.
+
+## W8. Ask for a review
+
+`review_ready` in `state.json` means no person has approved yet, and the
+gates in the gates file's `ask_review_after` (every gate but the human one
+when absent) are far enough along: Reef says low risk or approved this
+commit, QA has no failed case and at most `max_blocked` blocked ones, and
+any other listed gate passes. CI may still be running. Ask once per PR,
+not per commit.
+
+1. **Skip** when `run.json` has `slack` (a post already went out, as
+   takeover.md T8 does) or `slack_skip` (`--no-slack`, or the profile says
+   `Slack: none`). Write the reason to `<watch dir>/review-asked` and go on
+   with W3.
+2. **Message.** `slack-message.md` from the run directory when § 10 wrote
+   it; otherwise build it as § 10 *Notify* does. Add a last line with the
+   Reef and QA gate summaries from `state.json`, e.g.
+   `Reef: no_blockers, risk low · QA: 12 pass, 1 blocked`.
+3. **Post.** With `--dry-run`, print the message and the channel, and
+   stop. Otherwise load `mcp__claude_ai_Slack__slack_send_message` with
+   `ToolSearch` and post it to `run.json` `slack_channel` (§ 10's default
+   channel when absent). Save the post's link as `slack` in `run.json`, and
+   write it to `<watch dir>/review-asked`.
+4. **No tool, or the post failed.** Tell the human, with the message and
+   the channel in a code block to paste. Write the reason to
+   `<watch dir>/review-asked` all the same, so the watcher asks only once.

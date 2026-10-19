@@ -19,9 +19,16 @@ asked), `pass` or `fail`. Items are what a review round would address, each
 with a stable `key` so the watcher can tell new items from handled ones.
 
 `overall`, first match wins: `merged`, `closed`, `conflict`, `running`
-(some gate is running), `ready` (every gate passes), `round-needed` (every
-gate has finished and one failed), `stalled` (some gate is waiting and none
-is running; `waiting_on` names them).
+(some gate is running), `stalled` (a bot gate is waiting), `round-needed`
+(a gate failed; a person not having reviewed yet does not hold a round
+back), `stalled` (only the human gate is waiting), `ready` (every gate
+passes). `waiting_on` names the waiting gates.
+
+`review_ready` is true when the PR is open, not a draft, has no human
+approval yet, and every gate in the gates file's `ask_review_after` (default:
+every gate but the human one) is far enough along for a person to look:
+Reef low risk or approved, QA with no failed case and at most `max_blocked`
+blocked ones, any other gate passing. The watcher then asks for a review.
 
 The gates file is `~/.team-lead/repos/<name>.gates.json` whose `remote` matches the PR's
 repo (repo-profiles.md § PR gates). Without one: every check on the head
@@ -148,9 +155,11 @@ class PR:
             yield thread, (first.get("author") or {}), first
 
 
-def gate(spec, status, summary, items=()):
+def gate(spec, status, summary, items=(), review_ok=None):
+    """review_ok: far enough along to ask a person to review; by default, a pass."""
     return {"id": spec["id"], "kind": spec["kind"], "status": status,
-            "summary": summary, "items": list(items)}
+            "summary": summary, "items": list(items),
+            "review_ok": status == "pass" if review_ok is None else review_ok}
 
 
 def not_started(pr, spec, what):
@@ -269,7 +278,11 @@ def reef_gate(pr, spec):
     items += threads_for(pr, spec, "reef-thread")
     failed = verdict["conclusion"] not in spec.get("pass_conclusions", ["no_blockers"])
     blocking = [i for i in items if not i.get("optional")]
-    return gate(spec, "fail" if failed or blocking else "pass", summary, items)
+    status = "fail" if failed or blocking else "pass"
+    approved = any(r["state"] == "APPROVED" and r.get("commit_id") == pr.head
+                   and matches((r.get("user") or {}).get("login"), spec.get("authors")) for r in pr.reviews)
+    low_risk = verdict["risk"].lower() in spec.get("review_risks", ["low"])
+    return gate(spec, status, summary, items, review_ok=status == "pass" or approved or low_risk)
 
 
 QA_REPORT = re.compile(r"<!-- visual-qa-report:1 (\{.*\}) -->")
@@ -322,7 +335,9 @@ def qa_gate(pr, spec):
     summary = ", ".join(f"{n} {s}" for s, n in sorted(counts.items()))
     if waived:
         summary += f"; waived {', '.join(sorted(waived))}"
-    result = gate(spec, "fail" if items else "pass", summary, items)
+    blocked = counts.get("blocked", 0)
+    review_ok = not counts.get("fail") and blocked <= spec.get("max_blocked", 0)
+    result = gate(spec, "fail" if items else "pass", summary, items, review_ok=review_ok)
     result["blocked_waivers_left"] = max(spec.get("max_blocked", 0) - blocked_waived, 0)
     return result
 
@@ -371,6 +386,7 @@ KINDS = {"checks": checks_gate, "reef": reef_gate, "visual-qa": qa_gate, "human"
 
 
 def overall(pr, gates):
+    """A person not having reviewed holds nothing back: fix rounds start without them."""
     state, mergeable = pr.view["state"], pr.view.get("mergeable")
     if state == "MERGED":
         return "merged", []
@@ -381,17 +397,29 @@ def overall(pr, gates):
     statuses = {g["id"]: g["status"] for g in gates}
     if "running" in statuses.values():
         return "running", [i for i, s in statuses.items() if s == "running"]
-    waiting = [i for i, s in statuses.items() if s == "waiting"]
-    if waiting:
+    waiting = [g["id"] for g in gates if g["status"] == "waiting"]
+    if any(g["status"] == "waiting" and g["kind"] != "human" for g in gates):
         return "stalled", waiting
     if "fail" in statuses.values():
-        return "round-needed", []
+        return "round-needed", waiting
+    if waiting:
+        return "stalled", waiting
     return "ready", []
+
+
+def review_ready(pr, gates, config):
+    """Every gate a person should wait for is far enough along, and no person has approved yet."""
+    human = [g for g in gates if g["kind"] == "human"]
+    if pr.view["state"] != "OPEN" or pr.view["isDraft"] or not human or human[0]["status"] == "pass":
+        return False
+    after = config.get("ask_review_after") or [g["id"] for g in gates if g["kind"] != "human"]
+    return all(g["review_ok"] for g in gates if g["id"] in after)
 
 
 def print_summary(result):
     waiting = f" (waiting on {', '.join(result['waiting_on'])})" if result["waiting_on"] else ""
-    print(f"{result['url']} @ {result['head'][:7]}: {result['overall']}{waiting}")
+    ask = "; ready for a human review" if result.get("review_ready") else ""
+    print(f"{result['url']} @ {result['head'][:7]}: {result['overall']}{waiting}{ask}")
     for g in result["gates"]:
         items = f" [{len(g['items'])} items]" if g["items"] else ""
         print(f"  {g['id']:<6} {g['status']:<8} {g['summary']}{items}")
@@ -427,7 +455,8 @@ def main():
               "head": pr.head, "head_age_minutes": round(pr.head_age), "branch": pr.view["headRefName"],
               "base": pr.view["baseRefName"], "mergeable": pr.view.get("mergeable"),
               "auto_merge": bool(pr.view.get("autoMergeRequest")), "overall": state,
-              "waiting_on": waiting_on, "gates": gates, "gates_file": gates_file or "default"}
+              "waiting_on": waiting_on, "review_ready": review_ready(pr, gates, config), "gates": gates,
+              "gates_file": gates_file or "default"}
     # What the watcher compares with what it last acted on: a change here is news.
     result["signature"] = "|".join([state, pr.head, ",".join(waiting_on)]
                                    + sorted(i["key"] for g in gates for i in g["items"]))

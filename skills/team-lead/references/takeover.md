@@ -202,7 +202,9 @@ ready and post it). Use the profile's channel, else `C0BULBDLXUK`. Load
 3. **Not found:** post the PR fresh, with the message in § 10. The review
    bots pick it up from there.
 
-Save the post's or reply's link as `slack` in `run.json`. If Slack fails,
+Save the post's or reply's link as `slack` in `run.json`, so the PR
+watcher does not ask again (pr-watch.md W8). When this step was skipped for
+`--no-slack` or `Slack: none`, save the reason as `slack_skip`. If Slack fails,
 say so, or when `ToolSearch` finds no Slack tool, say so and give the
 message and channel to paste by hand (as § Final message); the PR still
 stands.
