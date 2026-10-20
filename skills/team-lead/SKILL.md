@@ -265,7 +265,8 @@ Spawn one `general-purpose` agent with `model: "sonnet"`, the description
 Ticket: <argument>`. Do not read that file yourself. It writes
 `ticket-source.md` (the ticket, every property and comment, the linked
 issues, tasks and documents, all verbatim) to the run directory, saves the
-ticket's images to `design/source/`, and returns the key, title, estimate,
+ticket's images to `design/source/`, moves a not-started ticket to In
+Progress (or the tracker's equivalent), and returns the key, title, estimate,
 Linear branch name and the file's path. Read `ticket-source.md` once, with
 `Read`. `NOT FOUND`: ask the human for a Linear identifier or a Notion task,
 or, without a Notion tasks database configured, for the task's URL.
