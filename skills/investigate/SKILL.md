@@ -1,7 +1,7 @@
 ---
 name: investigate
-description: "Investigate a production problem from a Linear ticket, a Slack thread or a Sentry issue and answer the way Gustavo wants: the root cause, a confidence score on a fixed scale, evidence built on real company / flow / worker IDs, every earlier explanation checked, customer impact, and next steps with an owner. Read-only on production. Reports in chat and never posts to Linear, Slack or GitHub until Gustavo asks, so he can question the findings first. Use when Gustavo says 'launch an investigation', 'investigate', 'dig into', 'research', 'deep dive', 'find the root cause', 'what happened', 'diagnose', or pastes a ticket ID or Slack link about a malfunction. Invoke as /investigate <ticket IDs | Slack links | Sentry issues> [\"my read is …\"]."
-argument-hint: "<ticket IDs | Slack links | Sentry issues> [\"my read is …\"]"
+description: "Investigate a production problem from a Linear ticket, a Slack thread or a Sentry issue and answer the way Gustavo wants: the root cause, a confidence score on a fixed scale, evidence built on real company / flow / worker IDs, every earlier explanation checked, customer impact, and next steps with an owner. Read-only on production. Reports in chat and never posts to Linear, Slack or GitHub until Gustavo asks, so he can question the findings first. Use when Gustavo says 'launch an investigation', 'investigate', 'dig into', 'research', 'deep dive', 'find the root cause', 'what happened', 'diagnose', or pastes a ticket ID or Slack link about a malfunction. Invoke as /investigate <ticket IDs | Slack links | Sentry issues> [\"my read is …\"] [\"focus: …\"]."
+argument-hint: "<ticket IDs | Slack links | Sentry issues> [\"my read is …\"] [\"focus: …\"]"
 ---
 
 # /investigate
@@ -58,8 +58,11 @@ where it stands, and continue from there.
 ## 1. Intake (ask nothing)
 
 1. **Sort the arguments:** Linear IDs, Slack links, Sentry issues, PRs, and
-   free text. Free text is Gustavo's own reading of the problem. It becomes
-   hypothesis H1, credited to him.
+   free text. Free text that starts with `focus:` is a **focus note**: the
+   aspect of the ticket he wants answered (one customer, one symptom, one
+   question such as "was it the release?"). It steers the work; it is not a
+   claim to test. Any other free text is his own reading of the problem. It
+   becomes hypothesis H1, credited to him.
 2. **Read every source in full:** the ticket with all its comments, the Slack
    thread and any thread it links, the Sentry issue, and the PR with its
    review threads. Follow links one level deep.
@@ -84,6 +87,7 @@ hour of digging.
 
 ```
 **Framing — correct me anytime, I'm continuing.**
+- Focus: <his focus note, as you understood it> (only when he gave one)
 - Symptom: <one line, as a user would see it>
 - Where: <company / flow / worker / task IDs, or "not found yet">
 - Code path: <entry point → where it fails>, read at <production branch | main>
@@ -99,7 +103,11 @@ its own hypothesis, with its source.
 
 ## 3. Gather evidence
 
-Run every check that applies:
+Run every check that applies. With a focus note, run the checks that
+answer it first and go deepest there; keep the rest to what the root cause
+needs. If the evidence points away from the focus (the real cause sits
+elsewhere, or the focus rests on a wrong premise), say so plainly instead of
+staying inside it.
 
 1. **One real example.** Find a concrete company, flow, worker and task with
    timestamps that show the symptom. Without one, say the problem is
@@ -128,6 +136,7 @@ message. Give each one:
 - what would disprove it
 - the IDs and time window
 - the access that preflight found
+- the focus note, if any
 
 They write raw output to `$CASE/evidence/` and return a verdict with evidence
 rows. Do the code reading yourself.

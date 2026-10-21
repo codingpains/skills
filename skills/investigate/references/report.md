@@ -24,6 +24,10 @@ Always say what keeps the score from 100 and what would raise it.
 **Confidence: <n>%.** <one sentence on why, and what keeps it from 100>
 <Was it the release? One line, yes or no, with the deploy time.>
 
+## Your focus: <the focus note>
+<Only when he gave one. The direct answer to it, with its records. Say if
+the root cause lies outside it.>
+
 ## What happened
 <3–6 numbered steps, from trigger to symptom, each with path:line or a record>
 
