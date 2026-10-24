@@ -18,9 +18,9 @@ handoff, report checks and PR flow do not change.
 
 ## Supported stages
 
-| Stage | T3 role | Pinned model and reasoning |
-|---|---|---|
-| `reviewer` | `review` | `~/.codex/agents/team-reviewer.toml` |
+| Stage | T3 role | Pinned model and reasoning | Accepted substitutes, in order |
+|---|---|---|---|
+| `reviewer` | `review` | `~/.codex/agents/team-reviewer.toml` | `gpt-6-sol`, `gpt-6.1-sol`, `gpt-5.6-sol` |
 
 Only read-only stages are here. A stage that commits raises commit and
 attribution questions this file does not answer yet. Any other name: stop
@@ -40,15 +40,23 @@ failure:
    from its file in the table above.
 3. **The catalog.** Call `orchestrator_capabilities`. The provider with
    `providerInstanceId` `codex` must have `canRunCrossProviderChildTask:
-   true` and empty `constraints`; the pinned model ID must be in its
-   `models`; the pinned reasoning value must be one of that model's
-   `reasoningEffort` options.
+   true` and empty `constraints`.
+4. **The model.** Use the pinned model ID when it is in the provider's
+   `models`. When it is not, use the first of the stage's accepted
+   substitutes that is, without asking: models are retired, and a missing
+   pin must never stop a run. Use the pinned reasoning value when the chosen
+   model offers it in `reasoningEffort`, else the nearest offered value
+   below it. Write the substitution in one line of `notes.md` and say it in
+   the final message, so the pin file gets updated.
 
-Never choose a model by name or version: only the pinned ID is used. To
-change a stage's model, edit its pin file.
+Never choose a model outside the pin and its substitutes list. To change a
+stage's model, edit its pin file and the list above.
 
-Any failure: one `AskUserQuestion` naming the failed check, with the options
-"Run on Claude (recommended)" and "Stop". Record the answer in `notes.md`.
+A failure of checks 1–3, or no accepted model in the catalog: one
+`AskUserQuestion` naming the failed check, with the options "Run on Claude
+(recommended)" and "Stop". When the session cannot ask (non-interactive),
+take "Run on Claude" and set `fallback` to the failed check. Record the
+outcome in `notes.md`.
 
 ## What to record
 
@@ -56,14 +64,16 @@ A `cross_provider` object in `run.json` (in a round, in that round's entry):
 
 ```
 {"stages": ["reviewer"], "provider": "codex",
- "models": {"reviewer": {"model": "gpt-5.6-sol", "reasoning": "high"}},
+ "models": {"reviewer": {"model": "gpt-6-sol", "reasoning": "high",
+                         "substituted_for": null}},
  "checked_at": "<date -u +%FT%TZ>", "fallback": null,
  "tasks": [{"stage": "reviewer", "taskId": "...", "childThreadId": "...",
             "clientRequestId": "...", "started_at": "...", "ended_at": "...",
             "status": "..."}]}
 ```
 
-`fallback` is `null`, or the reason the stage ran on Claude instead. One
+`fallback` is `null`, or the reason the stage ran on Claude instead.
+`substituted_for` is `null`, or the pinned model the catalog lacked. One
 `tasks` entry per delegation, send-backs included.
 
 ## The handoff
@@ -79,8 +89,8 @@ and return only the part `stage-report.md` names.
 
 Call `delegate_task` with:
 
-- `target`: `providerInstanceId` `codex`, the pinned `model`, and
-  `options` `{"reasoningEffort": "<pinned value>"}`;
+- `target`: `providerInstanceId` `codex`, the `model` the preflight chose,
+  and `options` `{"reasoningEffort": "<the reasoning it chose>"}`;
 - `role`: the stage's T3 role from the table;
 - `runtimeMode` `full-access`: Codex's workspace sandbox blocks writing the
   report to `~/.team-lead/runs/`, outside the worktree. The
@@ -109,7 +119,9 @@ prove a read-only stage stayed read-only.
 
 ## Failure
 
-A failed task, a provider error or a refused model: run the stage's Claude
+A refused model: retry once with the next accepted substitute in the
+catalog, as a new `clientRequestId` with `-m2`. A failed task, a provider
+error, or no substitute left: run the stage's Claude
 agent through `Agent` with the same packet, set `fallback` to the reason,
 and write one line in `notes.md`. Do not ask: the run is nearly done, and the
 stage on Claude is always acceptable. The final message says so.

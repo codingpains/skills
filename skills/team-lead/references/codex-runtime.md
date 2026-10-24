@@ -41,7 +41,7 @@ select Astra for a specialist automatically.
 | Implement | `team-coder` | `gpt-5.6-terra` | medium |
 | Harden | `team-hardener` | `gpt-5.6-terra` | medium |
 | Test | `team-tester` | `gpt-5.6-terra` | medium |
-| Review | `team-reviewer` | `gpt-5.6-sol` | high |
+| Review | `team-reviewer` | `gpt-6-sol` | high |
 | Wrap-up | `team-wrapup` | `gpt-5.6-terra` | medium |
 | Assess | `team-assessor` | `gpt-5.6-luna` | medium |
 

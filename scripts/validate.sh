@@ -43,7 +43,7 @@ for file in "$REPO"/codex/agents/*.toml; do
   model="$(toml_field "$file" model)"
   case "$model" in
     gpt-*-astra) fail "codex/agents/$base.toml: Astra is escalation-only, not a default agent model" ;;
-    gpt-5.6-sol|gpt-5.6-terra|gpt-5.6-luna|gpt-6.1-*) ;;
+    gpt-5.6-sol|gpt-5.6-terra|gpt-5.6-luna|gpt-6-sol|gpt-6-luna|gpt-6.1-*) ;;
     *) fail "codex/agents/$base.toml: unknown model '$model'" ;;
   esac
   effort="$(toml_field "$file" model_reasoning_effort)"
