@@ -43,5 +43,7 @@ environment, check command, domain words) lives in
 `~/.ticket/projects/<KEY>.md`, never here. Inside `/team-lead`, grooming still uses
 `/quill groom` from the `quill` skill. Quill keeps its user
 state (`quill.config.json`, `projects/*.notes.md`) in `$QUILL_HOME`, else
-`~/.quill/`, never in this repo. Before adding any skill, check whether an
+`~/.quill/`, never in this repo. `/investigate` keeps one profile per
+system (data sources, domain facts, access checks) in
+`~/.investigations/projects/<name>/`, never here. Before adding any skill, check whether an
 installed plugin already covers it.

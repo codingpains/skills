@@ -21,8 +21,8 @@ for key in "$@"; do
     while IFS= read -r file; do
       rel="${file#"$HOME_DIR"/}"
       case="${rel%%/*}"
-      # Skip top-level files and folders such as _imported-memory.
-      case "$case" in _*) continue ;; esac
+      # Skip top-level files, project profiles and folders such as _imported-memory.
+      case "$case" in _*|projects) continue ;; esac
       [ "$case" = "$rel" ] && continue
       printf '%s\t%s\n' "$case" "$key"
     done >> "$pairs"

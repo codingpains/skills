@@ -44,10 +44,11 @@ in megalith, for example). Statuses that mean groomed.>
 with ids. Who decides what, when the ticket names people.>
 
 ## Production evidence
-<where read-only records live: the `/investigate` skill's `sources.md` and
-`domain.md` when they exist (`$INVESTIGATIONS_HOME`, else
-`~/.investigations/`), the analytics skills that query this product's data
-(`fountain-analytics:*`), Sentry projects, the environments tickets name
+<where read-only records live: the `/investigate` skill's project profile
+(`sources.md` and `domain.md` in `$INVESTIGATIONS_HOME/projects/<name>/`,
+else `~/.investigations/projects/<name>/`) when one exists, the analytics
+skills that query this product's data (`fountain-analytics:*`), Sentry
+projects, the environments tickets name
 (`dev-09`) and how a test company is found there.>
 
 ## Conventions

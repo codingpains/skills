@@ -34,9 +34,9 @@ the root cause lies outside it.>
 ## Evidence
 | Check | Result |
 |---|---|
-| Real example | company / flow / worker IDs, timestamps |
+| Real example | record IDs, timestamps |
 | Timeline | first seen, deploys, data timestamps |
-| Scale | counts by company and region; large customers named with numbers |
+| Scale | counts by tenant and stage; key customers named with numbers |
 | Code | path:line |
 
 ## Earlier explanations
@@ -72,8 +72,9 @@ and no connection details.
 ```
 # <case>: <title>
 Status: open | reported | acted | closed — <date>
+Project: <profile name(s)>
 Sources: <tickets, threads, Sentry issues, PRs>
-Keys: <error codes, Sentry IDs, company/flow UUIDs, functions> (for find-cases)
+Keys: <error codes, Sentry IDs, record IDs, functions> (for find-cases)
 
 ## Framing
 <the framing note>
@@ -93,5 +94,5 @@ Keys: <error codes, Sentry IDs, company/flow UUIDs, functions> (for find-cases)
 One JSON object per line, one line per case:
 
 ```
-{"case":"onb-1408","date":"2026-10-14","status":"reported","title":"…","root_cause":"…","confidence":90,"area":"service-todo notifications","keys":["#61d172f8","WX-SYSTEM-47G","demoLoad.controller.ts"],"tickets":["ONB-1408"]}
+{"case":"onb-1408","project":"wx-system","date":"2026-10-14","status":"reported","title":"…","root_cause":"…","confidence":90,"area":"service-todo notifications","keys":["#61d172f8","WX-SYSTEM-47G","demoLoad.controller.ts"],"tickets":["ONB-1408"]}
 ```

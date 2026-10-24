@@ -1,6 +1,6 @@
 ---
 name: investigate
-description: "Investigate a production problem from a Linear ticket, a Slack thread or a Sentry issue and answer the way Gustavo wants: the root cause, a confidence score on a fixed scale, evidence built on real company / flow / worker IDs, every earlier explanation checked, customer impact, and next steps with an owner. Read-only on production. Reports in chat and never posts to Linear, Slack or GitHub until Gustavo asks, so he can question the findings first. Use when Gustavo says 'launch an investigation', 'investigate', 'dig into', 'research', 'deep dive', 'find the root cause', 'what happened', 'diagnose', or pastes a ticket ID or Slack link about a malfunction. Invoke as /investigate <ticket IDs | Slack links | Sentry issues> [\"my read is …\"] [\"focus: …\"]."
+description: "Investigate a production problem from a Linear ticket, a Slack thread or a Sentry issue and answer the way Gustavo wants: the root cause, a confidence score on a fixed scale, evidence built on real record IDs, every earlier explanation checked, customer impact, and next steps with an owner. Read-only on production. Reports in chat and never posts to Linear, Slack or GitHub until Gustavo asks, so he can question the findings first. Use when Gustavo says 'launch an investigation', 'investigate', 'dig into', 'research', 'deep dive', 'find the root cause', 'what happened', 'diagnose', or pastes a ticket ID or Slack link about a malfunction. Invoke as /investigate <ticket IDs | Slack links | Sentry issues> [\"my read is …\"] [\"focus: …\"]."
 argument-hint: "<ticket IDs | Slack links | Sentry issues> [\"my read is …\"] [\"focus: …\"]"
 ---
 
@@ -9,7 +9,7 @@ argument-hint: "<ticket IDs | Slack links | Sentry issues> [\"my read is …\"] 
 Gustavo wants four things from every investigation, without having to ask:
 **what the problem is, what caused it (with a confidence score), the evidence,
 and what has to be done.** He believes a finding when it rests on real
-records: a company, a flow, a worker, a timestamp, a count. He expects earlier
+records: an account, a record ID, a timestamp, a count. He expects earlier
 explanations (the ticket's, Reef's, a teammate's) to be tested, not repeated.
 
 Arguments: `$ARGUMENTS`.
@@ -36,16 +36,16 @@ this public repo:
 
 | File | What |
 |---|---|
-| `sources.md` | Where the data lives: database variables per region, naming, Sentry tips, VPN and cluster access. **Read at intake.** |
-| `domain.md` | Facts Gustavo has taught: which customers matter most, which code paths are live, team ownership. **Read at intake.** |
-| `preflight.conf` | The access checks `scripts/preflight.sh` runs. |
-| `index.jsonl` | One line per case, for finding related cases. |
+| `projects/<name>/` | One **project profile** per system (`wx-system`, `hire`): `sources.md` (where the data lives, which IDs a claim rests on, how deploys show up), `domain.md` (facts Gustavo has taught) and `preflight.conf` (access checks). Format, picking and building: `references/project-profile.md`. |
+| `index.jsonl` | One line per case, every project, for finding related cases. |
 | `<case>/case.md` | The case file: brief, hypotheses, corrections, verdict. |
 | `<case>/evidence/` | Raw query and log output. |
 | `<case>/report.md` | The last report given in chat. |
 
-If the folder is missing, create it, tell Gustavo, and continue with what you
-can reach.
+`$PROFILE` below means the loaded profile folder; when a case spans two
+systems, read both. Words like "record IDs", "tenant" and "stage" mean what
+the profile's `sources.md` § Records says. If the home folder is missing,
+create it, tell Gustavo, and continue with what you can reach.
 
 ## 0. Open the case
 
@@ -71,13 +71,16 @@ where it stands, and continue from there.
    one case and say so.
 4. **Past cases:** run
    `bash ~/.claude/skills/investigate/scripts/find-cases.sh <keys>` with every
-   key you have: error codes (`#61d172f8`), Sentry short IDs, company and
-   flow UUIDs, function names, ticket IDs. Read every matching `case.md`. A
+   key you have: error codes (`#61d172f8`), Sentry short IDs, record IDs,
+   function names, ticket IDs. Read every matching `case.md`. A
    match can end the case in minutes.
-5. **Access:** run `zsh ~/.claude/skills/investigate/scripts/preflight.sh`.
-   Whatever is unreachable becomes a blind spot in the framing note, not a
-   surprise an hour in.
-6. Read `sources.md` and `domain.md`.
+5. **Project:** pick the profile as `references/project-profile.md` says
+   (build one when nothing fits), then read its `sources.md` and
+   `domain.md`.
+6. **Access:** run
+   `zsh ~/.claude/skills/investigate/scripts/preflight.sh <name>` for each
+   loaded profile. Whatever is unreachable becomes a blind spot in the
+   framing note, not a surprise an hour in.
 
 ## 2. Framing note (post it, don't wait)
 
@@ -88,9 +91,10 @@ hour of digging.
 ```
 **Framing — correct me anytime, I'm continuing.**
 - Focus: <his focus note, as you understood it> (only when he gave one)
+- Project: <profile name(s); "new profile" when just built>
 - Symptom: <one line, as a user would see it>
-- Where: <company / flow / worker / task IDs, or "not found yet">
-- Code path: <entry point → where it fails>, read at <production branch | main>
+- Where: <the record IDs that show it, or "not found yet">
+- Code path: <entry point → where it fails>, read at <what ran in production | default branch>
 - Release: <suspect release and deploy time, or "none in the window">
 - Hypotheses:
   H1 <claim> (source: Gustavo | ticket | Reef | <teammate> | me)
@@ -109,19 +113,19 @@ needs. If the evidence points away from the focus (the real cause sits
 elsewhere, or the focus rests on a wrong premise), say so plainly instead of
 staying inside it.
 
-1. **One real example.** Find a concrete company, flow, worker and task with
-   timestamps that show the symptom. Without one, say the problem is
-   unconfirmed.
-2. **Timeline.** Line up Sentry's first and last sighting, the deploy times
-   of nearby releases (the production branch's release commits), and the
-   timestamps in the data. This settles "was it the release?", the question
-   behind every release follow-up ticket.
-3. **Scale.** Count the affected records by company and by region or stage.
-   When the large customers listed in `domain.md` are among them, name them
-   with their numbers. That is strong evidence the finding is real. Never
-   name a customer the data doesn't show.
-4. **The code as it ran.** Read the code at the production branch for what
-   happened, and at main for what a fix will change. Cite `path:line`.
+1. **One real example.** Find concrete record IDs with timestamps that show
+   the symptom. Without one, say the problem is unconfirmed.
+2. **Timeline.** Line up the error tracker's first and last sighting, the
+   deploy times of nearby releases (`sources.md` § Code and releases says
+   how they show up), and the timestamps in the data. This settles "was it
+   the release?", the question behind every release follow-up ticket.
+3. **Scale.** Count the affected records by tenant and by stage. When the
+   key customers listed in `domain.md` are among them, name them with their
+   numbers. That is strong evidence the finding is real. Never name a
+   customer the data doesn't show.
+4. **The code as it ran.** Read the code at what ran in production for what
+   happened, and at the default branch for what a fix will change. Cite
+   `path:line`.
 5. **Earlier explanations.** Test each one and mark it holds, wrong or
    partly right, with the proof.
 6. **Try to break the leading hypothesis.** Ask what you would see if it
@@ -132,6 +136,7 @@ large output (many query rows, a log export), spawn `investigate-probe`
 agents in the background. Spawn one per hypothesis or source, all in one
 message. Give each one:
 - the case folder
+- the profile folder(s)
 - the hypothesis
 - what would disprove it
 - the IDs and time window
@@ -165,7 +170,7 @@ he corrects a fact about the domain:
    which conclusions moved and which held.
 2. Log it under **Corrections** in `case.md`.
 3. If it holds beyond this case (which code path is live, what a field means,
-   who owns what), add one line to `domain.md`.
+   who owns what), add one line to `$PROFILE/domain.md`.
 
 ## 6. Act, only when asked
 
@@ -183,8 +188,8 @@ he corrects a fact about the domain:
 Update `case.md`: status, root cause, confidence, tickets filed, open
 questions. Then write its line to `index.jsonl`, replacing any older line
 for the same case (format in `references/report.md`). If you learned a
-lasting access trick, add it to `sources.md`. Don't write per-case memory
+lasting access trick, add it to `$PROFILE/sources.md`. Don't write per-case memory
 notes; the case file is the memory.
 
-Read `references/pitfalls.md` before step 3. It lists mistakes Gustavo has
-already corrected.
+Read `references/pitfalls.md` and the profile's `domain.md` § Pitfalls
+before step 3. They list mistakes Gustavo has already corrected.
