@@ -1,6 +1,6 @@
 # The groomed ticket
 
-What `/groom` writes, how it checks it, and how it goes back to the tracker.
+What `/solo-groom` writes, how it checks it, and how it goes back to the tracker.
 
 ## Type and template
 

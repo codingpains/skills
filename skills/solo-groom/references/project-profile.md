@@ -2,11 +2,11 @@
 
 A profile records, for one project, where a groom finds its answers: the
 repo, the docs, the tracker, the channels, the data, the words the code
-uses, and what worked on earlier grooms. `/groom` reads it at intake and
+uses, and what worked on earlier grooms. `/solo-groom` reads it at intake and
 updates it after every run, so each groom of the same project asks fewer
 questions than the last.
 
-Profiles live in `~/.groom/projects/<KEY>.md`, outside the skills repo:
+Profiles live in `~/.solo-groom/projects/<KEY>.md`, outside the skills repo:
 they name customers, channels and internal pages. `<KEY>` is the Linear
 team key (`ONB`, `I9C`) or, for a Notion tasks database, `notion-<first 8
 characters of its data source id>`. Hand edits are welcome; keep
@@ -73,7 +73,7 @@ next groom skips them: `<date> <kind> ✗ <source> (<why>)`.>
 
 ## Building one
 
-When `~/.groom/projects/<KEY>.md` does not exist, build it before the
+When `~/.solo-groom/projects/<KEY>.md` does not exist, build it before the
 audit, from what the machine already knows. Send the discovery to one
 `general-purpose` agent on sonnet, so the config files and tool results
 stay out of your context, and have it write the file:

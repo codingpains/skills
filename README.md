@@ -127,7 +127,7 @@ Hardener and Tester use the complexity, duplication and coverage scripts in
 `~/.claude/agents/references/` when present, and fall back to standard tools
 otherwise.
 
-### `/groom TICKET [note]` — groom one ticket without a question session
+### `/solo-groom TICKET [note]` — groom one ticket without a question session
 
 Fetches the ticket, audits it against the `/ticket` skill's bar, turns every
 gap into a question, and answers the questions itself from the project's
@@ -137,14 +137,14 @@ scored 1–3 (`skills/team-lead/references/confidence-scoring.md`). Scores of
 written down; only a product or scope 1 that no source settles is asked,
 once, with options. It then writes the groomed ticket back the way
 `/quill groom` does (original description kept, `Groomed` label, Notion
-story synced) and updates a per-project profile in `~/.groom/projects/`
+story synced) and updates a per-project profile in `~/.solo-groom/projects/`
 that records where the answers were found, so the next groom of that
 project is faster. `--dry-run` previews; `--no-story` skips the story.
 Words after the ticket are your note and outrank every source.
 
 | Piece | File |
 |---|---|
-| Orchestrator | `skills/groom/SKILL.md` |
-| Project profiles | `skills/groom/references/project-profile.md` |
-| Research and escalation rules | `skills/groom/references/research.md` |
-| Output, checks, write-back | `skills/groom/references/groomed-ticket.md` |
+| Orchestrator | `skills/solo-groom/SKILL.md` |
+| Project profiles | `skills/solo-groom/references/project-profile.md` |
+| Research and escalation rules | `skills/solo-groom/references/research.md` |
+| Output, checks, write-back | `skills/solo-groom/references/groomed-ticket.md` |

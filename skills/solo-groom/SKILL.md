@@ -1,10 +1,10 @@
 ---
-name: groom
-description: "Groom one Linear or Notion ticket on its own, to the bar the /ticket skill sets: evidence-backed context, numbered testable acceptance criteria, an estimate, exact domain terms, and enough for an agent or an engineer to start cold. Answers its own questions from the project's code, docs, tickets, Slack and production data, scores each answer 1–3, decides every technical point itself, and asks Gustavo only a product or scope question no source settles, at most once. Learns per project where the answers live and reuses that next time. Writes the groomed ticket back (original description kept), adds the Groomed label and syncs the Notion user story the way /quill groom does. Use when Gustavo says 'groom ONB-123', 'groom this ticket', 'make it ready', 'is this ticket ready', or wants a ticket groomed without a question session. Invoke as /groom <ticket> [note] [--dry-run] [--no-story]."
+name: solo-groom
+description: "Groom one Linear or Notion ticket on its own, to the bar the /ticket skill sets: evidence-backed context, numbered testable acceptance criteria, an estimate, exact domain terms, and enough for an agent or an engineer to start cold. Answers its own questions from the project's code, docs, tickets, Slack and production data, scores each answer 1–3, decides every technical point itself, and asks Gustavo only a product or scope question no source settles, at most once. Learns per project where the answers live and reuses that next time. Writes the groomed ticket back (original description kept), adds the Groomed label and syncs the Notion user story the way /quill groom does. Use when Gustavo says 'solo-groom ONB-123', 'make it ready', 'is this ticket ready', or wants a ticket groomed without a question session. A plain 'groom ONB-123' is /quill groom, not this. Invoke as /solo-groom <ticket> [note] [--dry-run] [--no-story]."
 argument-hint: "<ticket> [note] [--dry-run] [--no-story]"
 ---
 
-# /groom
+# /solo-groom
 
 You groom one ticket from start to finish, alone. The ticket must end up
 the way `/ticket` wants every ticket: read on its own by a coding agent or
@@ -30,9 +30,9 @@ Read before step 1, each with its own `Read` call, in one turn:
 
 | File | Owns |
 |---|---|
-| `~/.claude/skills/groom/references/project-profile.md` | the per-project profile: where the answers live, how to build one, how to update it after a run |
-| `~/.claude/skills/groom/references/research.md` | gaps → questions, the researcher brief, scoring, what you decide and what you ask |
-| `~/.claude/skills/groom/references/groomed-ticket.md` | the groomed ticket: type, template, the self-check, the write-back, the story |
+| `~/.claude/skills/solo-groom/references/project-profile.md` | the per-project profile: where the answers live, how to build one, how to update it after a run |
+| `~/.claude/skills/solo-groom/references/research.md` | gaps → questions, the researcher brief, scoring, what you decide and what you ask |
+| `~/.claude/skills/solo-groom/references/groomed-ticket.md` | the groomed ticket: type, template, the self-check, the write-back, the story |
 | `~/.claude/skills/team-lead/references/confidence-scoring.md` | the 1–3 scale and the escalation format |
 | `~/.claude/skills/ticket/references/standards.md`, `defaults.md`, `pitfalls.md` | the bar, the templates, the defaults and the mistakes already made. These are the `/ticket` skill's own files; read them there so the two skills never drift. Missing: say so and stop |
 
@@ -57,7 +57,7 @@ Read before step 1, each with its own `Read` call, in one turn:
 
 ## Run directory
 
-`~/.groom/runs/<KEY>/`, where `<KEY>` is the ticket's key (`ONB-123`,
+`~/.solo-groom/runs/<KEY>/`, where `<KEY>` is the ticket's key (`ONB-123`,
 `TASK-42`). Write each file as soon as it exists:
 
 ```
@@ -84,7 +84,7 @@ Spawn one `general-purpose` agent, `model: "sonnet"`, description
 ```
 Read ~/.claude/skills/team-lead/references/intake-reader.md and follow it.
 Ticket: <ticket>
-Run directory: ~/.groom/runs/<KEY>/   (use this instead of ~/.team-lead/runs/)
+Run directory: ~/.solo-groom/runs/<KEY>/   (use this instead of ~/.team-lead/runs/)
 Status: leave
 ```
 
