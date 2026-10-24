@@ -34,7 +34,7 @@ Read before step 1, each with its own `Read` call, in one turn:
 | `~/.claude/skills/groom/references/research.md` | gaps → questions, the researcher brief, scoring, what you decide and what you ask |
 | `~/.claude/skills/groom/references/groomed-ticket.md` | the groomed ticket: type, template, the self-check, the write-back, the story |
 | `~/.claude/skills/team-lead/references/confidence-scoring.md` | the 1–3 scale and the escalation format |
-| `~/.claude/skills/ticket/references/standards.md`, `defaults.md`, `pitfalls.md` | the bar, the templates, the defaults and the mistakes already made. These are the `/ticket` skill's own files; read them there so the two skills never drift. Missing: say so and stop |
+| `~/.claude/skills/ticket/references/standards.md`, `defaults.md`, `pitfalls.md` | the bar, the templates, the defaults and the mistakes already made. These are the `/ticket` skill's own files; read them there so the two skills never drift. Missing: say so and stop. The project's labels, estimate scale, test environment and check command are in `/ticket`'s project file, `~/.ticket/projects/<KEY>.md` (`~/.claude/skills/ticket/references/project-file.md`); read it at intake when it exists |
 
 ## Rules
 
