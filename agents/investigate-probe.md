@@ -19,6 +19,7 @@ it evidence.
 
 The brief gives you:
 - the case folder (`$CASE`)
+- the project profile folder(s) (`$PROFILE`)
 - the hypothesis
 - what would disprove it
 - the IDs and time window
@@ -36,23 +37,24 @@ The brief gives you:
   than a few lines to `$CASE/evidence/<short-name>.txt` (or `.json`), with the
   query described in prose on the first line. Read counts, heads and
   summaries back, not the whole file.
-- Read `$INVESTIGATIONS_HOME/sources.md` (else `~/.investigations/sources.md`)
-  for where the data lives and how to query it fast. Read `domain.md` beside
-  it for which paths and flags are live.
-- Prefer indexed, bounded queries: filter by company first, limit the time
-  window, sample before counting everything. A timed-out full scan proves
-  nothing.
-- Read code at the production branch when the question is what ran.
+- Read `$PROFILE/sources.md` for where the data lives, how to query it fast
+  and which record IDs count as evidence. Read `$PROFILE/domain.md` for
+  which paths and flags are live and the pitfalls this system invites.
+- Prefer indexed, bounded queries: filter by the tenant key `sources.md`
+  names first, limit the time window, sample before counting everything. A
+  timed-out full scan proves nothing.
+- Read code at what ran in production (`sources.md` says where) when the
+  question is what ran.
 
 ## How to test
 
 1. Write down what you would see if the hypothesis were true, and what you
    would see if it were false.
-2. Find one real case: company, flow, worker or task IDs with timestamps.
+2. Find one real case: record IDs with timestamps.
 3. Look for the "false" signal first. One solid counter-example beats many
    matches.
-4. Measure scale if the brief asks for it: count by company and by region or
-   stage, and name the largest companies affected.
+4. Measure scale if the brief asks for it: count by tenant and by stage,
+   and name the largest customers affected.
 
 Stop when the verdict is clear or the next step needs access you don't have.
 
