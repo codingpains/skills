@@ -33,7 +33,12 @@ Repo profiles hold per-repo checks. They live outside this repo, in
 `/team-lead --configure-repo` writes them; hand edits are fine too. Keep
 `updated:` current when you change a command.
 
-Grooming uses `/quill groom` from the `quill` skill. Quill keeps its user
+`/groom` grooms one ticket on its own (`skills/groom/`): it reuses
+team-lead's intake reader and confidence scoring, the installed `/ticket`
+skill's bar (`~/.claude/skills/ticket/references/`, not in this repo) and
+Quill's write-back conventions. Its per-project profiles live in
+`~/.groom/projects/`, never here. Inside `/team-lead`, grooming still uses
+`/quill groom` from the `quill` skill. Quill keeps its user
 state (`quill.config.json`, `projects/*.notes.md`) in `$QUILL_HOME`, else
 `~/.quill/`, never in this repo. Before adding any skill, check whether an
 installed plugin already covers it.
