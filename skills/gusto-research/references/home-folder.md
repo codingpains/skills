@@ -12,8 +12,10 @@ to the skills repo. Every Gusto Clásico skill shares it.
 | `comments/<id>.json`, `audience.md` | `comments.py` | Raw comments; digest of regulars and their requests. |
 | `transcripts/<id>.txt` | `transcript.py` | Plain-text transcripts, his and other channels'. |
 | `analytics/` | `analytics.py` | Raw Analytics reports. `analytics/studio/` holds CSVs he exports from YouTube Studio (impressions, click-through rate). |
-| `secrets/` | `analytics.py auth` | OAuth client and token, mode 600. Never print them. |
+| `secrets/` | `analytics.py auth`; Gustavo | OAuth client and token; the image API key (`gemini_api_key` or `openai_api_key`) for `/gusto-script`. Mode 600. Never print them. |
 | `ideas/<date>-<slug>.md` | this skill, then the later skills | One file per idea; format in `idea-file.md`. |
+| `self/` | `/gusto-script` | Stills of Gustavo and his set (`self.json` maps face, body, set), so generative AI can put him in an outfit. |
+| `productions/<idea slug>/` | `/gusto-script`, then preproduction and editing | One folder per video: deep research, script, storyboard, original reference images. Format: `~/.claude/skills/gusto-script/references/production.md`. |
 | `runs/<date>.md` | this skill | What each run looked at and proposed, and what he chose. |
 | `learnings.md` | this skill | What published videos taught: one dated line each, newest first. |
 

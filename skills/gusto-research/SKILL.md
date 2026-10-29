@@ -201,7 +201,7 @@ series parts that go with it. If an idea fails the scientific-evidence bar,
 don't set it to chosen. Name the claim that has no study behind it, and
 offer to research it or narrow it. Set ideas he turns down to `rejected`, and
 add his reason to the file when he gives one. Mention in one line that the
-next step is the script skill, which reads the `chosen` idea.
+next step is `/gusto-script`, which reads the `chosen` idea.
 
 ## Analytics setup
 

@@ -48,5 +48,7 @@ system (data sources, domain facts, access checks) in
 `~/.investigations/projects/<name>/`, never here. `/gusto-research` keeps the Gusto Clásico channel
 profile, catalogue, comments, analytics secrets and idea files in
 `$GUSTO_HOME`, else `~/.gusto-clasico/`, never here; later Gusto Clásico
-skills share that folder. Before adding any skill, check whether an
+skills share that folder. `/gusto-script` (`skills/gusto-script/`) adds
+the self pack and one production folder per video there, and imports
+`gusto-research`'s `common.py`. Before adding any skill, check whether an
 installed plugin already covers it.
