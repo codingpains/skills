@@ -5,10 +5,12 @@
     python3 ~/.claude/skills/gusto-script/scripts/media.py frames XJck0LcR9Ho --at 0:12 1:05 --out <production>/refs --name hook-2024
     python3 ~/.claude/skills/gusto-script/scripts/media.py page "https://www.gq.com/story/..."
     python3 ~/.claude/skills/gusto-script/scripts/media.py get "<image url>" --page "<article url>" --out <production>/refs --name 03-polo-azul --note "outfit 1"
+    python3 ~/.claude/skills/gusto-script/scripts/media.py import <downloaded file> --image-url "<image url>" --page "<article url>" --out <production>/refs --name 03-polo-azul
 
 frames  stills from a YouTube video (his own or any public one), saved as JPEG. Needs ffmpeg.
 page    the images on an article or gallery page, largest first, with their alt text.
 get     download one image and record where it came from in <out>/sources.json.
+import  copy in an image a browser downloaded (for sites that block get), and record it the same way.
 
 Every file saved is an original, kept for reference. sources.json says where each
 one came from (page, image URL, date), so nothing is used without knowing its origin.
@@ -168,6 +170,35 @@ def get(args):
     print(path)
 
 
+def sniff(data):
+    """The image's extension from its first bytes; sites often label webp as jpeg and the reverse."""
+    if data.startswith(b"\xff\xd8\xff"):
+        return ".jpg"
+    if data.startswith(b"\x89PNG"):
+        return ".png"
+    if data.startswith(b"GIF8"):
+        return ".gif"
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return ".webp"
+    if data[4:12] in (b"ftypavif", b"ftypavis"):
+        return ".avif"
+    return None
+
+
+def import_file(args):
+    source = Path(args.file).expanduser()
+    data = source.read_bytes()
+    extension = sniff(data[:16])
+    if not extension:
+        sys.exit(f"not an image: {source}")
+    out = Path(args.out).expanduser()
+    out.mkdir(parents=True, exist_ok=True)
+    path = out / (args.name + extension)
+    shutil.copyfile(source, path)
+    record(out, path, {"image_url": args.image_url, "page": args.page, "note": args.note, "via": "browser"})
+    print(path)
+
+
 def record(out, path, fields):
     """Append or replace the file's entry in sources.json."""
     sources_file = out / "sources.json"
@@ -203,6 +234,15 @@ def main():
     p.add_argument("--page", help="the article or gallery the image is on")
     p.add_argument("--note", help="what it is a reference for")
     p.set_defaults(run=get)
+
+    p = sub.add_parser("import", help="copy in an image a browser downloaded and record its source")
+    p.add_argument("file", help="the downloaded file")
+    p.add_argument("--image-url", required=True, help="the image's own URL")
+    p.add_argument("--page", required=True, help="the article or product page it is on")
+    p.add_argument("--out", required=True)
+    p.add_argument("--name", required=True, help="file name without extension, e.g. 03-polo-azul")
+    p.add_argument("--note", help="what it is a reference for")
+    p.set_defaults(run=import_file)
 
     args = parser.parse_args()
     args.run(args)

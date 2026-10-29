@@ -75,8 +75,8 @@ adds:
 
 Scripts, run with `python3`. `--help` explains each one:
 
-- `~/.claude/skills/gusto-script/scripts/media.py`: video frames, and the
-  images on a web page.
+- `~/.claude/skills/gusto-script/scripts/media.py`: video frames, the
+  images on a web page, and images a browser downloaded.
 - `~/.claude/skills/gusto-script/scripts/storyboard.py`: checks, generates
   and renders the storyboard.
 - `/gusto-research`'s `transcript.py`, `comments.py`, `market.py` and
@@ -194,6 +194,9 @@ Write `guion.md` in the format of `references/production.md` § guion.md.
      saves one image;
    - `media.py frames <video id> --at <time> --out <production>/refs --name <what>`
      grabs a still from his old video or a competitor's.
+   When `page` or `get` gets a 403, or `page` finds no images, use T3's
+   browser if it is there: `references/browser.md`. It ends with
+   `media.py import`, which records the source the same way.
    Look at each image before using it (Read it). The garment must match
    the script: colour, fabric, cut. If no page shows it, search further.
    Don't fall back on an image that doesn't match.
