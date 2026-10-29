@@ -53,6 +53,12 @@ pieces belong to the ~20 core pieces and which are trend pieces.
 ## Experto vs. Gusto
 Where the sources and his mottos agree, and where he will disagree on camera.
 
+## Evidencia científica   (required for any health or fitness claim)
+One verified row per claim: claim as it will be said, study, PMID or DOI,
+type, finding, date verified. Bar and table format:
+`scientific-evidence.md`. While a claim has no row, the idea cannot be
+`chosen`, and later skills may not add claims missing from this table.
+
 ## Fuentes
 URLs with dates.
 

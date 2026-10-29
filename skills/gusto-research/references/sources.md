@@ -54,9 +54,10 @@ nobody covers well. They are not experts to quote.
 
 ## Fitness ("treat yourself as an athlete")
 
-Evidence-based coaches only. No supplement hype, no miracle routines. Health
-claims need a study or a clear expert consensus, and medical topics end with
-"consulta a tu médico".
+Evidence-based coaches only, and only as **leads**: what they say points to
+the studies, and the studies are what the video cites. Every health or
+fitness claim needs peer-reviewed studies that were looked up and read; see
+`scientific-evidence.md`. No supplement hype, no miracle routines.
 
 | Source | Use it for |
 |---|---|

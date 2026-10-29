@@ -21,6 +21,14 @@ Arguments: `$ARGUMENTS`.
 
 - **Evidence, not taste.** Every idea cites numbers and dates. "Seems
   popular" without a number is not evidence.
+- **Health and fitness claims need peer-reviewed studies.** Any claim about
+  the body is held to this bar: training, nutrition, sleep, hormones, skin,
+  hair, weight or health. So is anything a title or hook sells as "science".
+  Each such claim cites at least one peer-reviewed study in a reputable
+  journal. The study must be looked up with `studies.py` and its abstract
+  read. Never cite a study from memory. Full bar:
+  `references/scientific-evidence.md`. An idea that fails it stays
+  `proposed` and cannot be `chosen`.
 - **His mottos win.** An idea that contradicts `channel.md` is dropped or
   reframed so that he disagrees on camera.
 - **Never send a viewer to a video he has not cleared.** `links_to` and
@@ -111,7 +119,14 @@ Work through these, in this order:
 5. **Expert sources.** Search `references/sources.md` for the coming season
    and each candidate topic. Collect outfit reference images: GQ, Pitti street
    style, Popeye. Note the URL and date of each.
-6. **Old videos to link.** For each candidate, pick the `[k]` videos it can
+6. **Studies.** For every health or fitness claim a candidate needs, run
+   `studies.py search "<English query>"`. Then run
+   `studies.py check <PMID or DOI> --abstract` on the ones you will cite.
+   Follow `references/scientific-evidence.md`. If the evidence is weaker
+   than the claim, narrow the claim to what the studies show, or drop the
+   candidate. A competitor's claim nobody can back is itself an idea: "lo
+   que dice la ciencia de verdad sobre…".
+7. **Old videos to link.** For each candidate, pick the `[k]` videos it can
    reference. When the exact moment matters, `transcript.py <id>` shows what
    the old video actually says.
 
@@ -140,6 +155,8 @@ On top of that:
   the video.
 - **experiment:** it names a format the catalogue shows he has never done.
   Check titles and playlists.
+- **fitness, or any health claim:** `## Evidencia científica` is filled in,
+  and every row is verified.
 - **Everything:** it can be shown, not just told. List the outfit changes,
   side-by-sides and on-screen examples. It also yields 4–5 Shorts.
 
@@ -164,7 +181,9 @@ Rank the shortlist by confidence, then by fit with the mix.
    questions.
 
 When he chooses, set the chosen idea to `status: chosen`, along with any
-series parts that go with it. Set ideas he turns down to `rejected`, and
+series parts that go with it. If an idea fails the scientific-evidence bar,
+don't set it to chosen. Name the claim that has no study behind it, and
+offer to research it or narrow it. Set ideas he turns down to `rejected`, and
 add his reason to the file when he gives one. Mention in one line that the
 next step is the script skill, which reads the `chosen` idea.
 
