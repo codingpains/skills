@@ -148,3 +148,23 @@ Words after the ticket are your note and outrank every source.
 | Project profiles | `skills/solo-groom/references/project-profile.md` |
 | Research and escalation rules | `skills/solo-groom/references/research.md` |
 | Output, checks, write-back | `skills/solo-groom/references/groomed-ticket.md` |
+
+### `/gusto-research [focus]` — video ideas for Gusto Clásico
+
+Researches the next videos for the YouTube channel Gusto Clásico (Spanish;
+men's style, fitness and charisma). It reads the channel's own numbers, its
+regulars' comments, competitors' recent uploads, YouTube search demand and
+the expert sources, then proposes ideas in four buckets: grow, loyal
+(3–5 part series), interact and experiment (≤5%). Every idea comes with
+evidence, the old videos it links to, its outfits and its Shorts. Ideas are
+saved one file each in `~/.gusto-clasico/ideas/` for the script and
+preproduction skills to pick up. `learn` adds published videos' analytics to
+`learnings.md`; `setup-analytics` connects YouTube Analytics. Needs `yt-dlp`.
+
+| Piece | File |
+|---|---|
+| Orchestrator | `skills/gusto-research/SKILL.md` |
+| Idea file format (shared with later skills) | `skills/gusto-research/references/idea-file.md` |
+| Expert sources and competitors | `skills/gusto-research/references/sources.md` |
+| Private home folder layout | `skills/gusto-research/references/home-folder.md` |
+| Data scripts (catalogue, comments, market, transcripts, analytics) | `skills/gusto-research/scripts/` |

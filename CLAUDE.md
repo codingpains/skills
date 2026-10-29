@@ -45,5 +45,8 @@ environment, check command, domain words) lives in
 state (`quill.config.json`, `projects/*.notes.md`) in `$QUILL_HOME`, else
 `~/.quill/`, never in this repo. `/investigate` keeps one profile per
 system (data sources, domain facts, access checks) in
-`~/.investigations/projects/<name>/`, never here. Before adding any skill, check whether an
+`~/.investigations/projects/<name>/`, never here. `/gusto-research` keeps the Gusto Clásico channel
+profile, catalogue, comments, analytics secrets and idea files in
+`$GUSTO_HOME`, else `~/.gusto-clasico/`, never here; later Gusto Clásico
+skills share that folder. Before adding any skill, check whether an
 installed plugin already covers it.
