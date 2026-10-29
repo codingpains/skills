@@ -175,7 +175,13 @@ def api_key(provider):
     if os.environ.get(env):
         return os.environ[env]
     path = HOME / "secrets" / f"{provider}_api_key"
-    return path.read_text().strip() if path.exists() else None
+    if not path.exists():
+        return None
+    key = path.read_text().strip()
+    if not key or any(c.isspace() for c in key):
+        # Usually the setup command itself, pasted from the clipboard instead of the key.
+        sys.exit(f"{path} holds more than one word, so it is not an API key; save only the key")
+    return key
 
 
 def provider_and_key(choice):

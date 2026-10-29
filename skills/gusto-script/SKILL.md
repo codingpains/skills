@@ -276,9 +276,13 @@ To rebuild it (`self`, or when he records in a new place):
 
 1. Gemini: on aistudio.google.com, choose **Get API key** and create one
    in a project with billing on. (OpenAI: platform.openai.com → API keys.)
-2. Have him save it himself, never paste it in chat:
-   `pbpaste > ~/.gusto-clasico/secrets/gemini_api_key && chmod 600 ~/.gusto-clasico/secrets/gemini_api_key`
-   (or `openai_api_key`).
+2. Save it without it passing through chat. If a secret-entry tool is
+   available (T3's `request_secret` with `delivery: "file"`), use it and
+   copy the file it returns into `secrets/gemini_api_key`, mode 600.
+   Otherwise he copies the key in the browser **last**, then types (not
+   pastes) `pbpaste > ~/.gusto-clasico/secrets/gemini_api_key && chmod 600 ~/.gusto-clasico/secrets/gemini_api_key`
+   (or `openai_api_key`). `pbpaste` writes whatever is on the clipboard,
+   so if he copied the command, that's what lands in the file.
 3. Run `storyboard.py models` to confirm the key works and list the image
    models. The first one listed is the default. To pin another, use
    `--model` or `GUSTO_IMAGE_MODEL`.
