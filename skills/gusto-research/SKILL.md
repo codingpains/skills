@@ -29,6 +29,11 @@ Arguments: `$ARGUMENTS`.
   read. Never cite a study from memory. Full bar:
   `references/scientific-evidence.md`. An idea that fails it stays
   `proposed` and cannot be `chosen`.
+- **Style advice stands on the rulebook.** Every style idea is anchored on
+  one to three rules from `rules.md`. It uses each rule's name, wording and
+  visual, so the same rules recur from video to video. Advice that no rule
+  covers becomes a proposed rule for Gustavo to approve, never an ad-hoc
+  one. Full rules: `references/rulebook.md`.
 - **His mottos win.** An idea that contradicts `channel.md` is dropped or
   reframed so that he disagrees on camera.
 - **Never send a viewer to a video he has not cleared.** `links_to` and
@@ -53,13 +58,17 @@ Home folder: `$GUSTO_HOME`, else `~/.gusto-clasico/`. What each file holds:
 
 ## 1. Load
 
-Read `channel.md`, `learnings.md`, `catalogue-review.md`, the latest file in
-`runs/`, and the frontmatter of every file in `ideas/`. From the ideas, work out:
+Read `channel.md`, `rules.md`, `learnings.md`, `catalogue-review.md`, the
+latest file in `runs/`, and the frontmatter of every file in `ideas/`. From
+the ideas, work out:
 
 - the open series and which part is next;
 - the published bucket and pillar mix of the last 12 long videos, against
   the targets in `channel.md`;
 - how many experiments were published in the last 20;
+- which rules the last 12 published style videos used, and which rules need
+  a definitive video (`references/rulebook.md` § Ideas from the rulebook
+  itself);
 - which ideas were proposed earlier and are still `proposed` or `parked`.
   Re-offer them only with fresh evidence.
 
@@ -126,7 +135,11 @@ Work through these, in this order:
    than the claim, narrow the claim to what the studies show, or drop the
    candidate. A competitor's claim nobody can back is itself an idea: "lo
    que dice la ciencia de verdad sobre…".
-7. **Old videos to link.** For each candidate, pick the `[k]` videos it can
+7. **Rules.** Map each style candidate to its rules in `rules.md`. If a
+   candidate's advice contradicts a rule, reframe it or drop it. If no rule
+   covers the advice, propose a new rule. Under-used rules, and rules with
+   no good video, are candidates in their own right.
+8. **Old videos to link.** For each candidate, pick the `[k]` videos it can
    reference. When the exact moment matters, `transcript.py <id>` shows what
    the old video actually says.
 
@@ -157,6 +170,8 @@ On top of that:
   Check titles and playlists.
 - **fitness, or any health claim:** `## Evidencia científica` is filled in,
   and every row is verified.
+- **style:** `rules:` names one to three rules, and `## Reglas` says where
+  each one shows up and with which visual.
 - **Everything:** it can be shown, not just told. List the outfit changes,
   side-by-sides and on-screen examples. It also yields 4–5 Shorts.
 
@@ -175,7 +190,8 @@ Rank the shortlist by confidence, then by fit with the mix.
    - links and `cta`
    - confidence and the file path
 3. End with your recommendation for next month's video and one sentence on
-   why.
+   why. Then list any proposed new rules and `borrador` rules still waiting
+   for him.
 4. Write `runs/<date>.md`. List what was read: the competitor handles, the
    queries, the sources. Then the shortlist, and the next run's open
    questions.

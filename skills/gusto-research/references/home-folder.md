@@ -6,6 +6,7 @@ to the skills repo. Every Gusto Clásico skill shares it.
 | Path | Written by | What |
 |---|---|---|
 | `channel.md` | Gustavo (and Claude when he says so) | Mottos, pillar and bucket mix, tone, format, cadence, competitors. Read first, every run. |
+| `rules.md` | Gustavo (Claude drafts, he confirms) | The style rulebook: the recurring rules every style video stands on. Format: `rulebook.md`. |
 | `catalogue.jsonl` | `catalogue.py` | Every upload: id, kind, date, views, likes, comments, duration, title. |
 | `catalogue-review.md` | `review_list.py`, then Gustavo | Which old videos he stands by: `[k]` keep, `[o]` outdated, `[r]` remake. |
 | `comments/<id>.json`, `audience.md` | `comments.py` | Raw comments; digest of regulars and their requests. |

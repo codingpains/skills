@@ -155,8 +155,9 @@ Researches the next videos for the YouTube channel Gusto Clásico (Spanish;
 men's style, fitness and charisma). It reads the channel's own numbers, its
 regulars' comments, competitors' recent uploads, YouTube search demand and
 the expert sources, then proposes ideas in four buckets: grow, loyal
-(3–5 part series), interact and experiment (≤5%). A health or fitness claim needs a verified peer-reviewed study before
-the idea can be chosen. Every idea comes with
+(3–5 part series), interact and experiment (≤5%). Style ideas stand on the recurring rules in `~/.gusto-clasico/rules.md`. A
+health or fitness claim needs a verified peer-reviewed study before the idea
+can be chosen. Every idea comes with
 evidence, the old videos it links to, its outfits and its Shorts. Ideas are
 saved one file each in `~/.gusto-clasico/ideas/` for the script and
 preproduction skills to pick up. `learn` adds published videos' analytics to
@@ -167,6 +168,7 @@ preproduction skills to pick up. `learn` adds published videos' analytics to
 | Orchestrator | `skills/gusto-research/SKILL.md` |
 | Idea file format (shared with later skills) | `skills/gusto-research/references/idea-file.md` |
 | Expert sources and competitors | `skills/gusto-research/references/sources.md` |
+| Style rulebook: how ideas anchor on recurring rules | `skills/gusto-research/references/rulebook.md` |
 | Peer-reviewed evidence bar for health and fitness claims | `skills/gusto-research/references/scientific-evidence.md` |
 | Private home folder layout | `skills/gusto-research/references/home-folder.md` |
 | Data scripts (catalogue, comments, market, transcripts, studies, analytics) | `skills/gusto-research/scripts/` |

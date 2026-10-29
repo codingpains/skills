@@ -18,6 +18,7 @@ pillar: style           # style | fitness | charisma
 status: proposed        # proposed | chosen | scripted | shot | published | parked | rejected
 created: 2026-10-29
 series:                 # loyal ideas: "<series name> 1/4"; else empty
+rules: [ajuste, tercera-pieza]   # style: 1–3 rule IDs from rules.md
 links_to: [_NG8gyjc1yA, qcIdvHc3OVs]   # back-catalogue videos referenced inside the video, all [k]
 cta: qcIdvHc3OVs        # the one "watch this next" video at the end, [k]
 video_id:               # filled in when published
@@ -39,6 +40,12 @@ What he says and what the viewer sees.
 5–8 beats. Each beat names the visual: outfit change, side-by-side,
 on-screen text, B-roll. Mark where each `links_to` video is mentioned and why
 it fits there.
+
+## Reglas   (style ideas)
+Each anchoring rule: its name and ID, the beat where it shows up, its
+**En pantalla** label and visual, and the earlier video that taught it.
+Mark a rule "(borrador)" if it is still a draft, or "propuesta" if this idea
+proposes it. See `rulebook.md`.
 
 ## Outfits
 Every outfit the video needs, described piece by piece (garment, colour,
