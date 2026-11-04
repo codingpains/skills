@@ -27,7 +27,7 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 | `--round <PR> [note]` | address review comments, a QA verdict or a requested change on an open PR of this ticket, in a new session (`references/review-rounds.md`). Text after the PR is the human's note for the round. With `--from <stage>`, resume the latest round at that stage. The watcher adds `--auto --context <file>` |
 | `--takeover <PR> [note]` | finish an open PR another agent started, on its branch: the whole PR goes through the team (`references/takeover.md`). Text after the PR is the human's note. With `--from <stage>`, resume it |
 | `--watch <PR> [--dry-run]` | babysit an open PR of this ticket until it merges: start a round when every merge gate has finished and one failed, turn on auto-merge when all pass (`references/pr-watch.md`) |
-| `--cross-provider <stages>` | run the named stages on Codex through T3 instead of on Claude (`references/cross-provider.md`). Today only `reviewer`. Off unless passed on this call, so a `--from` or `--round` call without it runs on Claude. The stage list is required, so the flag can sit before or after a round's note |
+| `--cross-provider <stages>` | run the named stages on Codex through T3 instead of on Claude (`references/cross-provider.md`). Today `reviewer` and `wrapup`. Off unless passed on this call, so a `--from` or `--round` call without it runs on Claude. The stage list is required, so the flag can sit before or after a round's note |
 | `--configure-repo [path]` | no ticket: create or refresh this repo's validation profile, optionally for one folder of a monorepo (`references/configure-repo.md`) |
 
 ## The team
@@ -39,7 +39,7 @@ identifier, or the Notion Task ID with its prefix (`TASK-42`). Flags:
 | 4 Harden | `team-hardener` | opus | yes | yes |
 | 5 Test | `team-tester` | opus | yes | yes |
 | 6 Review | `team-reviewer` | opus; with `--cross-provider reviewer`, the model in `~/.codex/agents/team-reviewer.toml` | no | no |
-| 7 Wrap-up | `team-wrapup` | sonnet | yes | yes |
+| 7 Wrap-up | `team-wrapup` | sonnet; with `--cross-provider wrapup`, the model in `~/.codex/agents/team-wrapup.toml` | yes | yes |
 | 11 Assess | `team-assessor` | opus | no | no |
 
 ## Runtime
@@ -507,7 +507,7 @@ what to change and why. An empty list skips step 9.
 ## 9. Wrap-up
 
 Spawn `team-wrapup` with the handoff, its *Your task* the fix list from
-`review-fixes.md`. It applies those
+`review-fixes.md` (through T3 when `--cross-provider` names `wrapup`). It applies those
 fixes and nothing else. Check its report as in steps 4–7, and check the diff
 of its commits (`git diff <last-sha-before-wrapup>..HEAD`) touches only what
 the fix list names. A must-fix it could not apply stops the pipeline and goes

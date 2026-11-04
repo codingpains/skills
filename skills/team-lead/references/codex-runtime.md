@@ -42,7 +42,7 @@ select Astra for a specialist automatically.
 | Harden | `team-hardener` | `gpt-5.6-terra` | medium |
 | Test | `team-tester` | `gpt-5.6-terra` | medium |
 | Review | `team-reviewer` | `gpt-6-sol` | high |
-| Wrap-up | `team-wrapup` | `gpt-5.6-terra` | medium |
+| Wrap-up | `team-wrapup` | `gpt-6.1-terra` | medium |
 | Assess | `team-assessor` | `gpt-5.6-luna` | medium |
 
 The installed agent configuration owns these choices. Do not pass model or

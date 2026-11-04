@@ -1,6 +1,6 @@
 name = "team-wrapup"
 description = "Applies only the selected team-lead review fixes, validates them, commits them and reports."
-model = "gpt-5.6-terra"
+model = "gpt-6.1-terra"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
